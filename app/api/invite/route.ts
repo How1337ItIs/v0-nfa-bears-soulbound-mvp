@@ -1,29 +1,19 @@
 import { NextResponse } from 'next/server';
-
-const inviteCodes = new Map<string, { issuedAt: number }>();
+import { redis } from '@/lib/redis';
 
 export async function POST() {
-  const code = `nfa-${Math.random().toString(16).slice(2, 6)}`;
-  inviteCodes.set(code, { issuedAt: Date.now() });
-  
+  const code = 'nfa-' + crypto.randomUUID().slice(0, 4);
+  await redis.set(`invite:${code}`, '0', 'EX', 900); // 15 min TTL
   return NextResponse.json({ code });
 }
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const code = searchParams.get('code');
-  
+export async function GET(req: Request) {
+  const code = new URL(req.url).searchParams.get('code');
   if (!code) {
-    return NextResponse.json({ valid: false }, { status: 400 });
+    return NextResponse.json({ error: 'Code is required' }, { status: 400 });
   }
-
-  const invite = inviteCodes.get(code);
-  if (!invite) {
-    return NextResponse.json({ valid: false });
-  }
-
-  const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
-  const valid = invite.issuedAt >= tenMinutesAgo;
   
-  return NextResponse.json({ valid });
+  const exists = await redis.exists(`invite:${code}`);
+  return NextResponse.json({ valid: Boolean(exists) });
+} 
 } 

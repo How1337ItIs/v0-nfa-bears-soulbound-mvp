@@ -1,45 +1,47 @@
 import { NextResponse } from 'next/server';
-import { createWalletClient, http, createPublicClient } from 'viem';
-import { getBalance } from 'viem/actions';
+import { redis } from '@/lib/redis';
 import { privateKeyToAccount } from 'viem/accounts';
+import { createWalletClient, http } from 'viem';
 import { bepolia } from '@/lib/viemProvider';
-import { membershipAbi } from '@/contracts/membershipAbi';
+import NFABearsMembership from '@/contracts/NFABearsMembership.json';
+import { limiter } from '@/lib/rate-limit';
 
 const account = privateKeyToAccount(process.env.DEPLOYER_KEY as `0x${string}`);
-console.log('Relayer account address:', account.address);
-
-const wallet = createWalletClient({ 
-  account, 
-  chain: bepolia, 
-  transport: http(process.env.BERA_RPC!) 
-});
-
-const publicClient = createPublicClient({
+const walletClient = createWalletClient({
+  account,
   chain: bepolia,
-  transport: http(process.env.BERA_RPC!)
+  transport: http()
 });
 
-export async function POST(request: Request) {
-  const { address } = await request.json();           // address to mint for
+export async function POST(req: Request) {
   try {
-    // Check account balance first
-    const balance = await getBalance(publicClient, { address: account.address });
-    console.log('Account balance:', balance.toString());
-    
-    if (balance === BigInt(0)) {
-      return NextResponse.json({ error: 'Insufficient BERA for gas' }, { status: 400 });
+    // Apply rate limiting
+    await limiter.check(req, 4, 'MINT');
+
+    const body = await req.json();
+    const { address, code } = body;
+
+    if (!address || !code) {
+      return NextResponse.json({ error: 'Address and code are required' }, { status: 400 });
     }
 
-    const txHash = await wallet.writeContract({
-      account,
-      address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-      abi: membershipAbi,
+    // Check and redeem invite code
+    const ok = await redis.del(`invite:${code}`);
+    if (!ok) {
+      return NextResponse.json({ error: 'Invalid or redeemed invite' }, { status: 400 });
+    }
+
+    const { request } = await walletClient.simulateContract({
+      address: '0xF0e401E962f2C126A3E44a6708E0884De038E77b',
+      abi: NFABearsMembership.abi,
       functionName: 'mintMembership',
-      args: [address],
+      args: [address]
     });
-    return NextResponse.json({ txHash });
-  } catch (e) {
-    console.error('Mint error:', e);
-    return NextResponse.json({ error: 'mint failed' }, { status: 500 });
+
+    const hash = await walletClient.writeContract(request);
+    return NextResponse.json({ hash });
+  } catch (error) {
+    console.error('Mint error:', error);
+    return NextResponse.json({ error: 'Failed to mint' }, { status: 500 });
   }
 } 

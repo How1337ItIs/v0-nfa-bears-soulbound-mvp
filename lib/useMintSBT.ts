@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { useAccount, usePublicClient } from 'wagmi';
+import { toast } from 'react-hot-toast';
 import { membershipAbi } from '@/contracts/membershipAbi';
 import { createPublicClient, http } from 'viem';
 import { bepolia } from '@/lib/viemProvider';
@@ -19,8 +21,19 @@ const publicClient = createPublicClient({
 });
 
 export function useMintSBT() {
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
   const [isLoading, setIsLoading] = useState(false);
   const [hasMinted, setHasMinted] = useState<boolean | null>(null);
+
+  const waitForTransaction = useCallback(async (hash: `0x${string}`) => {
+    let receipt = null;
+    while (!receipt) {
+      receipt = await publicClient.getTransactionReceipt({ hash });
+      await new Promise(r => setTimeout(r, 3000));
+    }
+    return receipt.status === 'success';
+  }, [publicClient]);
 
   const checkHasMinted = async (walletAddress: `0x${string}`) => {
     console.log('Checking mint status for:', walletAddress);
@@ -39,37 +52,40 @@ export function useMintSBT() {
     }
   };
 
-  const mint = async (walletAddress: `0x${string}`): Promise<MintResult> => {
+  const mint = useCallback(async (code: string) => {
+    if (!address) {
+      toast.error('Please connect your wallet');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const alreadyMinted = await checkHasMinted(walletAddress);
-      if (alreadyMinted) {
-        return { error: 'Wallet already has an SBT' };
-      }
-
       const response = await fetch('/api/mint', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ address: walletAddress }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address, code })
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Minting failed');
+        throw new Error(data.error || 'Failed to mint');
       }
 
-      const { txHash } = await response.json();
-      setHasMinted(true);
-      return { txHash };
+      toast.promise(
+        waitForTransaction(data.hash),
+        {
+          loading: 'Minting...',
+          success: 'Minted successfully!',
+          error: 'Mint failed'
+        }
+      );
     } catch (error) {
-      console.error('Minting failed:', error);
-      return { error: error instanceof Error ? error.message : 'Minting failed' };
+      console.error('Mint error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to mint');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [address, waitForTransaction]);
 
   return { mint, isLoading, hasMinted, checkHasMinted };
 } 

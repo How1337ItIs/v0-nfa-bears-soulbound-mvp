@@ -5,14 +5,14 @@ import { PrivyProvider } from '@privy-io/react-auth';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createConfig, WagmiProvider } from 'wagmi';
 import { http } from 'viem';
-import { berachain } from 'viem/chains';
+import { bepolia } from '@/lib/viemProvider';
 
 const queryClient = new QueryClient();
 
 const config = createConfig({
-  chains: [berachain],
+  chains: [bepolia],
   transports: {
-    [berachain.id]: http(process.env.NEXT_PUBLIC_RPC_URL),
+    [bepolia.id]: http(process.env.NEXT_PUBLIC_BEPOLIA_RPC),
   },
 });
 
