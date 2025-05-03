@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { Luckiest_Guy, Pacifico } from "next/font/google";
 import "./globals.css";
 
-import { Providers } from "./providers/PrivyProviders";
+import { PrivyProviders } from "./providers/PrivyProviders";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -50,9 +50,9 @@ export default function RootLayout({
           min-h-screen
         `}
       >
-        <Providers>
+        <PrivyProviders>
           {children}
-        </Providers>
+        </PrivyProviders>
       </body>
     </html>
   );

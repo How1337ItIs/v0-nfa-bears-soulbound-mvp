@@ -5,6 +5,7 @@ import { createWalletClient, http } from 'viem';
 import { bepolia } from '@/lib/viemProvider';
 import NFABearsMembership from '@/contracts/NFABearsMembership.json';
 import { limiter } from '@/lib/rate-limit';
+import { verifyCoordinates, verifyTimeSecret } from '@/lib/location';
 
 const account = privateKeyToAccount(process.env.DEPLOYER_KEY as `0x${string}`);
 const walletClient = createWalletClient({
@@ -19,17 +20,40 @@ export async function POST(req: Request) {
     await limiter.check(req, 4, 'MINT');
 
     const body = await req.json();
-    const { address, code } = body;
+    const { address, code, coordinates, secret } = body;
 
-    if (!address || !code) {
-      return NextResponse.json({ error: 'Address and code are required' }, { status: 400 });
+    if (!address || !code || !coordinates || !secret) {
+      return NextResponse.json({ 
+        error: 'Address, code, coordinates, and secret are required' 
+      }, { status: 400 });
     }
 
-    // Check and redeem invite code
-    const ok = await redis.del(`invite:${code}`);
-    if (!ok) {
-      return NextResponse.json({ error: 'Invalid or redeemed invite' }, { status: 400 });
+    // Get invite data
+    const inviteData = await redis.get(`invite:${code}`);
+    if (!inviteData) {
+      return NextResponse.json({ error: 'Invalid or expired invite' }, { status: 400 });
     }
+
+    const { timestamp, coordinates: venueCoordinates } = JSON.parse(inviteData);
+    const now = Date.now();
+    const isRecent = now - timestamp < 5 * 60 * 1000; // 5 minutes
+
+    if (!isRecent) {
+      return NextResponse.json({ error: 'Invite code expired' }, { status: 400 });
+    }
+
+    // Verify time secret
+    if (!verifyTimeSecret(secret)) {
+      return NextResponse.json({ error: 'Invalid time secret' }, { status: 400 });
+    }
+
+    // Verify coordinates
+    if (!verifyCoordinates(coordinates.lat, coordinates.lng)) {
+      return NextResponse.json({ error: 'Must be at venue' }, { status: 400 });
+    }
+
+    // Delete the code after verification
+    await redis.del(`invite:${code}`);
 
     const { request } = await walletClient.simulateContract({
       address: '0xF0e401E962f2C126A3E44a6708E0884De038E77b',
