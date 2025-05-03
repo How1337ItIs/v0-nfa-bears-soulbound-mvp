@@ -24,13 +24,15 @@ export function BigQRCode({ value }: BigQRCodeProps) {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <QRCodeSVG 
-        value={value}
-        size={320}
-        level="H"
-        includeMargin
-        className="rounded-lg shadow-lg"
-      />
+      <div className="pointer-events-none select-none">
+        <QRCodeSVG 
+          value={value}
+          size={320}
+          level="H"
+          includeMargin
+          className="rounded-lg shadow-lg"
+        />
+      </div>
       <p className="text-sm text-gray-600 break-all text-center max-w-xs">
         {value}
       </p>

@@ -1,0 +1,31 @@
+{
+  "venues": [
+    {
+      "id": "local-dev",
+      "name": "Local Development Venue",
+      "description": "Development environment venue for testing",
+      "lat": 37.7749,
+      "lng": -122.4194,
+      "radius": 100,
+      "beaconId": "dev-beacon"
+    },
+    {
+      "id": "berkeley-art-museum",
+      "name": "Berkeley Art Museum",
+      "description": "Contemporary art museum in Berkeley",
+      "lat": 37.8715,
+      "lng": -122.2607,
+      "radius": 50,
+      "beaconId": "bam-beacon"
+    },
+    {
+      "id": "sf-moma",
+      "name": "San Francisco Museum of Modern Art",
+      "description": "Modern and contemporary art museum in SF",
+      "lat": 37.7857,
+      "lng": -122.4011,
+      "radius": 75,
+      "beaconId": "sfmoma-beacon"
+    }
+  ]
+} 

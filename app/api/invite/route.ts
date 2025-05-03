@@ -1,80 +1,70 @@
 import { NextResponse } from 'next/server';
+import { nanoid } from 'nanoid';
+import { createHmac } from 'crypto';
 import { redis } from '@/lib/redis';
-import { generateTimeSecret, VENUE } from '@/lib/location';
-import crypto from 'crypto';
+import { validateVenue } from '@/lib/venues';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
-async function ensureRedisConnection() {
-  if (redis.status === 'ready') {
-    return true;
-  }
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, '1 m'),
+  analytics: true,
+});
 
-  console.log('Redis not ready, attempting to connect...');
+export async function POST(request: Request) {
   try {
-    await redis.connect();
-    console.log('Redis connection established');
-    return true;
-  } catch (error) {
-    console.error('Failed to connect to Redis:', error);
-    return false;
-  }
-}
-
-export async function POST(req: Request) {
-  console.log('POST /api/invite - Starting request');
-  try {
-    // Ensure Redis connection
-    const isConnected = await ensureRedisConnection();
-    if (!isConnected) {
-      return NextResponse.json({ 
-        error: 'Failed to connect to Redis',
-        details: 'Could not establish connection to Redis server'
-      }, { status: 500 });
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    const { success } = await ratelimit.limit(ip);
+    
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests' },
+        { status: 429 }
+      );
     }
 
-    console.log('Generating new invite...');
-    const code = 'nfa-' + crypto.randomUUID().slice(0, 4);
-    const timestamp = Date.now();
-    const secret = generateTimeSecret();
-    
-    console.log('Generated code:', code);
-    console.log('Generated secret:', secret);
-    
-    const inviteData = {
-      timestamp,
-      venueId: VENUE.id,
-      secret,
-      coordinates: VENUE.coordinates,
-      beaconId: VENUE.beaconId
-    };
-    
-    console.log('Storing invite data:', inviteData);
-    
-    try {
-      console.log('Attempting to store data in Redis...');
-      await redis.set(`invite:${code}`, JSON.stringify(inviteData), 'EX', 900);
-      console.log('Successfully stored invite data in Redis');
-    } catch (redisError) {
-      console.error('Redis error during set operation:', redisError);
-      return NextResponse.json({ 
-        error: 'Failed to store invite data',
-        details: redisError instanceof Error ? redisError.message : 'Unknown Redis error'
-      }, { status: 500 });
+    const { venueId } = await request.json();
+
+    if (!venueId || !validateVenue(venueId)) {
+      return NextResponse.json(
+        { error: 'Invalid venue ID' },
+        { status: 400 }
+      );
     }
-    
-    return NextResponse.json({ 
-      code,
-      secret,
-      venue: {
-        id: VENUE.id,
-        name: VENUE.name
-      }
+
+    const code = `${venueId}:${nanoid(6)}`;
+    const timestamp = Math.floor(Date.now() / 1000);
+    const expiresAt = timestamp + (15 * 60); // 15 minutes from now
+
+    // Create HMAC signature
+    const hmac = createHmac('sha256', process.env.SECRET_KEY || '');
+    hmac.update(`${code}|${timestamp}`);
+    const signature = hmac.digest('hex');
+
+    // Store in Redis with 15-minute TTL
+    const key = `invite:${code}`;
+    const success = await redis.set(key, '1', 'EX', 15 * 60, 'NX');
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Failed to generate invite' },
+        { status: 500 }
+      );
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/invite/${code}?t=${timestamp}&s=${signature}`;
+
+    return NextResponse.json({
+      url,
+      expiresAt: new Date(expiresAt * 1000).toISOString()
     });
   } catch (error) {
-    console.error('Unexpected error in invite generation:', error);
-    return NextResponse.json({ 
-      error: 'Failed to generate invite',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    console.error('Error generating invite:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
