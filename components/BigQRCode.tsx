@@ -3,39 +3,37 @@
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
 
-const QRCodeSVG = dynamic(() => import('qrcode.react').then(mod => mod.QRCodeSVG), {
-  ssr: false
-});
+const QRCode = dynamic(
+  () => import('qrcode.react').then(mod => mod.QRCodeSVG),
+  { ssr: false }
+);
 
 interface BigQRCodeProps {
-  value: string;
+  url: string;
 }
 
-export function BigQRCode({ value }: BigQRCodeProps) {
-  const [isClient, setIsClient] = useState(false);
+export function BigQRCode({ url }: BigQRCodeProps) {
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
+    setMounted(true);
   }, []);
 
-  if (!isClient) {
-    return <div className="w-[320px] h-[320px] bg-gray-100 rounded-lg animate-pulse" />;
+  if (!mounted) {
+    return (
+      <div className="w-64 h-64 bg-gray-100 animate-pulse rounded-lg" />
+    );
   }
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="pointer-events-none select-none">
-        <QRCodeSVG 
-          value={value}
-          size={320}
-          level="H"
-          includeMargin
-          className="rounded-lg shadow-lg"
-        />
-      </div>
-      <p className="text-sm text-gray-600 break-all text-center max-w-xs">
-        {value}
-      </p>
+    <div className="p-4 bg-white rounded-lg shadow-lg">
+      <QRCode
+        value={url}
+        size={256}
+        level="H"
+        includeMargin
+        className="w-64 h-64"
+      />
     </div>
   );
 } 

@@ -42,13 +42,24 @@ export async function POST(request: Request) {
     hmac.update(`${code}|${timestamp}`);
     const signature = hmac.digest('hex');
 
+    if (!redis) {
+      return NextResponse.json(
+        { error: 'Redis not available' },
+        { status: 500 }
+      );
+    }
+
     // Store in Redis with 15-minute TTL
     const key = `invite:${code}`;
-    const success = await redis.set(key, '1', 'EX', 15 * 60, 'NX');
+    const redisSuccess = await redis.set(key, JSON.stringify({
+      timestamp,
+      signature,
+      venueId
+    }), { ex: 15 * 60 });
 
-    if (!success) {
+    if (!redisSuccess) {
       return NextResponse.json(
-        { error: 'Failed to generate invite' },
+        { error: 'Failed to generate invite code' },
         { status: 500 }
       );
     }
@@ -77,17 +88,15 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Code is required' }, { status: 400 });
     }
     
-    // Ensure Redis connection
-    const isConnected = await ensureRedisConnection();
-    if (!isConnected) {
-      return NextResponse.json({ 
-        error: 'Failed to connect to Redis',
-        details: 'Could not establish connection to Redis server'
-      }, { status: 500 });
-    }
-    
     console.log('Verifying code:', code);
     
+    if (!redis) {
+      return NextResponse.json(
+        { error: 'Redis not available' },
+        { status: 500 }
+      );
+    }
+
     try {
       console.log('Attempting to get data from Redis...');
       const data = await redis.get(`invite:${code}`);
@@ -97,9 +106,9 @@ export async function GET(req: Request) {
       }
 
       console.log('Data found, parsing...');
-      const { timestamp, secret, venueId } = JSON.parse(data);
-      const now = Date.now();
-      const isRecent = now - timestamp < 5 * 60 * 1000; // 5 minutes
+      const { timestamp, signature, venueId } = JSON.parse(data);
+      const now = Math.floor(Date.now() / 1000);
+      const isRecent = now - timestamp < 5 * 60; // 5 minutes
       
       return NextResponse.json({ 
         valid: true,

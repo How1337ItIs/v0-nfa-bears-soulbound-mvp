@@ -113,7 +113,7 @@ function AmbassadorContent() {
             <div className="mt-8">
               <h2 className="text-lg font-semibold mb-4">Invite QR Code</h2>
               <div className="flex flex-col items-center gap-4">
-                <BigQRCode value={url} />
+                <BigQRCode url={url} />
                 <CountdownCircle
                   duration={60}
                   onComplete={() => {
