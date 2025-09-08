@@ -1,0 +1,238 @@
+/* ------------------------------------------------------------------
+ Psychedelic NFA Bears Dashboard Styles
+ – Self-hosted Inter fonts
+ – System font fallbacks for groovy fonts
+ – Custom animations and effects
+------------------------------------------------------------------- */
+
+/* Inter variable weight 100-900 */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2")
+    format("woff2");
+}
+
+/* Inter regular 400 (fallback for older browsers) */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyeAZ9hiJ-Ek-_EeA.woff2")
+    format("woff2");
+}
+
+/* Inter bold 700 (fallback) */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuFuYAZ9hiJ-Ek-_EeA.woff2")
+    format("woff2");
+}
+
+/* Tailwind layers */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS variables for the psychedelic theme */
+:root {
+  --cosmic-black: #0a0a14;
+  --card-bg: rgba(30, 20, 60, 0.4);
+  --electric-red: #ff3366;
+  --cosmic-purple: #6b5fff;
+  --electric-blue: #00d4ff;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --text-muted: rgba(255, 255, 255, 0.6);
+}
+
+/* Global styles */
+body {
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--cosmic-black);
+  color: var(--text-primary);
+  @apply antialiased;
+}
+
+/* Custom animations */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes dancing-bear {
+  0%,
+  100% {
+    transform: rotate(-5deg) translateY(0px);
+  }
+  25% {
+    transform: rotate(5deg) translateY(-5px);
+  }
+  50% {
+    transform: rotate(-3deg) translateY(-8px);
+  }
+  75% {
+    transform: rotate(3deg) translateY(-3px);
+  }
+}
+
+@keyframes spiral {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1.1);
+  }
+}
+
+@keyframes liquid-morph {
+  0% {
+    border-radius: 20px;
+  }
+  25% {
+    border-radius: 30px 10px 25px 15px;
+  }
+  50% {
+    border-radius: 15px 25px 10px 30px;
+  }
+  75% {
+    border-radius: 25px 15px 30px 10px;
+  }
+  100% {
+    border-radius: 20px;
+  }
+}
+
+@keyframes aurora {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Utility classes */
+.groovy-font {
+  font-family: "Impact", "Arial Black", "Franklin Gothic Bold", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.script-font {
+  font-family: "Brush Script MT", "Lucida Handwriting", "Apple Chancery", cursive;
+  font-style: italic;
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+.breathe-animation {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.dancing-bear {
+  animation: dancing-bear 2s ease-in-out infinite;
+}
+
+.spiral-animation {
+  animation: spiral 10s linear infinite;
+}
+
+.liquid-morph {
+  animation: liquid-morph 8s ease-in-out infinite;
+}
+
+.glassmorphic {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tie-dye-bg {
+  background: radial-gradient(circle at 20% 50%, var(--cosmic-purple) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, var(--electric-red) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, var(--electric-blue) 0%, transparent 50%), var(--cosmic-black);
+}
+
+.aurora-gradient {
+  background: linear-gradient(
+    45deg,
+    var(--electric-red),
+    var(--cosmic-purple),
+    var(--electric-blue),
+    var(--electric-red)
+  );
+  background-size: 400% 400%;
+  animation: aurora 8s ease infinite;
+}
+
+.magnetic-button {
+  transition: transform 0.2s ease;
+}
+
+.magnetic-button:hover {
+  transform: scale(1.05) translateY(-2px);
+}
+
+.glow-text {
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+}
+
+.melting-progress {
+  border-radius: 50px;
+  overflow: hidden;
+  position: relative;
+}
+
+.melting-progress::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, var(--electric-red), var(--cosmic-purple), var(--electric-blue));
+  border-radius: 50px;
+  z-index: -1;
+  animation: aurora 3s ease infinite;
+}
+
+/* 3D flip card styles */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
