@@ -47,7 +47,7 @@ export function TheFamilyTab() {
   return (
     <div className="space-y-8">
       <div className="text-center mb-8">
-        <h2 className="groovy-font text-5xl mb-4 glow-text">The Family</h2>
+        <h2 className="groovy-font text-5xl mb-4 glow-text text-white">The Family</h2>
         <p className="script-font text-xl text-white/80">Together we make the magic happen ✨</p>
       </div>
 
@@ -66,7 +66,7 @@ export function TheFamilyTab() {
       </div>
 
       <div className="mb-8">
-        <h3 className="groovy-font text-3xl mb-6 text-center text-pink-400">Active Proposals</h3>
+        <h3 className="groovy-font text-3xl mb-6 text-center text-red-400">Active Proposals</h3>
         <div className="space-y-6">
           {proposals.map((proposal) => (
             <Card key={proposal.id} className="glassmorphic rounded-3xl float-animation">
@@ -103,14 +103,14 @@ export function TheFamilyTab() {
 
                 {votes[proposal.id] ? (
                   <div className="text-center py-4">
-                    <div className="text-green-400 text-lg mb-2">✅ Vote Cast!</div>
+                    <div className="text-white text-lg mb-2">✅ Vote Cast!</div>
                     <p className="text-white/60">You voted: {votes[proposal.id]}</p>
                   </div>
                 ) : (
                   <div className="flex space-x-4">
                     <Button
                       onClick={() => castVote(proposal.id, "Yes")}
-                      className="flex-1 magnetic-button bg-green-600 hover:bg-green-700"
+                      className="flex-1 magnetic-button bg-blue-600 hover:bg-blue-700"
                     >
                       Yes 👍
                     </Button>
@@ -129,7 +129,7 @@ export function TheFamilyTab() {
       </div>
 
       <div>
-        <h3 className="groovy-font text-3xl mb-6 text-center text-purple-400">Street Team Leaderboard</h3>
+        <h3 className="groovy-font text-3xl mb-6 text-center text-red-400">Street Team Leaderboard</h3>
         <Card className="glassmorphic rounded-3xl">
           <CardContent className="p-6">
             <div className="space-y-4">
@@ -138,7 +138,7 @@ export function TheFamilyTab() {
                   key={member.rank}
                   className={`flex items-center justify-between p-4 rounded-2xl transition-all duration-300 ${
                     member.isUser
-                      ? "bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-pink-500/30 glow-text"
+                      ? "bg-gradient-to-r from-red-500/20 to-blue-500/20 border border-red-500/30 glow-text"
                       : "bg-white/5 hover:bg-white/10"
                   }`}
                 >
@@ -150,7 +150,7 @@ export function TheFamilyTab() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl groovy-font text-pink-400">{member.miracles}</div>
+                    <div className="text-2xl groovy-font text-red-400">{member.miracles}</div>
                     <div className="text-sm text-white/60">miracles</div>
                   </div>
                 </div>

@@ -1,8 +1,9 @@
 /* ------------------------------------------------------------------
- Psychedelic NFA Bears Dashboard Styles
+ Cosmic Charlie Dashboard Styles
  – Self-hosted Inter fonts
  – System font fallbacks for groovy fonts
  – Custom animations and effects
+ – Rosy red, electric blue, and white only
 ------------------------------------------------------------------- */
 
 /* Inter variable weight 100-900 */
@@ -40,12 +41,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom CSS variables for the psychedelic theme */
+/* Custom CSS variables for the cosmic theme */
 :root {
   --cosmic-black: #0a0a14;
-  --card-bg: rgba(30, 20, 60, 0.4);
-  --electric-red: #ff3366;
-  --cosmic-purple: #6b5fff;
+  --card-bg: rgba(30, 20, 40, 0.4);
+  --rosy-red: #ff3366;
   --electric-blue: #00d4ff;
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.8);
@@ -176,19 +176,12 @@ body {
 }
 
 .tie-dye-bg {
-  background: radial-gradient(circle at 20% 50%, var(--cosmic-purple) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, var(--electric-red) 0%, transparent 50%),
-    radial-gradient(circle at 40% 80%, var(--electric-blue) 0%, transparent 50%), var(--cosmic-black);
+  background: radial-gradient(circle at 20% 50%, var(--rosy-red) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, var(--electric-blue) 0%, transparent 50%), var(--cosmic-black);
 }
 
 .aurora-gradient {
-  background: linear-gradient(
-    45deg,
-    var(--electric-red),
-    var(--cosmic-purple),
-    var(--electric-blue),
-    var(--electric-red)
-  );
+  background: linear-gradient(45deg, var(--rosy-red), var(--electric-blue), var(--rosy-red));
   background-size: 400% 400%;
   animation: aurora 8s ease infinite;
 }
@@ -218,7 +211,7 @@ body {
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, var(--electric-red), var(--cosmic-purple), var(--electric-blue));
+  background: linear-gradient(45deg, var(--rosy-red), var(--electric-blue));
   border-radius: 50px;
   z-index: -1;
   animation: aurora 3s ease infinite;

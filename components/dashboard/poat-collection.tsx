@@ -22,14 +22,14 @@ export function POATCollection() {
         {isExpanded && (
           <Card className="glassmorphic rounded-3xl mb-4 liquid-morph">
             <CardContent className="p-6">
-              <h3 className="groovy-font text-2xl mb-4 text-center text-pink-400">POAT Collection</h3>
+              <h3 className="groovy-font text-2xl mb-4 text-center text-red-400">POAT Collection</h3>
               <div className="space-y-3 max-h-64 overflow-y-auto">
                 {poats.map((poat) => (
                   <div
                     key={poat.id}
                     className={`p-3 rounded-xl transition-all duration-300 cursor-pointer ${
                       poat.collected
-                        ? "bg-gradient-to-r from-green-500/20 to-blue-500/20 hover:scale-105"
+                        ? "bg-gradient-to-r from-red-500/20 to-blue-500/20 hover:scale-105"
                         : "bg-white/5 opacity-50"
                     }`}
                   >

@@ -14,9 +14,9 @@ export function DashboardHeader({ user, daysOnBus }: DashboardHeaderProps) {
   return (
     <div className="mb-8">
       <div className="text-center mb-8">
-        <h1 className="groovy-font text-6xl md:text-8xl mb-4 glow-text">Welcome to the Bus!</h1>
+        <h1 className="groovy-font text-6xl md:text-8xl mb-4 glow-text text-white">Welcome to the Bus!</h1>
         <p className="text-2xl text-white/80">
-          Hey there, <span className="script-font text-pink-400">{user?.email || "Beautiful Soul"}</span> ✨
+          Hey there, <span className="script-font text-red-400">{user?.email || "Beautiful Soul"}</span> ✨
         </p>
       </div>
 
@@ -30,7 +30,7 @@ export function DashboardHeader({ user, daysOnBus }: DashboardHeaderProps) {
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
-                className="w-3 h-3 bg-pink-400 rounded-full dancing-bear"
+                className="w-3 h-3 bg-red-400 rounded-full dancing-bear"
                 style={{ animationDelay: `${i * 0.2}s` }}
               />
             ))}
@@ -45,7 +45,7 @@ export function DashboardHeader({ user, daysOnBus }: DashboardHeaderProps) {
             <div className={`${isFlipped ? "opacity-0" : "opacity-100"} transition-opacity duration-300`}>
               <div className="text-center">
                 <div className="text-6xl mb-4 spiral-animation">🎭</div>
-                <h3 className="groovy-font text-3xl mb-2 text-pink-400">Miracle Token</h3>
+                <h3 className="groovy-font text-3xl mb-2 text-red-400">Miracle Token</h3>
                 <p className="text-white/80">Genesis Bear #247</p>
                 <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
                   <div className="h-full aurora-gradient w-3/4 rounded-full"></div>

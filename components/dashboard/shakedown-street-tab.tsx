@@ -22,11 +22,11 @@ export function ShakedownStreetTab() {
     },
     {
       id: 2,
-      name: "Psychedelic Prints",
+      name: "Electric Prints",
       category: "Art",
       discount: 15,
       logo: "🎨",
-      code: "TRIPPY15",
+      code: "ELECTRIC15",
     },
     {
       id: 3,
@@ -61,7 +61,7 @@ export function ShakedownStreetTab() {
   return (
     <div className="space-y-8">
       <div className="text-center mb-8">
-        <h2 className="groovy-font text-5xl mb-4 glow-text">Shakedown Street</h2>
+        <h2 className="groovy-font text-5xl mb-4 glow-text text-white">Shakedown Street</h2>
         <p className="script-font text-xl text-white/80">Find your miracle deals, beautiful soul ✨</p>
       </div>
 
@@ -99,15 +99,13 @@ export function ShakedownStreetTab() {
           >
             <CardContent className="p-6 text-center">
               <div className="text-6xl mb-4 breathe-animation">{vendor.logo}</div>
-              <h3 className="groovy-font text-2xl mb-2 text-pink-400">{vendor.name}</h3>
+              <h3 className="groovy-font text-2xl mb-2 text-red-400">{vendor.name}</h3>
               <Badge className="mb-4 aurora-gradient border-0">{vendor.category}</Badge>
-              <div className="text-3xl groovy-font text-green-400 mb-4">{vendor.discount}% OFF</div>
+              <div className="text-3xl groovy-font text-white mb-4">{vendor.discount}% OFF</div>
 
               {revealedCodes.includes(vendor.id) ? (
                 <div className="space-y-2">
-                  <div className="bg-black/50 rounded-lg p-4 font-mono text-lg text-green-400 glow-text">
-                    {vendor.code}
-                  </div>
+                  <div className="bg-black/50 rounded-lg p-4 font-mono text-lg text-white glow-text">{vendor.code}</div>
                   <p className="text-sm text-white/60">Code revealed! ✨</p>
                 </div>
               ) : (

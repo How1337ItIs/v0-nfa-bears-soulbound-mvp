@@ -41,7 +41,7 @@ export function ShowsTab() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="groovy-font text-4xl mb-6 text-center glow-text">Upcoming Shows</h2>
+        <h2 className="groovy-font text-4xl mb-6 text-center glow-text text-white">Upcoming Shows</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {upcomingShows.map((show) => (
             <Card
@@ -54,7 +54,7 @@ export function ShowsTab() {
                 </div>
               </div>
               <CardContent className="p-6">
-                <h3 className="groovy-font text-2xl mb-2 text-pink-400">{show.venue}</h3>
+                <h3 className="groovy-font text-2xl mb-2 text-red-400">{show.venue}</h3>
                 <p className="text-white/80 mb-1">{show.date}</p>
                 <p className="text-white/60 mb-4">{show.location}</p>
                 <Button
@@ -72,20 +72,20 @@ export function ShowsTab() {
       </div>
 
       <div>
-        <h2 className="groovy-font text-4xl mb-6 text-center glow-text">Past Shows</h2>
+        <h2 className="groovy-font text-4xl mb-6 text-center glow-text text-white">Past Shows</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pastShows.map((show) => (
             <Card key={show.id} className="glassmorphic rounded-3xl overflow-hidden float-animation">
-              <div className="h-32 bg-gradient-to-br from-purple-900/50 to-pink-900/50 relative">
+              <div className="h-32 bg-gradient-to-br from-blue-500/50 to-red-500/50 relative">
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                   <div className="text-4xl">🎵</div>
                 </div>
               </div>
               <CardContent className="p-6">
-                <h3 className="groovy-font text-2xl mb-2 text-purple-400">{show.venue}</h3>
+                <h3 className="groovy-font text-2xl mb-2 text-blue-400">{show.venue}</h3>
                 <p className="text-white/80 mb-1">{show.date}</p>
                 <p className="text-white/60 mb-4">{show.location}</p>
-                <Button className="w-full magnetic-button bg-gradient-to-r from-purple-600 to-pink-600">
+                <Button className="w-full magnetic-button bg-gradient-to-r from-blue-600 to-red-600">
                   Listen to Recording 🎧
                 </Button>
               </CardContent>
