@@ -1,45 +1,23 @@
-'use client';
+// Server Component - NO 'use client' to avoid heavy Web3 imports
+import dynamic from 'next/dynamic';
 
-import { usePrivy } from '@privy-io/react-auth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-
-export default function Home() {
-  const { authenticated, login, ready } = usePrivy();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (authenticated) {
-      router.push('/member');
-    }
-  }, [authenticated, router]);
-
-  if (!ready) {
-    return (
-      <main className="min-h-screen p-8">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">Loading...</h1>
-        </div>
-      </main>
-    );
-  }
-
-  if (authenticated) return null;
-
-  return (
-    <main className="min-h-screen p-8">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Welcome to NFA Bears</h1>
-        <p className="text-gray-600 mb-8">
-          Sign in with your email to begin your Miracle SBT journey. We'll help you create a wallet if you don't have one.
-        </p>
-        <button
-          onClick={() => login()}
-          className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
-        >
-          Sign In
-        </button>
+// Lazy-load the client component that needs Web3
+const DynamicHomePage = dynamic(() => import('./components/HomePage'), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen tie-dye-bg flex items-center justify-center">
+      <div className="text-center">
+        <div className="text-6xl mb-6 animate-pulse">🐻✨</div>
+        <h1 className="text-5xl font-bold text-white glow-text groovy-font mb-6">
+          NFA Bears
+        </h1>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
       </div>
-    </main>
-  );
+    </div>
+  ),
+});
+
+// Server component - super fast loading, no Web3 dependencies
+export default function Home() {
+  return <DynamicHomePage />;
 }

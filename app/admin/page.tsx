@@ -42,7 +42,9 @@ export default function AdminPage() {
       <div className="max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
         
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        {/* Invite Code Generation */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+          <h2 className="text-lg font-semibold mb-4">Generate Invite Codes</h2>
           <button
             onClick={generateInvite}
             disabled={isLoading}
@@ -72,7 +74,23 @@ export default function AdminPage() {
             </div>
           )}
         </div>
+
+        {/* Genesis Bears Testing */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <h2 className="text-lg font-semibold mb-4">Testing Tools</h2>
+          <div className="space-y-3">
+            <a 
+              href="/mint-genesis"
+              className="block w-full text-center bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              🐻 Test Mint Genesis Bears
+            </a>
+            <p className="text-sm text-gray-600">
+              Use this to mint Genesis Bears for testing the membership verification system.
+            </p>
+          </div>
+        </div>
       </div>
     </main>
   );
-} 
+}

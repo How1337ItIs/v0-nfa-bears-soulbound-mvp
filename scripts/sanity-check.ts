@@ -35,7 +35,7 @@ async function main() {
   });
   
   console.log('Contract owner:', owner);
-  console.log('Is relayer the owner?', owner.toLowerCase() === relayerAddress.toLowerCase());
+  console.log('Is relayer the owner?', (owner as string).toLowerCase() === relayerAddress.toLowerCase());
 }
 
 main().catch(console.error); 

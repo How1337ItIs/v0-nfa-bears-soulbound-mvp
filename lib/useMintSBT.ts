@@ -1,91 +1,196 @@
-import { useCallback, useState } from 'react';
-import { useAccount, usePublicClient } from 'wagmi';
+import { useCallback, useState, useEffect } from 'react';
+import { useAccount, usePublicClient, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { toast } from 'react-hot-toast';
 import { membershipAbi } from '@/contracts/membershipAbi';
-import { createPublicClient, http } from 'viem';
-import { bepolia } from '@/lib/viemProvider';
 
-interface MintResult {
-  txHash?: string;
-  error?: string;
-}
-
-const contract = { 
-  address: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`,
-  abi: membershipAbi 
-} as const;
-
-const publicClient = createPublicClient({
-  chain: bepolia,
-  transport: http('https://bepolia.rpc.berachain.com')
-});
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS as `0x${string}`;
 
 export function useMintSBT() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const publicClient = usePublicClient();
-  const [isLoading, setIsLoading] = useState(false);
+  const { writeContract, isPending: isWritePending, data: hash, error: writeError } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
+  
   const [hasMinted, setHasMinted] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [mintStatus, setMintStatus] = useState<'idle' | 'checking' | 'minting' | 'confirming' | 'success' | 'error'>('idle');
 
-  const waitForTransaction = useCallback(async (hash: `0x${string}`) => {
-    let receipt = null;
-    while (!receipt) {
-      receipt = await publicClient.getTransactionReceipt({ hash });
-      await new Promise(r => setTimeout(r, 3000));
+  // Check if user already has a minted SBT on account change
+  useEffect(() => {
+    if (address && isConnected) {
+      checkHasMinted(address);
     }
-    return receipt.status === 'success';
-  }, [publicClient]);
+  }, [address, isConnected]);
 
-  const checkHasMinted = async (walletAddress: `0x${string}`) => {
-    console.log('Checking mint status for:', walletAddress);
+  // Handle transaction confirmation
+  useEffect(() => {
+    if (isConfirmed && hash) {
+      setHasMinted(true);
+      setMintStatus('success');
+      setIsLoading(false);
+      toast.success('🎉 Miracle SBT minted successfully! Welcome to the NFA Bears family!');
+    }
+  }, [isConfirmed, hash]);
+
+  // Handle write errors
+  useEffect(() => {
+    if (writeError) {
+      setMintStatus('error');
+      setIsLoading(false);
+      const errorMessage = writeError.message.includes('User rejected') 
+        ? 'Transaction rejected by user'
+        : 'Failed to mint SBT. Please try again.';
+      toast.error(errorMessage);
+    }
+  }, [writeError]);
+
+  const checkHasMinted = useCallback(async (walletAddress: `0x${string}`) => {
+    if (!publicClient || !CONTRACT_ADDRESS) {
+      console.error('Missing public client or contract address');
+      return false;
+    }
+
+    setMintStatus('checking');
     try {
       const result = await publicClient.readContract({
-        ...contract,
+        address: CONTRACT_ADDRESS,
+        abi: membershipAbi,
         functionName: 'hasMinted',
         args: [walletAddress]
       }) as boolean;
-      console.log('Mint status result:', result);
+      
       setHasMinted(result);
+      setMintStatus('idle');
       return result;
     } catch (error) {
       console.error('Error checking mint status:', error);
+      setHasMinted(false);
+      setMintStatus('error');
       return false;
     }
-  };
+  }, [publicClient]);
 
-  const mint = useCallback(async (code: string) => {
-    if (!address) {
-      toast.error('Please connect your wallet');
-      return;
+  const mintWithCode = useCallback(async (inviteCode: string): Promise<void> => {
+    if (!address || !isConnected) {
+      toast.error('Please connect your wallet first');
+      throw new Error('Wallet not connected');
+    }
+
+    if (!CONTRACT_ADDRESS) {
+      toast.error('Contract not configured');
+      throw new Error('Contract address not set');
+    }
+
+    // Check if already minted
+    if (hasMinted) {
+      toast.error('You already have a Miracle SBT');
+      throw new Error('Already minted');
     }
 
     setIsLoading(true);
+    setMintStatus('minting');
+
     try {
-      const response = await fetch('/api/mint', {
+      console.log('🎪 Starting 60-Second Miracle flow for:', address);
+      
+      // Step 1: Verify invite code and location
+      const verifyResponse = await fetch('/api/invite/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address, code })
+        body: JSON.stringify({ 
+          code: inviteCode,
+          address: address 
+        })
       });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to mint');
+      if (!verifyResponse.ok) {
+        const errorData = await verifyResponse.json();
+        throw new Error(errorData.error || 'Invite verification failed');
       }
 
-      toast.promise(
-        waitForTransaction(data.hash),
-        {
-          loading: 'Minting...',
-          success: 'Minted successfully!',
-          error: 'Mint failed'
-        }
-      );
-    } catch (error) {
-      console.error('Mint error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to mint');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [address, waitForTransaction]);
+      const verificationData = await verifyResponse.json();
+      console.log('✅ Invite verified:', verificationData);
 
-  return { mint, isLoading, hasMinted, checkHasMinted };
+      // Step 2: Mint SBT via smart contract
+      writeContract({
+        address: CONTRACT_ADDRESS,
+        abi: membershipAbi,
+        functionName: 'mintMembership',
+        args: [address]
+      });
+
+    } catch (error) {
+      console.error('🚨 Mint error:', error);
+      setMintStatus('error');
+      setIsLoading(false);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to mint SBT';
+      toast.error(errorMessage);
+      throw error;
+    }
+  }, [address, isConnected, hasMinted, writeContract]);
+
+  const mintDirectly = useCallback(async (): Promise<void> => {
+    if (!address || !isConnected) {
+      toast.error('Please connect your wallet first');
+      throw new Error('Wallet not connected');
+    }
+
+    if (!CONTRACT_ADDRESS) {
+      toast.error('Contract not configured');
+      throw new Error('Contract address not set');
+    }
+
+    // Check if already minted
+    if (hasMinted) {
+      toast.error('You already have a Miracle SBT');
+      throw new Error('Already minted');
+    }
+
+    setIsLoading(true);
+    setMintStatus('minting');
+
+    try {
+      console.log('🎪 Direct minting SBT for:', address);
+      
+      writeContract({
+        address: CONTRACT_ADDRESS,
+        abi: membershipAbi,
+        functionName: 'mintMembership',
+        args: [address]
+      });
+
+    } catch (error) {
+      console.error('🚨 Direct mint error:', error);
+      setMintStatus('error');
+      setIsLoading(false);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Failed to mint SBT';
+      toast.error(errorMessage);
+      throw error;
+    }
+  }, [address, isConnected, hasMinted, writeContract]);
+
+  return { 
+    // Main functions
+    mintWithCode,
+    mintDirectly,
+    checkHasMinted,
+    
+    // State
+    isLoading: isLoading || isWritePending || isConfirming,
+    hasMinted,
+    mintStatus,
+    
+    // Transaction details
+    transactionHash: hash,
+    isConfirmed,
+    
+    // Detailed loading states
+    isChecking: mintStatus === 'checking',
+    isMinting: mintStatus === 'minting' || isWritePending,
+    isConfirming,
+    isSuccess: mintStatus === 'success' && isConfirmed,
+    isError: mintStatus === 'error' || !!writeError,
+  };
 } 

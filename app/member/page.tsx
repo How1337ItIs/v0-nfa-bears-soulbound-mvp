@@ -1,10 +1,28 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
+import { useAccount } from 'wagmi';
 import { useMintSBT } from '@/lib/useMintSBT';
+import { useGenesisBears } from '@/lib/useGenesisBears';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import dynamicImport from 'next/dynamic';
+
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
+// Dynamic QR code to avoid SSR issues
+const QRCodeComponent = dynamicImport(
+  () => import('qrcode.react').then(mod => ({ default: mod.QRCodeSVG })),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-48 h-48 bg-gray-100 animate-pulse rounded-lg flex items-center justify-center">
+        <div className="text-gray-500 text-sm">Loading...</div>
+      </div>
+    )
+  }
+);
 
 const UncleSamSkeleton = () => (
   <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" className="mx-auto mb-2">
@@ -22,142 +40,289 @@ const UncleSamSkeleton = () => (
 );
 
 export default function MemberPage() {
-  const { user, authenticated, logout } = usePrivy();
-  const { mint, isLoading, hasMinted, checkHasMinted } = useMintSBT();
-  const [txHash, setTxHash] = useState<string | null>(null);
-  const [showToast, setShowToast] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user, authenticated, logout, ready } = usePrivy();
+  const { address } = useAccount();
+  const { hasMinted, checkHasMinted } = useMintSBT();
+  const { isHolder, balance, tokenIds, loading: genesisBearLoading, error: genesisBearError, refresh } = useGenesisBears();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!authenticated) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && ready && !authenticated) {
       router.push('/');
     }
-  }, [authenticated, router]);
+  }, [authenticated, ready, mounted, router]);
 
   useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => setShowToast(false), 5000);
-      return () => clearTimeout(timer);
+    if (address && mounted) {
+      checkHasMinted(address);
     }
-  }, [showToast]);
+  }, [address, mounted, checkHasMinted]);
 
-  // Check mint status when wallet is available
-  useEffect(() => {
-    if (user?.wallet?.address) {
-      checkHasMinted(user.wallet.address);
-    }
-  }, [user?.wallet?.address, checkHasMinted]);
-
-  const handleMint = async () => {
-    try {
-      const walletAddress = user?.wallet?.address;
-      if (!walletAddress) throw new Error('No wallet connected');
-      
-      const result = await mint(walletAddress);
-      if (result.error) {
-        setError(result.error || 'Unknown error occurred');
-        return;
-      }
-      
-      if (result.txHash) {
-        setTxHash(result.txHash);
-        setShowToast(true);
-        setError(null);
-      }
-    } catch (error) {
-      console.error('Minting failed:', error);
-      setError(error instanceof Error ? error.message : 'Minting failed');
-    }
-  };
-
-  const walletAddress = user?.wallet?.address;
-  const displayAddress = walletAddress 
-    ? `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}`
+  const displayAddress = address 
+    ? `${address.slice(0, 6)}…${address.slice(-4)}`
     : 'No wallet connected';
 
   const handleCopy = () => {
-    if (walletAddress) {
-      navigator.clipboard.writeText(walletAddress);
+    if (address) {
+      navigator.clipboard.writeText(address);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     }
   };
 
+  if (!mounted || !ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
   if (!authenticated) return null;
 
   return (
-    <main className="min-h-screen p-8">
-      <div className="max-w-2xl mx-auto">
-        <UncleSamSkeleton />
-        <h1 className="text-4xl font-groovy text-trip-red mb-6 drop-shadow-lg">Member Dashboard</h1>
-        <div className="bg-trip-white/90 p-6 rounded-3xl shadow-lg border-4 border-trip-blue wavy-border">
-          <div className="mb-4">
-            <p className="text-sm text-trip-blue font-accent">Wallet Address</p>
-            <div className="flex items-center gap-2">
-              <p className="font-mono text-trip-red">{displayAddress}</p>
-              <button
-                onClick={handleCopy}
-                className="ml-2 px-2 py-1 bg-trip-blue text-trip-white rounded font-accent text-xs hover:bg-trip-red transition-colors"
-                title="Copy wallet address"
-              >
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-              <Image
-                src="/bepolia.svg"
-                alt="Berachain Bepolia"
-                width={24}
-                height={24}
-                className="inline-block"
-              />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <UncleSamSkeleton />
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">NFA Bears Member</h1>
+              <p className="text-gray-600">Welcome to the family!</p>
             </div>
-          </div>
-
-          <div className="mb-4">
-            <p className="text-sm text-trip-blue font-accent">Miracle SBT Status</p>
-            {hasMinted === null ? (
-              <p className="text-trip-blue">Checking status...</p>
-            ) : hasMinted ? (
-              <div>
-                <p className="text-trip-blue font-bold">✓ SBT Owned</p>
-                {txHash && (
-                  <p className="mt-2 text-sm text-trip-red font-mono">
-                    Transaction: <span>{txHash}</span>
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div>
-                <button
-                  onClick={handleMint}
-                  disabled={isLoading}
-                  className="mt-2 bg-trip-blue text-trip-white px-6 py-3 rounded-full font-groovy text-lg shadow-md hover:bg-trip-red hover:text-trip-white transition-all duration-200 disabled:opacity-50 border-4 border-trip-red wavy-border"
-                >
-                  {isLoading ? 'Minting...' : 'Mint SBT'}
-                </button>
-                {error && (
-                  <p className="mt-2 text-sm text-trip-red font-bold">{error}</p>
-                )}
-              </div>
-            )}
+            <button
+              onClick={logout}
+              className="px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              Logout
+            </button>
           </div>
         </div>
 
-        {showToast && (
-          <div className="fixed bottom-4 right-4 bg-trip-blue text-trip-white px-4 py-2 rounded-lg shadow-lg font-groovy text-lg border-4 border-trip-red wavy-border">
-            SBT minted on Bepolia! tx: {txHash}
-          </div>
-        )}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Membership Status */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Membership Status</h2>
+              {genesisBearLoading && (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
+              )}
+            </div>
+            
+            {/* Genesis Bears Status */}
+            {genesisBearError ? (
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg mb-4">
+                <div className="flex items-center">
+                  <div className="text-2xl mr-3">❌</div>
+                  <div>
+                    <div className="font-semibold text-red-800">Connection Error</div>
+                    <div className="text-sm text-red-600">{genesisBearError}</div>
+                    <button 
+                      onClick={refresh}
+                      className="text-xs text-red-700 underline hover:text-red-800 mt-1"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : isHolder ? (
+              <div className="space-y-4">
+                <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                  <div className="flex items-center">
+                    <div className="text-2xl mr-3">🐻</div>
+                    <div>
+                      <div className="font-semibold text-purple-800">Genesis Bear Holder</div>
+                      <div className="text-sm text-purple-600">You own {balance} Genesis Bear{balance !== 1 ? 's' : ''}</div>
+                      {tokenIds.length > 0 && (
+                        <div className="text-xs text-purple-500 mt-1">
+                          Bear{tokenIds.length !== 1 ? 's' : ''} #{tokenIds.join(', #')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
-        <button
-          onClick={logout}
-          className="mt-8 bg-trip-red text-trip-white px-6 py-3 rounded-full font-groovy text-lg shadow-md hover:bg-trip-blue hover:text-trip-white transition-all duration-200 border-4 border-trip-blue wavy-border"
-        >
-          Log Out
-        </button>
+                {hasMinted && (
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center">
+                      <div className="text-2xl mr-3">✅</div>
+                      <div>
+                        <div className="font-semibold text-green-800">Miracle SBT Holder</div>
+                        <div className="text-sm text-green-600">Active community member</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600"><strong>Wallet:</strong></p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono text-xs bg-gray-100 p-2 rounded">{displayAddress}</p>
+                    <button
+                      onClick={handleCopy}
+                      className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors"
+                    >
+                      {copied ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600"><strong>Email:</strong></p>
+                  <p className="text-sm">{user?.email?.address || 'Not provided'}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center">
+                  <div className="text-2xl mr-3">⚠️</div>
+                  <div>
+                    <div className="font-semibold text-yellow-800">No Genesis Bear Found</div>
+                    <div className="text-sm text-yellow-600">You need to own a Genesis Bear to access premium features</div>
+                    <div className="text-xs text-yellow-500 mt-1">
+                      Connected wallet: {displayAddress}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Member Benefits */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Member Benefits</h2>
+            
+            <div className="space-y-3">
+              <div className="flex items-center p-3 bg-purple-50 rounded-lg">
+                <div className="text-purple-600 mr-3">🎵</div>
+                <div className="text-sm">
+                  <div className="font-medium">Event Access</div>
+                  <div className="text-gray-600">Discounted tickets to NFA Bears shows</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center p-3 bg-blue-50 rounded-lg">
+                <div className="text-blue-600 mr-3">🛒</div>
+                <div className="text-sm">
+                  <div className="font-medium">Vendor Discounts</div>
+                  <div className="text-gray-600">~10% off at participating vendors</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center p-3 bg-green-50 rounded-lg">
+                <div className="text-green-600 mr-3">🎆</div>
+                <div className="text-sm">
+                  <div className="font-medium">POAT Collection</div>
+                  <div className="text-gray-600">Collect event attendance tokens</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center p-3 bg-orange-50 rounded-lg">
+                <div className="text-orange-600 mr-3">💬</div>
+                <div className="text-sm">
+                  <div className="font-medium">Community Access</div>
+                  <div className="text-gray-600">Discord server and exclusive channels</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Member QR Code */}
+          {hasMinted && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Your Member QR</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Show this QR code to vendors for discounts
+              </p>
+              
+              {!showQR ? (
+                <button
+                  onClick={() => setShowQR(true)}
+                  className="w-full py-3 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  Generate QR Code
+                </button>
+              ) : (
+                <div className="text-center space-y-4">
+                  {typeof window !== 'undefined' && (
+                    <QRCodeComponent
+                      value={address || ''}
+                      size={192}
+                      level="M"
+                      includeMargin={true}
+                      className="mx-auto"
+                    />
+                  )}
+                  <p className="text-xs text-gray-500">Your wallet address</p>
+                  <button
+                    onClick={() => setShowQR(false)}
+                    className="text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    Hide QR Code
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Community Links */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Community</h2>
+            
+            <div className="space-y-3">
+              <a 
+                href="https://discord.gg/nfabears" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="text-2xl mr-3">💬</div>
+                <div>
+                  <div className="font-medium text-gray-900">Join Discord</div>
+                  <div className="text-sm text-gray-600">Connect with other Bears</div>
+                </div>
+              </a>
+              
+              <a 
+                href="https://twitter.com/nfabears" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="text-2xl mr-3">🐦</div>
+                <div>
+                  <div className="font-medium text-gray-900">Follow on Twitter</div>
+                  <div className="text-sm text-gray-600">Stay updated on events</div>
+                </div>
+              </a>
+              
+              <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
+                <div className="text-2xl mb-2">✨</div>
+                <div className="text-sm text-gray-700">
+                  <strong>"Fuck crypto, real family shit"</strong>
+                  <br />— The NFA Bears way
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Footer */}
+        <div className="mt-8 text-center text-sm text-gray-500">
+          <p>Not Fade Away • Not Financial Advice • Non-Fungible Acid Bears</p>
+          <p className="mt-1">Built with ♥️ for the Deadhead community</p>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
 

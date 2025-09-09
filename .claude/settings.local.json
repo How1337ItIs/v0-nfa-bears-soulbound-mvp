@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsx:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npx next:*)",
+      "Bash(npm audit:*)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "Bash(powershell:*)",
+      "Bash(curl:*)",
+      "Bash(NEXT_TYPESCRIPT_NO_TYPE_CHECK=1 npx next dev --port 3003)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm ls:*)",
+      "WebFetch(domain:docs.privy.io)",
+      "Bash(git clone:*)",
+      "Read(//c/Users/natha/nfa-bears-mvp/**)",
+      "Bash(git config:*)",
+      "Bash(GIT_TERMINAL_PROMPT=1 git clone https://github.com/How1337ItIs/v0-nfa-bears-soulbound-mvp.git)",
+      "Bash(cat:*)",
+      "Bash(git pull:*)",
+      "Bash(tree:*)",
+      "Bash(git fetch:*)",
+      "Bash(npx hardhat run:*)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc:*)",
+      "Bash(git stash push:*)",
+      "Bash(NEXT_TYPESCRIPT_NO_TYPE_CHECK=1 npm run dev)",
+      "Bash(find:*)",
+      "Bash(npm ci:*)",
+      "Bash(taskkill:*)",
+      "Bash(pnpm add:*)",
+      "Bash(choco install:*)",
+      "Bash(cp:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

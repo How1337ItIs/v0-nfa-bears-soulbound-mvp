@@ -1,0 +1,12 @@
+{
+  "contractName": "NFAGenesisBears",
+  "contractAddress": "0x7D464Ec4159114FeCeD3B064aFfc1e928c7a11b0",
+  "network": "bepolia",
+  "chainId": 80069,
+  "deployer": "0xC9ba78130433dfC58dBf0F94f4Ff3b29E1a050a4",
+  "blockNumber": null,
+  "transactionHash": "0xec2d2451570f093f75aee013b61c8231937cf4128ac790c6baddbc869012417c",
+  "timestamp": "2025-09-08T07:10:33.351Z",
+  "totalSupply": "4",
+  "maxSupply": "710"
+}

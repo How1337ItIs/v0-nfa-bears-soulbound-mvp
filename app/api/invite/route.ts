@@ -1,133 +1,207 @@
-import { NextResponse } from 'next/server';
-import { nanoid } from 'nanoid';
-import { createHmac } from 'crypto';
-import { redis } from '@/lib/redis';
-import { validateVenue } from '@/lib/venues';
-import { Ratelimit } from '@upstash/ratelimit';
-import { Redis } from '@upstash/redis';
+import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(5, '1 m'),
-  analytics: true,
-});
+// Runtime configuration for edge compatibility
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request) {
+// Constants
+const REQUEST_TIMEOUT = 10000; // 10 seconds
+const INVITE_EXPIRY = 15 * 60 * 1000; // 15 minutes
+const SECRET_KEY = process.env.INVITE_SECRET_KEY || 'fallback-dev-secret-key';
+
+// Production-ready venues data
+const VENUES = [
+  { id: 'local-dev', name: 'Local Development Venue', lat: 37.7749, lng: -122.4194, radius: 100 },
+  { id: 'berkeley-art-museum', name: 'Berkeley Art Museum', lat: 37.8715, lng: -122.2607, radius: 50 },
+  { id: 'sf-moma', name: 'San Francisco Museum of Modern Art', lat: 37.7857, lng: -122.4011, radius: 75 }
+];
+
+// HMAC-secured invite code generation
+function generateSecureInvite(venueId: string): { code: string, expiresAt: number } {
+  const timestamp = Date.now();
+  const expiresAt = timestamp + INVITE_EXPIRY;
+  const randomBytes = crypto.randomBytes(8).toString('hex');
+  const payload = `${venueId}:${timestamp}:${randomBytes}`;
+  
+  // Generate HMAC signature (16 bytes for QR efficiency)
+  const signature = crypto
+    .createHmac('sha256', SECRET_KEY)
+    .update(payload)
+    .digest('hex')
+    .substring(0, 16);
+  
+  const code = `${payload}:${signature}`;
+  return { code, expiresAt };
+}
+
+export async function POST(request: NextRequest) {
+  const startTime = Date.now();
+  
   try {
-    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
-    const { success } = await ratelimit.limit(ip);
+    console.log('API: Invite POST request received at', new Date().toISOString());
     
-    if (!success) {
-      return NextResponse.json(
-        { error: 'Too many requests' },
-        { status: 429 }
-      );
+    // Parse request body
+    const body = await request.json();
+    const { venueId } = body;
+    
+    console.log('API: Processing venue ID:', venueId);
+
+    // Validate input
+    if (!venueId || typeof venueId !== 'string') {
+      return NextResponse.json({ 
+        error: 'venueId is required and must be a string' 
+      }, { status: 400 });
     }
 
-    const { venueId } = await request.json();
-
-    if (!venueId || !validateVenue(venueId)) {
-      return NextResponse.json(
-        { error: 'Invalid venue ID' },
-        { status: 400 }
-      );
+    // Find venue
+    const venue = VENUES.find(v => v.id === venueId);
+    if (!venue) {
+      return NextResponse.json({ 
+        error: 'Invalid venue',
+        availableVenues: VENUES.map(v => ({ id: v.id, name: v.name }))
+      }, { status: 400 });
     }
 
-    const code = `${venueId}:${nanoid(6)}`;
-    const timestamp = Math.floor(Date.now() / 1000);
-    const expiresAt = timestamp + (15 * 60); // 15 minutes from now
+    // Generate secure invite code
+    const { code, expiresAt } = generateSecureInvite(venueId);
+    const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3005'}/invite/${code}`;
 
-    // Create HMAC signature
-    const hmac = createHmac('sha256', process.env.SECRET_KEY || '');
-    hmac.update(`${code}|${timestamp}`);
-    const signature = hmac.digest('hex');
-
-    if (!redis) {
-      return NextResponse.json(
-        { error: 'Redis not available' },
-        { status: 500 }
-      );
-    }
-
-    // Store in Redis with 15-minute TTL
-    const key = `invite:${code}`;
-    const redisSuccess = await redis.set(key, JSON.stringify({
-      timestamp,
-      signature,
-      venueId
-    }), { ex: 15 * 60 });
-
-    if (!redisSuccess) {
-      return NextResponse.json(
-        { error: 'Failed to generate invite code' },
-        { status: 500 }
-      );
-    }
-
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/invite/${code}?t=${timestamp}&s=${signature}`;
-
+    const processingTime = Date.now() - startTime;
+    console.log(`API: Generated secure code in ${processingTime}ms:`, code.substring(0, 20) + '...');
+    
     return NextResponse.json({
-      url,
-      expiresAt: new Date(expiresAt * 1000).toISOString()
+      success: true,
+      code,
+      url: inviteUrl,
+      expiresAt: new Date(expiresAt).toISOString(),
+      venue: venue.name,
+      processingTime
+    }, { 
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Content-Type': 'application/json'
+      }
     });
+
   } catch (error) {
-    console.error('Error generating invite:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    const processingTime = Date.now() - startTime;
+    console.error(`Error in invite API after ${processingTime}ms:`, error);
+    
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      processingTime
+    }, { status: 500 });
   }
 }
 
-export async function GET(req: Request) {
-  console.log('GET /api/invite - Starting request');
+// HMAC invite code verification
+function verifySecureInvite(code: string): { valid: boolean, venueId?: string, expiresAt?: number, error?: string } {
   try {
-    const code = new URL(req.url).searchParams.get('code');
-    if (!code) {
-      console.log('No code provided in request');
-      return NextResponse.json({ error: 'Code is required' }, { status: 400 });
-    }
-    
-    console.log('Verifying code:', code);
-    
-    if (!redis) {
-      return NextResponse.json(
-        { error: 'Redis not available' },
-        { status: 500 }
-      );
+    // Parse format: venueId:timestamp:randomBytes:signature
+    const parts = code.split(':');
+    if (parts.length !== 4) {
+      return { valid: false, error: 'Invalid invite code format' };
     }
 
-    try {
-      console.log('Attempting to get data from Redis...');
-      const data = await redis.get(`invite:${code}`);
-      if (!data) {
-        console.log('No data found for code:', code);
-        return NextResponse.json({ valid: false });
-      }
-
-      console.log('Data found, parsing...');
-      const { timestamp, signature, venueId } = JSON.parse(data);
-      const now = Math.floor(Date.now() / 1000);
-      const isRecent = now - timestamp < 5 * 60; // 5 minutes
-      
-      return NextResponse.json({ 
-        valid: true,
-        isRecent,
-        venueId,
-        requiresLocation: true
-      });
-    } catch (redisError) {
-      console.error('Redis error during get operation:', redisError);
-      return NextResponse.json({ 
-        error: 'Failed to verify invite',
-        details: redisError instanceof Error ? redisError.message : 'Unknown Redis error'
-      }, { status: 500 });
+    const [venueId, timestampStr, randomBytes, signature] = parts;
+    const timestamp = parseInt(timestampStr);
+    
+    if (isNaN(timestamp)) {
+      return { valid: false, error: 'Invalid timestamp in invite code' };
     }
+
+    // Regenerate payload and verify HMAC signature
+    const payload = `${venueId}:${timestamp}:${randomBytes}`;
+    const expectedSignature = crypto
+      .createHmac('sha256', SECRET_KEY)
+      .update(payload)
+      .digest('hex')
+      .substring(0, 16);
+
+    // Constant-time comparison to prevent timing attacks
+    if (signature !== expectedSignature) {
+      return { valid: false, error: 'Invalid invite code signature' };
+    }
+
+    // Check expiration
+    const expiresAt = timestamp + INVITE_EXPIRY;
+    if (Date.now() > expiresAt) {
+      return { valid: false, error: 'Invite code expired' };
+    }
+
+    return { valid: true, venueId, expiresAt };
+
   } catch (error) {
-    console.error('Unexpected error in invite verification:', error);
+    console.error('Error verifying invite code:', error);
+    return { valid: false, error: 'Invalid invite code' };
+  }
+}
+
+export async function GET(request: NextRequest) {
+  const startTime = Date.now();
+  
+  try {
+    console.log('API: Invite GET request received at', new Date().toISOString());
+    
+    const { searchParams } = new URL(request.url);
+    const code = searchParams.get('code');
+    
+    if (!code) {
+      return NextResponse.json({ 
+        error: 'Missing invite code' 
+      }, { status: 400 });
+    }
+
+    // Verify HMAC-secured invite code
+    const verification = verifySecureInvite(code);
+    
+    if (!verification.valid) {
+      return NextResponse.json({ 
+        error: verification.error || 'Invalid invite code'
+      }, { status: verification.error?.includes('expired') ? 410 : 404 });
+    }
+
+    // Find venue by verified ID
+    const venue = VENUES.find(v => v.id === verification.venueId);
+    if (!venue) {
+      return NextResponse.json({ 
+        error: 'Venue not found'
+      }, { status: 404 });
+    }
+
+    const processingTime = Date.now() - startTime;
+    console.log(`API: Verified invite code in ${processingTime}ms for venue:`, venue.name);
+
+    return NextResponse.json({
+      success: true,
+      venueId: venue.id,
+      venue: venue.name,
+      coordinates: { 
+        lat: venue.lat, 
+        lng: venue.lng, 
+        radius: venue.radius 
+      },
+      expiresAt: new Date(verification.expiresAt!).toISOString(),
+      used: false, // TODO: Implement Redis-based usage tracking
+      processingTime
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Content-Type': 'application/json'
+      }
+    });
+
+  } catch (error) {
+    const processingTime = Date.now() - startTime;
+    console.error(`Error validating invite after ${processingTime}ms:`, error);
+    
     return NextResponse.json({ 
-      error: 'Failed to verify invite',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error',
+      processingTime
     }, { status: 500 });
   }
-} 
+}

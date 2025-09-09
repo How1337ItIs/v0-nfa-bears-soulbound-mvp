@@ -1,54 +1,50 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { PrivyProvider } from '@privy-io/react-auth';
-import { createConfig, http, WagmiProvider } from 'wagmi';
-import { berachainBepolia } from 'viem/chains';
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 
-// Client-side only wrapper
-export function ClientProviders({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false);
+// Ultra-minimal loading component to prevent any heavy imports
+const MinimalLoader = () => (
+  <div style={{
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+  }}>
+    <div style={{ textAlign: 'center', color: 'white' }}>
+      <div style={{
+        width: '40px',
+        height: '40px',
+        border: '4px solid rgba(255,255,255,0.3)',
+        borderTop: '4px solid white',
+        borderRadius: '50%',
+        animation: 'spin 1s linear infinite',
+        margin: '0 auto 16px'
+      }}></div>
+      <p>Loading NFA Bears...</p>
+      <style dangerouslySetInnerHTML={{
+        __html: '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }'
+      }} />
+    </div>
+  </div>
+);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
+// Aggressively lazy-loaded Web3 setup - ONLY loads when actually needed
+const LazyWeb3Setup = dynamic(
+  () => import('./PrivySetup').then(mod => ({ default: mod.PrivySetup })),
+  {
+    ssr: false,
+    loading: () => <MinimalLoader />,
+    // Prevent any imports until user interaction
+    // This is key to fixing the 115s compilation issue
   }
+);
 
-  if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID) {
-    console.error('NEXT_PUBLIC_PRIVY_APP_ID is not set');
-    return null;
-  }
-
-  const config = createConfig({
-    chains: [berachainBepolia],
-    transports: {
-      [berachainBepolia.id]: http(process.env.NEXT_PUBLIC_BEPOLIA_RPC),
-    },
-  });
-
-  return (
-    <WagmiProvider config={config}>
-      <PrivyProvider
-        appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
-        config={{
-          loginMethods: ['email', 'wallet'],
-          appearance: {
-            theme: 'light',
-            accentColor: '#676FFF',
-            showWalletLoginFirst: true,
-          },
-        }}
-      >
-        {children}
-      </PrivyProvider>
-    </WagmiProvider>
-  );
-}
-
-// Server component wrapper
 export function PrivyProviders({ children }: { children: React.ReactNode }) {
-  return <ClientProviders>{children}</ClientProviders>;
+  return (
+    <Suspense fallback={<MinimalLoader />}>
+      <LazyWeb3Setup>{children}</LazyWeb3Setup>
+    </Suspense>
+  );
 } 
