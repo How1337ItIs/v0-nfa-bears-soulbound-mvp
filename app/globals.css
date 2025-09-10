@@ -5,15 +5,8 @@
  – Psychedelic glassmorphic aesthetic
 ------------------------------------------------------------------- */
 
-/* Inter variable weight 100-900 */
-@font-face {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2")
-    format("woff2");
-}
+/* Inter font */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 
 /* Tailwind layers */
 @tailwind base;
@@ -145,6 +138,31 @@ body {
   }
 }
 
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(6400%);
+  }
+}
+
+@keyframes dancing-bear {
+  0%,
+  100% {
+    transform: rotate(-5deg) translateY(0px);
+  }
+  25% {
+    transform: rotate(5deg) translateY(-5px);
+  }
+  50% {
+    transform: rotate(-3deg) translateY(-8px);
+  }
+  75% {
+    transform: rotate(3deg) translateY(-3px);
+  }
+}
+
 /* Animation Classes */
 .animate-caustic {
   animation: caustic 12s ease-in-out infinite;
@@ -168,6 +186,14 @@ body {
 
 .animate-float-particle {
   animation: float-particle 8s ease-in-out infinite;
+}
+
+.animate-scan {
+  animation: scan 2s linear infinite;
+}
+
+.dancing-bear {
+  animation: dancing-bear 2s ease-in-out infinite;
 }
 
 .liquid-morph {
@@ -212,7 +238,8 @@ body {
   .animate-orbital,
   .animate-parade,
   .animate-float-particle,
-  .liquid-morph {
+  .liquid-morph,
+  .dancing-bear {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }

@@ -1,11 +1,8 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import "./globals.css"
+import { PrivyProviders } from "./providers/PrivyProviders"
 import { MobileAppShell } from "@/components/mobile/MobileAppShell"
-import { PrivyProvider } from "@privy-io/react-auth"
-
-const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "NFA Bears - Not Fade Away",
@@ -23,21 +20,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <PrivyProvider
-          appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
-          config={{
-            appearance: {
-              theme: "dark",
-              accentColor: "#1a1aff",
-            },
-            embeddedWallets: {
-              createOnLogin: "users-without-wallets",
-            },
-          }}
-        >
+      <head>
+        <meta name="theme-color" content="#1a1aff" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
+      <body className="antialiased">
+        <PrivyProviders>
           <MobileAppShell>{children}</MobileAppShell>
-        </PrivyProvider>
+        </PrivyProviders>
       </body>
     </html>
   )

@@ -1,48 +1,47 @@
 "use client"
 
-import { forwardRef, type ButtonHTMLAttributes } from "react"
+import type React from "react"
 import { cn } from "@/lib/utils"
 
-interface TouchButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "critical" | "ghost"
-  size?: "sm" | "md" | "lg" | "xl"
-  glow?: boolean
+interface TouchButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: "primary" | "secondary" | "ghost" | "destructive"
+  size?: "sm" | "md" | "lg"
+  children: React.ReactNode
 }
 
-export const TouchButton = forwardRef<HTMLButtonElement, TouchButtonProps>(
-  ({ className, variant = "primary", size = "md", glow = false, children, ...props }, ref) => {
-    const variants = {
-      primary: "bg-[#1a1aff] text-white hover:scale-[1.02] active:scale-95 shadow-lg shadow-blue-500/25",
-      secondary: "bg-white/10 backdrop-blur-sm border border-[#1a1aff]/50 text-white hover:bg-[#1a1aff]/20",
-      critical: "bg-[#ff3366] text-[#000011] hover:scale-[1.02] active:scale-95 shadow-lg",
-      ghost: "text-white hover:bg-white/10 active:bg-white/20",
-    }
+export function TouchButton({
+  variant = "primary",
+  size = "md",
+  className,
+  children,
+  disabled,
+  ...props
+}: TouchButtonProps) {
+  const baseClasses =
+    "touch-manipulation transition-all duration-200 font-medium rounded-xl flex items-center justify-center"
 
-    const sizes = {
-      sm: "px-4 py-2 text-sm min-h-[36px]",
-      md: "px-6 py-3 text-base min-h-[44px]",
-      lg: "px-8 py-4 text-lg min-h-[52px]",
-      xl: "px-10 py-5 text-xl min-h-[60px]",
-    }
+  const variants = {
+    primary: "bg-[#1a1aff] text-white shadow-lg shadow-[#1a1aff]/25 hover:shadow-[#1a1aff]/40 active:scale-95",
+    secondary: "bg-white/10 text-white border border-white/20 hover:bg-white/20 active:scale-95",
+    ghost: "text-white hover:bg-white/10 active:scale-95",
+    destructive: "bg-[#ff3366] text-white hover:bg-[#ff3366]/90 active:scale-95",
+  }
 
-    return (
-      <button
-        ref={ref}
-        className={cn(
-          "inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-200 touch-manipulation",
-          "focus:outline-none focus:ring-2 focus:ring-[#1a1aff] focus:ring-offset-2 focus:ring-offset-[#000011]",
-          "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none",
-          variants[variant],
-          sizes[size],
-          glow && variant === "primary" && "shadow-[0_0_20px_rgba(26,26,255,0.4)]",
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </button>
-    )
-  },
-)
+  const sizes = {
+    sm: "px-4 py-2 text-sm min-h-[44px]",
+    md: "px-6 py-3 text-base min-h-[48px]",
+    lg: "px-8 py-4 text-lg min-h-[56px]",
+  }
 
-TouchButton.displayName = "TouchButton"
+  const disabledClasses = "opacity-50 cursor-not-allowed"
+
+  return (
+    <button
+      className={cn(baseClasses, variants[variant], sizes[size], disabled && disabledClasses, className)}
+      disabled={disabled}
+      {...props}
+    >
+      {children}
+    </button>
+  )
+}

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { MobileCard } from "./MobileCard"
 import { TouchButton } from "./TouchButton"
 import { QRScannerMobile } from "./QRScannerMobile"
-import { Users, Zap, Gift, Music, QrCode, Plus, TrendingUp, Calendar } from "lucide-react"
+import { Scan, QrCode, Users, Gift, TrendingUp, Calendar } from "lucide-react"
 
 export function MobileDashboard() {
   const [showScanner, setShowScanner] = useState(false)
@@ -12,156 +12,148 @@ export function MobileDashboard() {
   const handleScanSuccess = (result: string) => {
     console.log("Scanned:", result)
     setShowScanner(false)
-    // Handle scan result
+    // Handle the scanned result
   }
-
-  const stats = [
-    { icon: Users, label: "Family", value: "1,247", color: "text-[#00ff88]" },
-    { icon: Music, label: "Shows", value: "89", color: "text-[#1a1aff]" },
-    { icon: Gift, label: "Saved", value: "$143", color: "text-[#ffff00]" },
-    { icon: Zap, label: "POATs", value: "7", color: "text-[#ff3366]" },
-  ]
-
-  const quickActions = [
-    {
-      icon: QrCode,
-      label: "Scan Code",
-      action: () => setShowScanner(true),
-      variant: "primary" as const,
-    },
-    {
-      icon: Plus,
-      label: "Generate",
-      action: () => console.log("Generate invite"),
-      variant: "secondary" as const,
-    },
-  ]
-
-  const upcomingEvents = [
-    {
-      date: "Dec 15",
-      title: "Shakedown Street Jam",
-      venue: "The Fillmore",
-      distance: "2.3 mi",
-    },
-    {
-      date: "Dec 18",
-      title: "Terrapin Station",
-      venue: "Golden Gate Park",
-      distance: "5.1 mi",
-    },
-  ]
 
   return (
     <div className="min-h-screen p-4 space-y-6">
-      {/* Member Status Card */}
-      <MobileCard variant="glassmorphic" className="relative overflow-hidden">
-        {/* Terrapin watermark */}
-        <div className="absolute top-4 right-4 opacity-5">
-          <svg width="60" height="60" viewBox="0 0 60 60" fill="currentColor">
-            <path d="M30 5C16.2 5 5 16.2 5 30s11.2 25 25 25 25-11.2 25-25S43.8 5 30 5zm0 8c4.4 0 8 3.6 8 8s-3.6 8-8 8-8-3.6-8-8 3.6-8 8-8zm0 30c-6.2 0-11.7-3.2-15-8 3.3-4.8 8.8-8 15-8s11.7 3.2 15 8c-3.3 4.8-8.8 8-15 8z" />
-          </svg>
+      {/* Hero Section with Fish Pair */}
+      <div className="relative overflow-hidden">
+        {/* Fish Pair Background */}
+        <div className="absolute inset-0 opacity-15">
+          <div className="animate-orbital">
+            <svg width="200" height="200" viewBox="0 0 200 200" className="absolute top-0 left-0 text-[#1a1aff]">
+              <path
+                d="M50 100c0-20 10-30 30-30s30 10 30 30-10 30-30 30-30-10-30-30zm70 0c0 20 10 30 30 30s30-10 30-30-10-30-30-30-30 10-30 30z"
+                fill="currentColor"
+              />
+            </svg>
+          </div>
         </div>
 
-        <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-[#1a1aff]/30 to-[#ff3366]/30 rounded-2xl flex items-center justify-center">
-            <span className="text-2xl">🎫</span>
+        <MobileCard variant="hero" className="relative z-10">
+          <div className="text-center">
+            <div className="text-4xl mb-2">🐻</div>
+            <h1 className="text-2xl font-bold text-white glow-text mb-2">Welcome Back, Bear</h1>
+            <p className="text-white/70">Ready for some real family shit?</p>
           </div>
-          <div className="flex-1">
-            <h2 className="text-xl font-bold text-white mb-1">Miracle SBT Holder</h2>
-            <p className="text-white/70 text-sm">Member since Oct 2024</p>
-            <div className="flex items-center mt-2">
-              <div className="w-2 h-2 bg-[#00ff88] rounded-full mr-2 animate-pulse"></div>
-              <span className="text-[#00ff88] text-sm font-medium">Verified</span>
-            </div>
-          </div>
-        </div>
-      </MobileCard>
+        </MobileCard>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon
-          return (
-            <MobileCard key={index} variant="glassmorphic" className="text-center p-4">
-              <Icon className={`w-6 h-6 mx-auto mb-2 ${stat.color}`} />
-              <div className={`text-2xl font-bold ${stat.color} mb-1`}>{stat.value}</div>
-              <div className="text-white/60 text-sm">{stat.label}</div>
-            </MobileCard>
-          )
-        })}
+        <MobileCard variant="glassmorphic">
+          <div className="text-center">
+            <Users className="w-8 h-8 text-[#1a1aff] mx-auto mb-2" />
+            <div className="text-2xl font-bold text-white">247</div>
+            <div className="text-white/70 text-sm">Days on Bus</div>
+          </div>
+        </MobileCard>
+
+        <MobileCard variant="glassmorphic">
+          <div className="text-center">
+            <Gift className="w-8 h-8 text-[#00ff88] mx-auto mb-2" />
+            <div className="text-2xl font-bold text-white">$143</div>
+            <div className="text-white/70 text-sm">Saved</div>
+          </div>
+        </MobileCard>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 gap-4">
-        {quickActions.map((action, index) => {
-          const Icon = action.icon
-          return (
-            <TouchButton
-              key={index}
-              variant={action.variant}
-              size="lg"
-              onClick={action.action}
-              className="flex-col space-y-2 h-20"
-            >
-              <Icon className="w-6 h-6" />
-              <span className="text-sm">{action.label}</span>
-            </TouchButton>
-          )
-        })}
-      </div>
-
-      {/* Upcoming Events */}
       <MobileCard variant="glassmorphic">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">Upcoming Shows</h3>
-          <Calendar className="w-5 h-5 text-[#1a1aff]" />
+        <h3 className="text-white font-semibold mb-4 flex items-center">
+          <span className="mr-2">⚡</span>
+          Quick Actions
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          <TouchButton variant="primary" size="lg" onClick={() => setShowScanner(true)} className="flex-col space-y-2">
+            <Scan className="w-6 h-6" />
+            <span>Scan Code</span>
+          </TouchButton>
+          <TouchButton variant="secondary" size="lg" className="flex-col space-y-2">
+            <QrCode className="w-6 h-6" />
+            <span>Generate</span>
+          </TouchButton>
         </div>
-        <div className="space-y-3">
-          {upcomingEvents.map((event, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-              <div className="flex items-center space-x-3">
-                <div className="text-center">
-                  <div className="text-[#ffff00] font-bold text-sm">{event.date}</div>
-                </div>
-                <div>
-                  <h4 className="text-white font-medium text-sm">{event.title}</h4>
-                  <p className="text-white/60 text-xs">{event.venue}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-[#1a1aff] text-xs font-medium">{event.distance}</div>
-                <TrendingUp className="w-4 h-4 text-[#00ff88] ml-auto mt-1" />
-              </div>
+      </MobileCard>
+
+      {/* Member Benefits */}
+      <MobileCard variant="glassmorphic">
+        <h3 className="text-white font-semibold mb-4 flex items-center">
+          <span className="mr-2">🎪</span>
+          Your SBT
+        </h3>
+        <div className="bg-gradient-to-r from-[#1a1aff]/20 to-[#ff3366]/20 rounded-xl p-4 border border-[#1a1aff]/30">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <div className="text-white font-semibold">Miracle SBT #1337</div>
+              <div className="text-white/70 text-sm">Verified Member</div>
             </div>
-          ))}
+            <div className="text-3xl">🎫</div>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-white/70">Discounts</span>
+            <span className="text-[#00ff88]">20% Active</span>
+          </div>
         </div>
       </MobileCard>
 
       {/* Recent Activity */}
       <MobileCard variant="glassmorphic">
-        <h3 className="text-lg font-semibold text-white mb-4">Family Activity</h3>
+        <h3 className="text-white font-semibold mb-4 flex items-center">
+          <TrendingUp className="w-5 h-5 mr-2" />
+          Recent Activity
+        </h3>
         <div className="space-y-3">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-[#1a1aff]/30 rounded-full flex items-center justify-center">
-              <Users className="w-4 h-4 text-[#1a1aff]" />
-            </div>
+            <div className="w-2 h-2 bg-[#00ff88] rounded-full"></div>
             <div className="flex-1">
-              <p className="text-white text-sm">
-                <span className="font-medium">Jerry_G</span> joined the family
-              </p>
-              <p className="text-white/50 text-xs">2 hours ago</p>
+              <div className="text-white text-sm">Welcomed new member</div>
+              <div className="text-white/50 text-xs">2 hours ago</div>
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-[#00ff88]/30 rounded-full flex items-center justify-center">
-              <Gift className="w-4 h-4 text-[#00ff88]" />
-            </div>
+            <div className="w-2 h-2 bg-[#1a1aff] rounded-full"></div>
             <div className="flex-1">
-              <p className="text-white text-sm">
-                <span className="font-medium">You</span> saved $12 at Crystal Bay
-              </p>
-              <p className="text-white/50 text-xs">1 day ago</p>
+              <div className="text-white text-sm">Used discount at venue</div>
+              <div className="text-white/50 text-xs">1 day ago</div>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <div className="w-2 h-2 bg-[#ffff00] rounded-full"></div>
+            <div className="flex-1">
+              <div className="text-white text-sm">Earned POAT badge</div>
+              <div className="text-white/50 text-xs">3 days ago</div>
+            </div>
+          </div>
+        </div>
+      </MobileCard>
+
+      {/* Upcoming Events */}
+      <MobileCard variant="glassmorphic">
+        <h3 className="text-white font-semibold mb-4 flex items-center">
+          <Calendar className="w-5 h-5 mr-2" />
+          Upcoming Shows
+        </h3>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+            <div>
+              <div className="text-white font-medium">Dead & Company</div>
+              <div className="text-white/70 text-sm">Sphere, Las Vegas</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[#1a1aff] font-semibold">Dec 15</div>
+              <div className="text-white/50 text-xs">8:00 PM</div>
+            </div>
+          </div>
+          <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+            <div>
+              <div className="text-white font-medium">Phil Lesh & Friends</div>
+              <div className="text-white/70 text-sm">Capitol Theatre</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[#1a1aff] font-semibold">Dec 20</div>
+              <div className="text-white/50 text-xs">7:30 PM</div>
             </div>
           </div>
         </div>
