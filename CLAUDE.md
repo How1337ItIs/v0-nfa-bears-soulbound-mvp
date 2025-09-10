@@ -1,144 +1,207 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with the NFA Bears MVP codebase.
 
-## Project Overview: NFA Bears MVP
+# 🚨 CRITICAL REFERENCE
 
-**Cultural Foundation**: "Fuck crypto, real family shit" - A Grateful Dead-inspired Web3 community that prioritizes authentic human connection over speculation. Triple entendre: Non-Fungible Acid Bears | Not Fade Away | Not Financial Advice.
+## Environment Variables
 
-**Core Philosophy**: Based on the "Pill Triad" - Clear (radical transparency), Rave (collective joy), Light (transformative insight). Follows Jerry Garcia's wisdom: "You don't want to be the king" - no centralized control, community-driven governance.
+**YOU MUST** ensure these environment variables are properly configured:
 
-**Mission**: Preserve and evolve Deadhead parking lot culture using blockchain tools to facilitate genuine IRL connections, support underground vendors, and keep the music playing in intimate venues.
+```bash
+# SECURITY CRITICAL - Never expose or log these
+DEPLOYER_PRIVATE_KEY=0x[64_char_hex_private_key]
+SECRET_KEY=[64_char_random_string_for_hmac]
+
+# Contract Addresses  
+NEXT_PUBLIC_CONTRACT_ADDRESS=0xF0e401E962f2C126A3E44a6708E0884De038E77b
+
+# Blockchain & Auth
+NEXT_PUBLIC_BEPOLIA_RPC=https://bepolia.rpc.berachain.com/
+NEXT_PUBLIC_PRIVY_APP_ID=[privy_app_id]
+
+# Database
+REDIS_URL=[upstash_redis_url]
+REDIS_TOKEN=[upstash_redis_token]
+
+# Development (set to 'true' to bypass GPS verification)
+DEV_SKIP_GPS=false
+NEXT_PUBLIC_BASE_URL=http://localhost:3001
+```
+
+## Contract Addresses & Chain Info
+
+- **Chain**: Berachain Bepolia Testnet (Chain ID: **80069**)
+- **RPC**: https://bepolia.rpc.berachain.com/
+- **Explorer**: https://bepolia.beratrail.io/
+- **Membership Contract**: `0xF0e401E962f2C126A3E44a6708E0884De038E77b`
+- **Genesis Contract**: TBD (not yet deployed)
 
 ## Development Commands
 
 ```bash
-# Start development server
-npm run dev
-
-# Build for production  
-npm run build
-
-# Start production server
-npm run start
-
-# Lint code
-npm run lint
+# Essential daily commands
+npm run dev              # Start development server (port 3001)
+npm run build           # Build for production
+npm run lint            # Lint and typecheck
+npm run typecheck       # TypeScript validation
 
 # Smart contract operations
-npm run compile:contracts
-npm run deploy:membership
-npm run mint:demo
+npm run compile:contracts    # Compile Solidity contracts
+npm run deploy:membership   # Deploy membership contract
+npm run mint:demo          # Test minting workflow
 ```
 
-## Membership Architecture (Dual-Token System)
+## Security Warnings
 
-### Current Implementation: Miracle SBTs
-- **Contract**: `contracts/NFABearsMembership.sol` (ERC-721 with transfer blocking)
-- **Distribution**: In-person only via GPS-verified QR codes
-- **Purpose**: Free membership for grassroots onboarding
-- **Benefits**: Community access, vendor discounts (~10%), POAT collection
-- **Verification**: Non-transferable, one per wallet, 30-day activation window
+**🚨 NEVER MODIFY THESE WITHOUT EXPLICIT APPROVAL:**
+- Environment variable handling in API routes (`app/api/*/route.ts`)
+- HMAC signing logic in invite system (`lib/crypto-utils.ts`)
+- Private key usage in minting relayer (`app/api/mint/route.ts`)
+- Rate limiting configuration (`@upstash/ratelimit` instances)
 
-### Missing: Genesis Bears (710 NFTs @ $333)
-- **Purpose**: Founding members with governance votes and premium benefits
-- **Governance**: 1 NFT = 1 DAO vote for treasury, events, partnerships
-- **Benefits**: ~20% vendor discounts, free event access, art evolution perks
-- **Revenue**: ~$236K treasury funding live events (28%), development (19%), artists (14%)
+# ⚡ DAILY DEVELOPMENT
 
-## Technical Architecture
+## Tech Stack & Architecture
 
-### "60-Second Miracle" Flow
-1. **Ambassador** (`/ambassador`): Generates geo-fenced QR codes (15min TTL)
-2. **GPS Validation** (`/invite/[code]`): Haversine formula verifies venue proximity  
-3. **Privy Integration**: Email/wallet login, no seed phrases required
-4. **SBT Minting**: Gas-subsidized NFT minting via relayer
-5. **Community Integration**: Discord access, buddy pairing, welcome guide
+- **Framework**: Next.js 15 with App Router, TypeScript, React 18
+- **Styling**: Tailwind CSS with custom glassmorphic components
+- **Web3**: Privy (auth) + wagmi v2 + viem v2 (blockchain interactions)
+- **Blockchain**: Berachain Bepolia testnet only
+- **Database**: Upstash Redis (invite codes, rate limiting)
+- **PWA**: Full mobile app capabilities with service worker
 
-### Security & Sybil Resistance
-- **GPS Verification**: 100m venue radius with Haversine distance calculation
-- **HMAC Signatures**: Time-stamped invite codes with cryptographic validation
-- **Rate Limiting**: 5 requests/minute via Upstash Redis
-- **Device Fingerprinting**: Prevent bulk claiming (not yet implemented)
-- **One-Time Codes**: Redis TTL ensures single-use with 15-minute expiry
+## User Type Logic
 
-### Backend Infrastructure  
-- **Redis**: Invite storage, rate limiting, session management
-- **API Routes**: `/api/invite` (POST/GET), `/api/mint` (SBT creation)
-- **Vendor System**: QR scanning for membership verification (`/vendor`)
-- **PWA Support**: Offline capability, mobile-optimized experience
+**CRITICAL BUSINESS LOGIC** - User hierarchy affects all feature access:
 
-## Venue System (`data/venues.json`)
+1. **Genesis Holders**: Own Genesis Bears NFTs → 20% discounts, DAO voting, can miracle others
+2. **SBT Members**: Own Miracle SBT → 10% discounts, community access  
+3. **Unverified Users**: No NFTs → Must donate $10 OR complete tasks to access features
 
-Three configured venues with GPS coordinates and radius:
-- **local-dev**: SF coordinates (37.7749, -122.4194), 100m radius for testing
-- **berkeley-art-museum**: Real venue with 50m radius  
-- **sf-moma**: Production venue with 75m radius
+```typescript
+// User type detection pattern (see lib/userTypeDetection.ts)
+const userType = await detectUserType(address);
+if (userType === 'genesis') {
+  // Premium features enabled
+} else if (userType === 'sbt') {
+  // Standard member features
+} else {
+  // Unverified user flow
+}
+```
 
-**Development**: Set `DEV_SKIP_GPS=true` to bypass location verification
+## API Patterns & Examples
 
-## Environment Configuration
+### Invite System (`/api/invite`)
+```typescript
+// Generate invite (POST)
+{ "venueId": "local-dev", "latitude": 37.7749, "longitude": -122.4194 }
 
-Required `.env` variables:
-- `NEXT_PUBLIC_PRIVY_APP_ID`: Web3 authentication
-- `REDIS_URL`, `REDIS_TOKEN`: Upstash Redis for invite storage
-- `SECRET_KEY`: HMAC signing for invite security  
-- `DEV_SKIP_GPS`: Development GPS bypass flag
-- `NEXT_PUBLIC_BASE_URL`: Invite URL generation
+// Verify invite (GET)
+/api/invite/[code] → validates GPS + HMAC signature
+```
 
-## Web3 Integration (Berachain Focus)
+### Minting System (`/api/mint`)
+```typescript
+// Mint SBT (POST)
+{ "address": "0x...", "code": "invite_code" }
+// → Validates code, checks existing membership, mints via relayer
+```
 
-- **Network**: Berachain bepolia testnet (chainId: 80069)
-- **Privy + Wagmi**: Seamless wallet creation and blockchain interaction
-- **Target Features**: Proof-of-Liquidity yield farming, BGT governance tokens
-- **Gas Subsidization**: Relayer covers transaction costs for user onboarding
+## Code Conventions
 
-## Missing Critical Components
-
-### Economics Infrastructure
-- **Treasury Management**: Multi-sig, DAO governance, PoL integration
-- **POAT System**: Event attendance NFTs with IPFS metadata  
-- **Vendor Marketplace**: Discount verification, reimbursement automation
-- **Credit System**: Referral rewards staking toward BGT yield
-
-### Community Features  
-- **Discord Integration**: Role assignment, buddy pairing, moderation
-- **Deadhead Chatbot**: Archive.org integration, crowd-sourced lore verification
-- **Regional Chapters**: Decentralized event organization framework
-
-## Development Priorities
-
-### Immediate (Current MVP Issues)
-1. **Complete Authentication**: Finish Privy flow in `/invite/[code]` redemption
-2. **Fix SSR Bug**: Resolve HTMLElement hydration issues in QR generation  
-3. **SBT Minting**: Connect successful verification to actual NFT creation
-4. **Genesis Contracts**: Implement ERC-721A with UUPS upgradeability
-
-### Medium-Term (Q3-Q4 2025 Roadmap)
-1. **Vendor Pilot**: 10 vendors with discount verification system
-2. **Event Infrastructure**: Small venue shows, POAT distribution
-3. **Community Tools**: Discord bot, onboarding automation
-4. **Economic Foundation**: Treasury deployment, PoL integration
-
-## Code Conventions & Culture
-
-- **No Comments**: Code should be self-documenting unless complex algorithms
+- **NO COMMENTS**: Code must be self-documenting unless complex algorithms
 - **Security First**: Every user input validated, rate limited, cryptographically signed
 - **Mobile-First**: PWA functionality, offline capability, touch-optimized UI
-- **Community Values**: All features must serve authentic human connection over metrics
+- **Environment Validation**: All critical env vars validated at module level
 
-## Known Issues
+## Common Workflows
 
-- **SSR Bug**: HTMLElement used client-side in QR generation components  
-- **Incomplete Flow**: Invite redemption stops at verification, missing SBT mint
-- **Missing Contracts**: No Genesis NFT, POAT, or treasury management deployed
-- **Vendor Integration**: Scanner works but no discount/reimbursement backend
+### Testing GPS System
+```bash
+# Use Chrome DevTools > Sensors > Location to spoof coordinates
+# Default test venue: SF (37.7749, -122.4194) with 100m radius
+# Set DEV_SKIP_GPS=true to bypass for development
+```
 
-## Testing Strategy
+### Smart Contract Deployment
+```bash
+npm run compile:contracts
+npm run deploy:membership
+# Contract address automatically updates in .env
+```
 
-- **GPS Testing**: Chrome DevTools Sensors panel for location spoofing
+### Debugging Invite Flow
+```javascript
+// Check Redis invite storage
+const inviteData = await redis.get(`invite:${code}`);
+console.log('Invite data:', JSON.parse(inviteData));
+```
+
+# 📚 CONTEXTUAL KNOWLEDGE
+
+## Business Logic Summary
+
+**Revenue Model**: 
+- Genesis Bears (710 NFTs @ $333 each) = ~$236K treasury
+- Miracle SBTs (free, GPS-verified, community growth)
+- Vendor discount system (10-20% based on membership tier)
+
+**"60-Second Miracle" Flow**:
+1. Ambassador generates GPS-locked QR code (15min expiry)
+2. User scans → GPS verification within 100m radius
+3. Privy login (email/social → embedded wallet creation)
+4. Gasless SBT minting via relayer wallet
+5. Community access granted
+
+## GPS Verification System
+
+- **Algorithm**: Haversine formula for distance calculation
+- **Radius**: Configurable per venue (50-100m typical)
+- **Security**: HMAC-signed invite codes with timestamp
+- **Venues**: Configured in `data/venues.json`
+
+```javascript
+// GPS validation pattern
+const distance = calculateHaversineDistance(userLat, userLon, venueLat, venueLon);
+if (distance > venue.radius) throw new Error('Outside venue radius');
+```
+
+## Rate Limiting & Redis
+
+- **Upstash Redis**: Invite storage, rate limiting, session management
+- **Rate Limits**: 5 requests/minute on `/api/invite`, 3 requests/minute on `/api/mint`
+- **Data Structure**: `invite:${code}` → `{timestamp, venueId}`
+- **TTL**: 15 minutes for invite codes
+
+## Testing Approach
+
 - **Local Development**: Use `local-dev` venue with SF coordinates
-- **Redis Testing**: `test-redis.js` script for connection verification  
-- **Smart Contracts**: Hardhat local network before bepolia deployment
+- **GPS Testing**: Chrome DevTools Sensors panel for location spoofing
+- **Contract Testing**: Hardhat local network before Bepolia deployment
+- **Redis Testing**: `scripts/test-redis.js` for connection verification
 
-This is not just a Web3 project - it's a cultural preservation effort using technology to keep the Deadhead community spirit alive for future generations. Every technical decision should honor that mission.
+# 🎯 PROJECT CONTEXT
+
+## Cultural Foundation
+
+**Mission**: Preserve Deadhead parking lot culture using Web3 tools for authentic IRL connections. Based on "Pill Triad" philosophy: Clear (transparency), Rave (joy), Light (insight). Community-driven, anti-speculation.
+
+## Current Issues & TODOs
+
+**Known Issues**:
+- Some mock data in dashboard components (needs real blockchain data)
+- Genesis Bears contract not yet deployed
+- POAT (Proof of Attendance) system incomplete
+- Vendor discount tracking needs implementation
+
+**Development Priorities**:
+1. Complete Genesis Bears minting functionality  
+2. Implement POAT event attendance tracking
+3. Build vendor discount verification system
+4. Add comprehensive test suite
+
+---
+
+**This is a cultural preservation project using technology to keep authentic community spirit alive. Every technical decision should honor this mission.**

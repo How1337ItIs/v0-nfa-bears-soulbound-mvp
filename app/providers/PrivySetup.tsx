@@ -9,9 +9,9 @@ import { useState } from 'react';
 
 // Define Berachain testnet configuration for production readiness
 const berachainTestnet = defineChain({
-  id: 80084,
-  name: 'Berachain bArtio',
-  network: 'berachain-bartio',
+  id: 80069,
+  name: 'Berachain Bepolia',
+  network: 'berachain-bepolia',
   nativeCurrency: {
     decimals: 18,
     name: 'BERA',
@@ -19,19 +19,31 @@ const berachainTestnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_BEPOLIA_RPC || 'https://bartio.rpc.berachain.com/'],
+      http: [process.env.NEXT_PUBLIC_BEPOLIA_RPC || 'https://bepolia.rpc.berachain.com/'],
     },
     public: {
-      http: [process.env.NEXT_PUBLIC_BEPOLIA_RPC || 'https://bartio.rpc.berachain.com/'],
+      http: [process.env.NEXT_PUBLIC_BEPOLIA_RPC || 'https://bepolia.rpc.berachain.com/'],
     },
   },
   blockExplorers: {
     default: {
       name: 'Berachain Explorer',
-      url: 'https://bartio.beratrail.io',
+      url: 'https://bepolia.beratrail.io',
     },
   },
   testnet: true,
+});
+
+// Export wagmi config for use in hooks
+export const wagmiConfig = createConfig({
+  chains: [berachainTestnet],
+  transports: {
+    [berachainTestnet.id]: http(
+      process.env.NEXT_PUBLIC_BEPOLIA_RPC || 'https://bepolia.rpc.berachain.com/'
+    )
+  },
+  ssr: true,
+  batch: { multicall: true },
 });
 
 export function PrivySetup({ children }: { children: React.ReactNode }) {
@@ -44,17 +56,6 @@ export function PrivySetup({ children }: { children: React.ReactNode }) {
         gcTime: 10 * 60 * 1000, // 10 minutes
       },
     },
-  }));
-  
-  const [wagmiConfig] = useState(() => createConfig({
-    chains: [berachainTestnet],
-    transports: {
-      [berachainTestnet.id]: http(
-        process.env.NEXT_PUBLIC_BEPOLIA_RPC || 'https://bartio.rpc.berachain.com/'
-      )
-    },
-    ssr: true,
-    batch: { multicall: true },
   }));
 
   return (
@@ -74,12 +75,11 @@ export function PrivySetup({ children }: { children: React.ReactNode }) {
           showWalletLoginFirst: false,
         },
         
-        // Optimized embedded wallets
+        // Optimized embedded wallets - force Bepolia for new wallets
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
-          noPromptOnSignature: true,
           priceDisplay: {
-            primary: 'fiat-usd',
+            primary: 'fiat-currency',
             secondary: 'native-token',
           },
         },
@@ -95,11 +95,10 @@ export function PrivySetup({ children }: { children: React.ReactNode }) {
           privacyPolicyUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'}/privacy`,
         },
         
-        // Branding customizations
-        customizations: {
-          walletChainType: 'ethereum-only',
-          loginMessage: 'Join the NFA Bears family! Connect your wallet to get your Miracle SBT.',
-        },
+        // Network configuration - CRITICAL: Only Berachain Bepolia testnet
+        defaultChain: berachainTestnet,
+        supportedChains: [berachainTestnet],
+        
         
         // External wallets
         externalWallets: {

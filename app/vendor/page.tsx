@@ -59,7 +59,6 @@ export default function VendorPage() {
           toast.error('No membership found');
         }
       } catch (error) {
-        console.error('Error checking SBT:', error);
         setHasSBT(false);
         toast.error('Failed to verify membership');
       } finally {
@@ -71,7 +70,6 @@ export default function VendorPage() {
   }, [result, publicClient]);
 
   const handleScan = (decodedText: string) => {
-    console.log('QR scan result:', decodedText);
     setResult(decodedText);
     setHasSBT(null);
   };
@@ -93,7 +91,7 @@ export default function VendorPage() {
           <p className="text-center text-gray-600 mb-4">
             Scan a member's wallet QR code to verify their Miracle SBT
           </p>
-          <QRScanner onScan={handleScan} />
+          <QRScanner onScanSuccess={handleScan} />
         </div>
         
         {result && (

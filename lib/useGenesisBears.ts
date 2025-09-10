@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { readContract } from 'wagmi/actions';
-import { config } from '@/app/providers/PrivyProviders';
+import { wagmiConfig as config } from '@/app/providers/PrivySetup';
 
 const GENESIS_BEARS_ADDRESS = process.env.NEXT_PUBLIC_GENESIS_BEARS_CONTRACT as `0x${string}`;
 

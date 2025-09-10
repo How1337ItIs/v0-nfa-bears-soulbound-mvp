@@ -9,6 +9,7 @@
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "npx tsc --noEmit",
     "compile:contracts": "hardhat compile",
     "deploy:membership": "hardhat run contracts/scripts/deploy_membership.ts --network bepolia",
     "mint:demo": "hardhat run contracts/scripts/mint_membership.ts --network bepolia --to"

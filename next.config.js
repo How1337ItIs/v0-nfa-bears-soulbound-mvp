@@ -142,9 +142,6 @@ const nextConfig = {
     minimumCacheTTL: 60,
   },
   
-  // Development-specific optimizations
-  swcMinify: true,
-  
   // Skip static optimization in development for speed
   output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
 };

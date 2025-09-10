@@ -2,9 +2,9 @@ import { createPublicClient, createWalletClient, http, defineChain } from "viem"
 
 // Production-ready Berachain testnet configuration
 export const bepolia = defineChain({
-  id: 80084,
-  name: "Berachain bArtio",
-  network: "berachain-bartio",
+  id: 80069,
+  name: "Berachain Bepolia",
+  network: "berachain-bepolia",
   nativeCurrency: { 
     name: "BERA", 
     symbol: "BERA", 
@@ -12,16 +12,16 @@ export const bepolia = defineChain({
   },
   rpcUrls: {
     default: { 
-      http: [process.env.NEXT_PUBLIC_BEPOLIA_RPC || "https://bartio.rpc.berachain.com/"] 
+      http: [process.env.NEXT_PUBLIC_BEPOLIA_RPC || "https://bepolia.rpc.berachain.com/"] 
     },
     public: { 
-      http: ["https://bartio.rpc.berachain.com/"] 
+      http: ["https://bepolia.rpc.berachain.com/"] 
     }
   },
   blockExplorers: {
     default: { 
       name: "Berachain Explorer", 
-      url: "https://bartio.beratrail.io" 
+      url: "https://bepolia.beratrail.io" 
     }
   },
   testnet: true,
@@ -30,18 +30,18 @@ export const bepolia = defineChain({
 // Production-ready client configurations with retry logic
 export const publicClient = createPublicClient({ 
   chain: bepolia, 
-  transport: http(process.env.NEXT_PUBLIC_BEPOLIA_RPC || "https://bartio.rpc.berachain.com/", {
+  transport: http(process.env.NEXT_PUBLIC_BEPOLIA_RPC || "https://bepolia.rpc.berachain.com/", {
     batch: true,
     retryCount: 3,
-    retryDelay: ({ count }) => Math.min(1000 * 2 ** count, 30000),
+    retryDelay: 1000,
   })
 });
 
 export const walletClient = createWalletClient({ 
   chain: bepolia, 
-  transport: http(process.env.NEXT_PUBLIC_BEPOLIA_RPC || "https://bartio.rpc.berachain.com/", {
+  transport: http(process.env.NEXT_PUBLIC_BEPOLIA_RPC || "https://bepolia.rpc.berachain.com/", {
     batch: true,
     retryCount: 3,
-    retryDelay: ({ count }) => Math.min(1000 * 2 ** count, 30000),
+    retryDelay: 1000,
   })
 }); 

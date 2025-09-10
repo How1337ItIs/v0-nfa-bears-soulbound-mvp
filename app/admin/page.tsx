@@ -29,7 +29,7 @@ export default function AdminPage() {
       const qr = await QRCode.toDataURL(code);
       setQrCode(qr);
     } catch (error) {
-      console.error('Failed to generate invite:', error);
+      // Error handled by UI state - logged server-side
     } finally {
       setIsLoading(false);
     }

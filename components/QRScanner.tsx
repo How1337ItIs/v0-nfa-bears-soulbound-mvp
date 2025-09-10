@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Html5QrcodeScanner, Html5QrcodeScannerConfig, Html5QrcodeScanType } from 'html5-qrcode';
+import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
 import { toast } from 'react-hot-toast';
 
 interface QRScannerProps {
@@ -55,7 +55,7 @@ export default function QRScanner({
   const initializeScanner = useCallback(async () => {
     if (!elementRef.current || scannerRef.current) return;
 
-    const config: Html5QrcodeScannerConfig = {
+    const config = {
       fps,
       qrbox: {
         width: Math.min(250, width * 0.8),
@@ -187,25 +187,25 @@ export default function QRScanner({
         {/* Scanner Container */}
         <div className="relative bg-black/20 rounded-lg overflow-hidden border border-white/20">
           {error ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center" style={{ minHeight: height }}>
+            <div className="flex flex-col items-center justify-center p-4 sm:p-8 text-center min-h-[250px] sm:min-h-[300px]">
               <div className="text-4xl mb-4">📷</div>
               <p className="text-red-300 mb-4 text-sm">{error}</p>
               <button
                 onClick={startScanning}
-                className="px-6 py-2 aurora-gradient text-white rounded-lg magnetic-button transition-all font-medium"
+                className="px-4 sm:px-6 py-2 aurora-gradient text-white rounded-lg magnetic-button transition-all font-medium text-sm"
               >
                 {hasPermission === false ? 'Grant Camera Permission' : 'Try Again'}
               </button>
             </div>
           ) : hasPermission === null ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center" style={{ minHeight: height }}>
+            <div className="flex flex-col items-center justify-center p-4 sm:p-8 text-center min-h-[250px] sm:min-h-[300px]">
               <div className="text-4xl mb-4 float-animation">🎪</div>
               <p className="text-white/80 mb-4 text-sm">
                 We need camera access to scan QR codes for your Miracle SBT
               </p>
               <button
                 onClick={requestCameraPermission}
-                className="px-6 py-2 aurora-gradient text-white rounded-lg magnetic-button transition-all font-medium"
+                className="px-4 sm:px-6 py-2 aurora-gradient text-white rounded-lg magnetic-button transition-all font-medium text-sm"
               >
                 Enable Camera
               </button>
@@ -215,28 +215,28 @@ export default function QRScanner({
               <div 
                 id="qr-scanner" 
                 ref={elementRef}
+                className="w-full"
                 style={{ 
-                  width: '100%',
-                  minHeight: height 
+                  minHeight: 250 
                 }}
               />
               
               {/* Scanner overlay with dancing bears */}
               {isScanning && (
                 <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute top-4 left-4 text-white/60 text-xs">
+                  <div className="absolute top-2 sm:top-4 left-2 sm:left-4 text-white/60 text-xs">
                     Looking for QR code...
                   </div>
                   
                   {/* Corner markers */}
-                  <div className="absolute top-8 left-8 w-6 h-6 border-l-2 border-t-2 border-white/60"></div>
-                  <div className="absolute top-8 right-8 w-6 h-6 border-r-2 border-t-2 border-white/60"></div>
-                  <div className="absolute bottom-8 left-8 w-6 h-6 border-l-2 border-b-2 border-white/60"></div>
-                  <div className="absolute bottom-8 right-8 w-6 h-6 border-r-2 border-b-2 border-white/60"></div>
+                  <div className="absolute top-4 sm:top-8 left-4 sm:left-8 w-4 sm:w-6 h-4 sm:h-6 border-l-2 border-t-2 border-white/60"></div>
+                  <div className="absolute top-4 sm:top-8 right-4 sm:right-8 w-4 sm:w-6 h-4 sm:h-6 border-r-2 border-t-2 border-white/60"></div>
+                  <div className="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 w-4 sm:w-6 h-4 sm:h-6 border-l-2 border-b-2 border-white/60"></div>
+                  <div className="absolute bottom-4 sm:bottom-8 right-4 sm:right-8 w-4 sm:w-6 h-4 sm:h-6 border-r-2 border-b-2 border-white/60"></div>
                   
                   {/* Dancing bears in corners */}
-                  <div className="absolute top-2 right-2 text-lg float-animation">🐻</div>
-                  <div className="absolute bottom-2 left-2 text-lg breathe-animation">✨</div>
+                  <div className="absolute top-1 sm:top-2 right-1 sm:right-2 text-sm sm:text-lg float-animation">🐻</div>
+                  <div className="absolute bottom-1 sm:bottom-2 left-1 sm:left-2 text-sm sm:text-lg breathe-animation">✨</div>
                 </div>
               )}
             </div>

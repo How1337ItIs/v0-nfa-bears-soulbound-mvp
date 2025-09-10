@@ -24,7 +24,9 @@ export function useMintSBT() {
 
   // Handle transaction confirmation
   useEffect(() => {
+    console.log('🎪 Transaction state:', { isConfirmed, hash, isWritePending, isConfirming });
     if (isConfirmed && hash) {
+      console.log('✅ Transaction confirmed! Setting success state...');
       setHasMinted(true);
       setMintStatus('success');
       setIsLoading(false);
@@ -94,6 +96,8 @@ export function useMintSBT() {
       console.log('🎪 Starting 60-Second Miracle flow for:', address);
       
       // Step 1: Verify invite code and location
+      console.log('🔍 Sending verification request:', { code: inviteCode.substring(0, 20) + '...', address });
+      
       const verifyResponse = await fetch('/api/invite/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,9 +107,18 @@ export function useMintSBT() {
         })
       });
 
+      console.log('🔍 Verification response status:', verifyResponse.status);
+
       if (!verifyResponse.ok) {
-        const errorData = await verifyResponse.json();
-        throw new Error(errorData.error || 'Invite verification failed');
+        const errorText = await verifyResponse.text();
+        console.error('🔍 Verification error response:', errorText);
+        
+        try {
+          const errorData = JSON.parse(errorText);
+          throw new Error(errorData.error || 'Invite verification failed');
+        } catch {
+          throw new Error(`Verification failed: ${verifyResponse.status} - ${errorText}`);
+        }
       }
 
       const verificationData = await verifyResponse.json();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, use } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import { useAccount } from 'wagmi';
@@ -35,9 +35,11 @@ function isWithinRadius(
 
 type FlowStatus = 'verifying' | 'needs-auth' | 'needs-location' | 'minting' | 'success' | 'error';
 
-export default async function InvitePage({ params }: { params: Promise<{ code: string }> }) {
-  const resolvedParams = await params;
-  return <InvitePageClient code={resolvedParams.code} />;
+export default function InvitePage({ params }: { params: Promise<{ code: string }> }) {
+  const resolvedParams = use(params);
+  // URL decode the invite code since Next.js encodes URL parameters
+  const decodedCode = decodeURIComponent(resolvedParams.code);
+  return <InvitePageClient code={decodedCode} />;
 }
 
 function InvitePageClient({ code }: { code: string }) {
@@ -45,7 +47,12 @@ function InvitePageClient({ code }: { code: string }) {
   const router = useRouter();
   const { login, authenticated, ready } = usePrivy();
   const { address } = useAccount();
-  const { mint, isLoading: isMinting, hasMinted, checkHasMinted } = useMintSBT();
+  const { mintWithCode, isLoading: isMinting, hasMinted, checkHasMinted, isSuccess, isMinting: isMintingState } = useMintSBT();
+
+  // Debug logging
+  console.log('🎪 InvitePageClient received code:', code);
+  console.log('🎪 Code length:', code.length);
+  console.log('🎪 Code parts:', code.split(':').length);
   
   const [status, setStatus] = useState<FlowStatus>('verifying');
   const [error, setError] = useState<string | null>(null);
@@ -55,22 +62,21 @@ function InvitePageClient({ code }: { code: string }) {
   // Verify invite code and extract venue info
   const verifyInvite = useCallback(async () => {
     try {
-      const timestamp = searchParams.get('t');
-      const signature = searchParams.get('s');
-
-      if (!timestamp || !signature) {
-        throw new Error('Invalid invite URL - missing parameters');
-      }
+      console.log('Verifying invite code:', code);
 
       // Verify invite with backend
       const response = await fetch(`/api/invite?code=${code}`);
       if (!response.ok) {
+        const errorData = await response.text();
+        console.error('API error:', response.status, errorData);
         throw new Error('Invalid or expired invite code');
       }
 
       const data = await response.json();
-      if (!data.valid || !data.isRecent) {
-        throw new Error('Invite code has expired');
+      console.log('API response data:', data);
+      
+      if (!data.success) {
+        throw new Error('Invite code verification failed');
       }
 
       // Get venue info
@@ -82,16 +88,18 @@ function InvitePageClient({ code }: { code: string }) {
       setVenue(venueData);
       
       // GPS verification is required unless explicitly disabled in development
+      // Production environments should never skip GPS verification
       const shouldSkipGPS = process.env.NODE_ENV === 'development' && 
-                           process.env.NEXT_PUBLIC_DEV_SKIP_GPS === 'true';
+                           process.env.NEXT_PUBLIC_DEV_SKIP_GPS === 'true' &&
+                           process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production';
       
-      if (data.requiresLocation && !shouldSkipGPS) {
-        setStatus('needs-location');
-      } else {
-        if (shouldSkipGPS) {
-          console.warn('⚠️ GPS verification bypassed in development mode');
-        }
+      if (shouldSkipGPS) {
+        console.warn('⚠️ GPS verification bypassed in development mode');
+        console.log('✅ Bypassing GPS, setting status to needs-auth');
         setStatus('needs-auth');
+      } else {
+        console.log('📍 GPS verification required, setting status to needs-location');
+        setStatus('needs-location');
       }
     } catch (error) {
       console.error('Invite verification failed:', error);
@@ -145,19 +153,14 @@ function InvitePageClient({ code }: { code: string }) {
       }
 
       // Mint the SBT
-      await mint(code);
-      setStatus('success');
-      
-      // Redirect after success
-      setTimeout(() => {
-        router.push('/member');
-      }, 3000);
+      await mintWithCode(code);
+      // Success and redirect handled by transaction confirmation useEffect
     } catch (error) {
       console.error('Minting failed:', error);
       setError(error instanceof Error ? error.message : 'Failed to mint membership');
       setStatus('error');
     }
-  }, [address, checkHasMinted, mint, code, router]);
+  }, [address, checkHasMinted, mintWithCode, code, router]);
 
   // Flow control effects
   useEffect(() => {
@@ -173,10 +176,28 @@ function InvitePageClient({ code }: { code: string }) {
   }, [status, getUserLocation]);
 
   useEffect(() => {
+    console.log('🎪 Auth flow check:', { status, ready, authenticated, address: !!address });
     if (status === 'needs-auth' && ready && authenticated && address) {
+      console.log('🚀 All conditions met, calling completeMint...');
       completeMint();
     }
   }, [status, ready, authenticated, address, completeMint]);
+
+  // Handle successful minting and redirect
+  useEffect(() => {
+    console.log('🎪 Minting status check:', { isSuccess, hasMinted, status, isMintingState });
+    
+    // Redirect if transaction succeeded OR if user already has SBT
+    if ((isSuccess && hasMinted) || (hasMinted && status === 'success' && !isMintingState)) {
+      console.log('🎉 Minting complete (or already minted)! Redirecting...');
+      
+      // Redirect after success to Dead Easy Guide
+      setTimeout(() => {
+        console.log('🔄 Redirecting to /dead-easy-guide');
+        router.push('/dead-easy-guide');
+      }, 3000);
+    }
+  }, [isSuccess, hasMinted, status, isMintingState, router]);
 
   // Render based on current status
   if (status === 'verifying') {
@@ -215,7 +236,7 @@ function InvitePageClient({ code }: { code: string }) {
     );
   }
 
-  if (status === 'needs-auth' && ready && !authenticated) {
+  if (status === 'needs-auth' && !authenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
         <div className="text-center p-8 max-w-md">
@@ -271,7 +292,7 @@ function InvitePageClient({ code }: { code: string }) {
             <p className="text-gray-600 mb-6">Your Miracle SBT has been minted successfully. You're now part of the NFA Bears community.</p>
           </div>
           <div className="space-y-3">
-            <p className="text-sm text-gray-500">Redirecting to member dashboard...</p>
+            <p className="text-sm text-gray-500">Redirecting to your onboarding guide...</p>
             <div className="w-full bg-green-200 rounded-full h-2">
               <div className="bg-green-600 h-2 rounded-full animate-pulse" style={{width: '100%'}}></div>
             </div>

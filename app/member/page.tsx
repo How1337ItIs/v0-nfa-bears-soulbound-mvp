@@ -309,7 +309,7 @@ export default function MemberPage() {
                 <div className="text-2xl mb-2">✨</div>
                 <div className="text-sm text-gray-700">
                   <strong>"Fuck crypto, real family shit"</strong>
-                  <br />— The NFA Bears way
+                  <br />— NFA Bears what!?!?
                 </div>
               </div>
             </div>

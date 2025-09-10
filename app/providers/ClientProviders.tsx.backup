@@ -29,36 +29,36 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
       const { http } = await import('wagmi');
       const { defineChain } = await import('viem');
 
-      const bepolia = defineChain({
-        id: 11155111,
-        name: 'Sepolia',
-        network: 'sepolia',
+      const berachainBepolia = defineChain({
+        id: 80069,
+        name: 'Berachain Bepolia',
+        network: 'berachain-bepolia',
         nativeCurrency: {
           decimals: 18,
-          name: 'Sepolia Ether',
-          symbol: 'ETH',
+          name: 'BERA',
+          symbol: 'BERA',
         },
         rpcUrls: {
           default: {
-            http: [process.env.NEXT_PUBLIC_BEPOLIA_RPC || ''],
+            http: [process.env.NEXT_PUBLIC_BEPOLIA_RPC || 'https://bepolia.rpc.berachain.com/'],
           },
           public: {
-            http: [process.env.NEXT_PUBLIC_BEPOLIA_RPC || ''],
+            http: [process.env.NEXT_PUBLIC_BEPOLIA_RPC || 'https://bepolia.rpc.berachain.com/'],
           },
         },
         blockExplorers: {
           default: {
-            name: 'Etherscan',
-            url: 'https://sepolia.etherscan.io',
+            name: 'Berachain Explorer',
+            url: 'https://bepolia.beratrail.io',
           },
         },
         testnet: true,
       });
 
       const wagmiConfig = createConfig({
-        chains: [bepolia],
+        chains: [berachainBepolia],
         transports: {
-          [bepolia.id]: http(process.env.NEXT_PUBLIC_BEPOLIA_RPC || '')
+          [berachainBepolia.id]: http(process.env.NEXT_PUBLIC_BEPOLIA_RPC || 'https://bepolia.rpc.berachain.com/')
         }
       });
 

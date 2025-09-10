@@ -3,8 +3,17 @@ const fs = require("fs");
 const path = require("path");
 
 async function main() {
-  // Verify the wallet address
-  const privateKey = '0x9d8b52f2b5269b8b32f03b0d22dcc9c28ce7be85a8752694487902fbff2e1b4e';
+  // Verify the wallet address matches environment variable
+  const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
+  
+  if (!privateKey) {
+    throw new Error('DEPLOYER_PRIVATE_KEY environment variable is required');
+  }
+  
+  if (!privateKey.startsWith('0x') || privateKey.length !== 66) {
+    throw new Error('DEPLOYER_PRIVATE_KEY must be a valid 64-character hex private key starting with 0x');
+  }
+  
   const wallet = new ethers.Wallet(privateKey);
   console.log("Expected wallet address:", wallet.address);
   

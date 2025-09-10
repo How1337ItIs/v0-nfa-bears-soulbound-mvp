@@ -33,8 +33,8 @@ const CACHE_LATER_ASSETS = [
 const NETWORK_FIRST_URLS = [
   '/api/',
   '/invite/',
-  'https://bartio.rpc.berachain.com/',
-  'https://bartio.beratrail.io/',
+  'https://bepolia.rpc.berachain.com/',
+  'https://bepolia.beratrail.io/',
 ];
 
 // Cache-first strategy URLs (static assets, images)

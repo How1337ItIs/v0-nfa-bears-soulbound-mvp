@@ -37,6 +37,18 @@ This document compiles the latest Web3 development best practices for 2025, spec
 - **Error Handling**: Comprehensive error states for network issues, insufficient funds, etc.
 - **Transaction Status**: Real-time transaction monitoring and user feedback
 
+### Network Switching Best Practices (2025)
+- **Automatic Detection**: Implement seamless background chain switching like Rabby Wallet
+- **useSwitchChain Hook**: Use wagmi's dual behavior - switches connector when connected, config when not
+- **Error Handling**: Handle `SwitchChainNotSupportedError` for wallets that don't support programmatic switching
+- **Reconnection Safety**: Wait for account status to be "connected" before attempting chain switches
+- **wallet_switchEthereumChain First**: Try switching before adding new chains with `wallet_addEthereumChain`
+- **User Confirmation**: Always show clear prompts for chain additions with security warnings
+- **Mobile Considerations**: Use mobile deep linking for better wallet app integration
+- **Chain Validation**: Validate RPC endpoints and chain metadata before adding
+- **Fallback Strategy**: Graceful degradation when automatic switching fails
+- **Transaction Simulation**: Show users what will happen before they sign
+
 ### Performance Optimization
 - **Code Splitting**: Lazy load Web3 components to reduce initial bundle size
 - **Caching**: Cache blockchain data with appropriate TTLs

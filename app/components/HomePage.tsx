@@ -39,10 +39,10 @@ export default function HomePage() {
               NFA Bears
             </h1>
             <p className="text-xl text-white mb-4">
-              <strong className="aurora-gradient bg-clip-text text-transparent">Not Fade Away</strong> • <strong className="aurora-gradient bg-clip-text text-transparent">Not Financial Advice</strong> • <strong className="aurora-gradient bg-clip-text text-transparent">Non-Fungible Acid Bears</strong>
+              <strong className="text-yellow-300 glow-text">Not Fade Away</strong> • <strong className="text-purple-300 glow-text">Not Financial Advice</strong> • <strong className="text-blue-300 glow-text">Non-Fungible Acid Bears</strong>
             </p>
             <p className="text-lg text-white/80 max-w-2xl mx-auto mb-8">
-              Where the Grateful Dead parking lot meets the blockchain. Real family shit, not crypto hype.
+              Where the Grateful Dead parking lot meets the blockchain. Fuck crypto, real family shit.
             </p>
             
             <div className="p-6 glassmorphic rounded-xl liquid-morph mb-8 max-w-md mx-auto">
@@ -115,7 +115,7 @@ export default function HomePage() {
             <p className="mb-2">
               Built on <strong className="text-white/80">Berachain</strong> • Powered by <strong className="text-white/80">community</strong>
             </p>
-            <p className="glow-text text-white/80">"Fuck crypto, real family shit" — The NFA Bears way</p>
+            <p className="glow-text text-white/80">"Fuck crypto, real family shit" — NFA Bears what!?!?</p>
           </div>
         </div>
       </div>

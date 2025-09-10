@@ -1,16 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { Redis } from '@upstash/redis';
+import { redis } from '@/lib/redis';
 import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+import { 
+  withErrorHandling, 
+  Logger, 
+  createValidationError, 
+  createRateLimitError,
+  createAuthorizationError,
+  createInternalError, 
+  extractRequestContext 
+} from '@/lib/error-handling';
 
 // Runtime configuration for edge compatibility
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // Production security configuration
-const redis = Redis.fromEnv();
 const ratelimit = new Ratelimit({
-  redis,
+  redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(10, "60 s"), // 10 requests per minute
   analytics: true,
   prefix: "nfa-verify-rl"
@@ -18,7 +27,22 @@ const ratelimit = new Ratelimit({
 
 // Constants
 const INVITE_EXPIRY = 15 * 60 * 1000; // 15 minutes
-const SECRET_KEY = process.env.INVITE_SECRET_KEY || 'fallback-dev-secret-key';
+// Validate required secret key (only in production for now)
+if (!process.env.INVITE_SECRET_KEY) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('INVITE_SECRET_KEY environment variable is required for HMAC security');
+  }
+  console.warn('⚠️ INVITE_SECRET_KEY missing - using insecure fallback for development');
+}
+
+if (process.env.INVITE_SECRET_KEY && process.env.INVITE_SECRET_KEY.length < 32) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('INVITE_SECRET_KEY must be at least 32 characters for security');
+  }
+  console.warn('⚠️ INVITE_SECRET_KEY too short - insecure for production');
+}
+
+const SECRET_KEY = process.env.INVITE_SECRET_KEY || 'dev-fallback-secret-key-only-for-development';
 
 // Production-ready venues data
 const VENUES = [
@@ -83,135 +107,184 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c * 1000; // Convert to meters
 }
 
-export async function POST(request: NextRequest) {
-  const startTime = Date.now();
+const verifyHandler = async (request: NextRequest) => {
+  const context = extractRequestContext(request);
+  Logger.info('Invite verification request received', { endpoint: context.endpoint }, context);
   
-  try {
-    console.log('🔍 Invite verification request received at', new Date().toISOString());
+  // Enhanced rate limiting with IP and address tracking
+  const ip = context.ip || 'anonymous';
+  const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+  
+  if (!success) {
+    Logger.security('Rate limit exceeded for invite verification', {
+      ip,
+      limit,
+      remaining,
+      reset: new Date(reset).toISOString()
+    }, context);
     
-    // Enhanced rate limiting with IP and address tracking
-    const ip = request.ip || request.headers.get('x-forwarded-for') || 'anonymous';
-    const { success, limit, reset, remaining } = await ratelimit.limit(ip);
+    const error = createRateLimitError('Too many verification attempts. Please wait before trying again.', context);
     
-    if (!success) {
-      console.warn('🚫 Rate limit exceeded for IP:', ip);
-      return NextResponse.json(
-        { 
-          error: 'Too many verification attempts. Please wait before trying again.',
-          retryAfter: Math.round((reset - Date.now()) / 1000)
-        },
-        { 
-          status: 429,
-          headers: {
-            'X-RateLimit-Limit': limit.toString(),
-            'X-RateLimit-Remaining': remaining.toString(),
-            'X-RateLimit-Reset': new Date(reset).toISOString(),
-          }
-        }
-      );
-    }
-    
-    const body = await request.json();
-    const { code, address, latitude, longitude } = body;
-    
-    console.log('🔍 Verifying invite for address:', address);
-    
-    // Security: Prevent code reuse by tracking used codes
-    const codeKey = `used-code:${crypto.createHash('sha256').update(code).digest('hex')}`;
-    const codeUsed = await redis.get(codeKey);
-    
-    if (codeUsed) {
-      return NextResponse.json({ 
-        error: 'This invite code has already been used' 
-      }, { status: 400 });
-    }
-
-    // Validate required fields
-    if (!code || typeof code !== 'string') {
-      return NextResponse.json({ 
-        error: 'Invite code is required' 
-      }, { status: 400 });
-    }
-
-    // Verify HMAC-secured invite code
-    const verification = verifySecureInvite(code);
-    
-    if (!verification.valid) {
-      return NextResponse.json({ 
-        error: verification.error || 'Invalid invite code'
-      }, { status: verification.error?.includes('expired') ? 410 : 404 });
-    }
-
-    // Find venue by verified ID
-    const venue = VENUES.find(v => v.id === verification.venueId);
-    if (!venue) {
-      return NextResponse.json({ 
-        error: 'Venue not found'
-      }, { status: 404 });
-    }
-
-    // Optional geolocation verification (for production deployment)
-    let locationValid = true;
-    let distanceFromVenue = null;
-
-    if (latitude && longitude && typeof latitude === 'number' && typeof longitude === 'number') {
-      distanceFromVenue = calculateDistance(latitude, longitude, venue.lat, venue.lng);
-      locationValid = distanceFromVenue <= venue.radius;
-      
-      console.log(`📍 Location check: ${distanceFromVenue.toFixed(2)}m from ${venue.name} (limit: ${venue.radius}m)`);
-      
-      if (!locationValid) {
-        return NextResponse.json({ 
-          error: `You must be within ${venue.radius}m of ${venue.name} to claim your Miracle SBT`,
-          distance: distanceFromVenue,
-          venue: venue.name
-        }, { status: 403 });
-      }
-    } else {
-      console.log('📍 Location verification skipped (coordinates not provided)');
-    }
-
-    // Mark code as used to prevent reuse
-    await redis.set(codeKey, JSON.stringify({
-      address,
-      venue: venue.id,
-      timestamp: Date.now(),
-      ip
-    }), { ex: 24 * 60 * 60 }); // 24 hour expiry
-
-    const processingTime = Date.now() - startTime;
-    console.log(`✅ Invite verified in ${processingTime}ms for venue:`, venue.name);
-
-    return NextResponse.json({
-      success: true,
-      verified: true,
-      venueId: venue.id,
-      venueName: venue.name,
-      address,
-      location: {
-        verified: locationValid,
-        distance: distanceFromVenue,
-        withinRadius: locationValid
+    return NextResponse.json(
+      {
+        error: error.message,
+        type: error.type,
+        retryAfter: Math.round((reset - Date.now()) / 1000),
+        timestamp: new Date().toISOString()
       },
-      expiresAt: new Date(verification.expiresAt!).toISOString(),
-      processingTime,
-      message: `Welcome to ${venue.name}! You can now mint your Miracle SBT.`
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-        'Content-Type': 'application/json',
-        'X-RateLimit-Remaining': remaining.toString(),
+      { 
+        status: error.statusCode,
+        headers: {
+          'X-RateLimit-Limit': limit.toString(),
+          'X-RateLimit-Remaining': remaining.toString(),
+          'X-RateLimit-Reset': new Date(reset).toISOString(),
+          'Content-Type': 'application/json'
+        }
       }
-    });
-
-  } catch (error) {
-    const processingTime = Date.now() - startTime;
-    console.error(`❌ Error verifying invite after ${processingTime}ms:`, error);
-    
-    return NextResponse.json({ 
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      processingTime
-    }, { status: 500 });
+    );
   }
-}
+  
+  const body = await request.json();
+  const { code, address, latitude, longitude } = body;
+  
+  Logger.info('Processing invite verification', {
+    address,
+    hasLocation: !!(latitude && longitude)
+  }, context);
+  
+  // Security: Atomic check-and-set to prevent race condition in code reuse
+  const codeKey = `used-code:${crypto.createHash('sha256').update(code).digest('hex')}`;
+  
+  // Use Redis SET with NX (only set if not exists) for atomic operation
+  const usageData = JSON.stringify({
+    address,
+    timestamp: Date.now(),
+    ip
+  });
+  
+  let setResult;
+  try {
+    setResult = await redis.set(codeKey, usageData, { 
+      nx: true, // Only set if key doesn't exist (atomic)
+      ex: 24 * 60 * 60 // 24 hour expiry
+    });
+  } catch (redisError) {
+    Logger.error('Redis atomic operation failed', redisError instanceof Error ? redisError : new Error(String(redisError)), context);
+    throw createInternalError('Failed to verify invite code usage', context);
+  }
+  
+  if (!setResult) {
+    Logger.warn('Attempt to reuse invite code', {
+      codeHash: codeKey.substring(10, 20) + '...',
+      address
+    }, context);
+    throw createValidationError('This invite code has already been used', context);
+  }
+
+  // Validate required fields
+  if (!code || typeof code !== 'string') {
+    throw createValidationError('Invite code is required', context);
+  }
+
+  if (!address || typeof address !== 'string') {
+    throw createValidationError('Wallet address is required', context);
+  }
+
+  // Verify HMAC-secured invite code
+  const verification = verifySecureInvite(code);
+  
+  if (!verification.valid) {
+    Logger.security('Invalid invite code verification attempt', {
+      error: verification.error,
+      address,
+      codePreview: code.substring(0, 10) + '...'
+    }, context);
+    
+    if (verification.error?.includes('expired')) {
+      const error = createValidationError(verification.error, context);
+      error.statusCode = 410;
+      throw error;
+    } else {
+      const error = createValidationError(verification.error || 'Invalid invite code', context);
+      error.statusCode = 404;
+      throw error;
+    }
+  }
+
+  // Find venue by verified ID
+  const venue = VENUES.find(v => v.id === verification.venueId);
+  if (!venue) {
+    Logger.error('Venue not found for verified invite code', {
+      venueId: verification.venueId
+    }, context);
+    throw createInternalError('Venue configuration error', context);
+  }
+
+  // Optional geolocation verification (for production deployment)
+  let locationValid = true;
+  let distanceFromVenue = null;
+
+  if (latitude && longitude && typeof latitude === 'number' && typeof longitude === 'number') {
+    distanceFromVenue = calculateDistance(latitude, longitude, venue.lat, venue.lng);
+    locationValid = distanceFromVenue <= venue.radius;
+    
+    Logger.info('Location verification performed', {
+      venue: venue.name,
+      distance: distanceFromVenue,
+      radius: venue.radius,
+      valid: locationValid
+    }, context);
+    
+    if (!locationValid) {
+      Logger.security('GPS verification failed - user outside venue radius', {
+        venue: venue.name,
+        distance: distanceFromVenue,
+        radius: venue.radius,
+        address
+      }, context);
+      
+      const error = createAuthorizationError(
+        `You must be within ${venue.radius}m of ${venue.name} to claim your Miracle SBT`,
+        context
+      );
+      error.context.distance = distanceFromVenue;
+      error.context.venue = venue.name;
+      throw error;
+    }
+  } else {
+    Logger.info('Location verification skipped - coordinates not provided', {
+      venue: venue.name
+    }, context);
+  }
+
+  // Code already marked as used above with atomic operation
+  Logger.info('Invite verification completed successfully', {
+    venue: venue.name,
+    venueId: venue.id,
+    address,
+    locationVerified: locationValid
+  }, context);
+
+  return NextResponse.json({
+    success: true,
+    verified: true,
+    venueId: venue.id,
+    venueName: venue.name,
+    address,
+    location: {
+      verified: locationValid,
+      distance: distanceFromVenue,
+      withinRadius: locationValid
+    },
+    expiresAt: new Date(verification.expiresAt!).toISOString(),
+    message: `Welcome to ${venue.name}! You can now mint your Miracle SBT.`
+  }, {
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'Content-Type': 'application/json',
+      'X-RateLimit-Remaining': remaining.toString(),
+    }
+  });
+};
+
+export const POST = withErrorHandling(verifyHandler);

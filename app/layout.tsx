@@ -1,24 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import dynamic from "next/dynamic";
-
-// Lazy load Web3 providers - CRITICAL for fast compilation
-const LazyProviders = dynamic(() => import("./providers/PrivyProviders").then(mod => ({ default: mod.PrivyProviders })), {
-  ssr: false,
-  loading: () => (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center', 
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      color: 'white',
-      fontFamily: 'system-ui, sans-serif'
-    }}>
-      <div>Initializing NFA Bears...</div>
-    </div>
-  ),
-});
+import { PrivyProviders } from "./providers/PrivyProviders";
+import WalletHeader from "../components/WalletHeader";
 
 // Environment validation disabled for speed
 console.log('Environment validation: DISABLED (development mode)');
@@ -61,7 +44,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased min-h-screen" style={{fontFamily: 'system-ui, sans-serif'}}>
-        <LazyProviders>{children}</LazyProviders>
+        <PrivyProviders>
+          <WalletHeader />
+          {children}
+        </PrivyProviders>
       </body>
     </html>
   );

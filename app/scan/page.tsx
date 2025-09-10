@@ -37,7 +37,6 @@ export default function ScanPage() {
 
   // Handle QR code scan success
   const handleScanSuccess = async (decodedText: string) => {
-    console.log('🔍 QR Code scanned:', decodedText);
     setScannedCode(decodedText);
     setCurrentStep('location');
     
@@ -49,7 +48,6 @@ export default function ScanPage() {
           handleMintWithLocation(decodedText, position);
         },
         (error) => {
-          console.warn('Location access denied:', error);
           toast.error('Location access required for venue verification');
           // Continue without location for development
           handleMintWithLocation(decodedText, null);
@@ -91,7 +89,6 @@ export default function ScanPage() {
       }, 3000);
       
     } catch (error) {
-      console.error('Minting failed:', error);
       setCurrentStep('scan');
       setScannedCode(null);
     }
@@ -99,7 +96,6 @@ export default function ScanPage() {
 
   // Handle scan error
   const handleScanError = (error: string) => {
-    console.error('Scan error:', error);
     toast.error('QR code scanning failed. Please try again.');
   };
 
@@ -166,31 +162,31 @@ export default function ScanPage() {
           </div>
 
           {/* Progress Steps */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="flex items-center space-x-4">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+          <div className="flex items-center justify-center mb-6 px-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <div className={`w-6 sm:w-8 h-6 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium ${
                 currentStep === 'scan' ? 'bg-white text-purple-600' : 
                 ['location', 'minting', 'success'].includes(currentStep) ? 'bg-green-400 text-white' : 'bg-white/20 text-white/60'
               }`}>
                 1
               </div>
-              <div className="w-8 h-1 bg-white/20">
+              <div className="w-4 sm:w-8 h-1 bg-white/20">
                 <div className={`h-full bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-500 ${
                   ['location', 'minting', 'success'].includes(currentStep) ? 'w-full' : 'w-0'
                 }`}></div>
               </div>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+              <div className={`w-6 sm:w-8 h-6 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium ${
                 currentStep === 'location' ? 'bg-white text-purple-600' : 
                 ['minting', 'success'].includes(currentStep) ? 'bg-green-400 text-white' : 'bg-white/20 text-white/60'
               }`}>
                 2
               </div>
-              <div className="w-8 h-1 bg-white/20">
+              <div className="w-4 sm:w-8 h-1 bg-white/20">
                 <div className={`h-full bg-gradient-to-r from-purple-400 to-pink-400 transition-all duration-500 ${
                   ['minting', 'success'].includes(currentStep) ? 'w-full' : 'w-0'
                 }`}></div>
               </div>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+              <div className={`w-6 sm:w-8 h-6 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium ${
                 currentStep === 'minting' ? 'bg-white text-purple-600' : 
                 currentStep === 'success' ? 'bg-green-400 text-white' : 'bg-white/20 text-white/60'
               }`}>
@@ -200,20 +196,23 @@ export default function ScanPage() {
           </div>
 
           {/* Step Labels */}
-          <div className="flex items-center justify-between mb-8 text-center text-white/70 text-sm">
-            <span className={currentStep === 'scan' ? 'text-white font-medium' : ''}>Scan QR Code</span>
-            <span className={currentStep === 'location' ? 'text-white font-medium' : ''}>Verify Location</span>
-            <span className={['minting', 'success'].includes(currentStep) ? 'text-white font-medium' : ''}>Mint SBT</span>
+          <div className="flex items-center justify-between mb-8 text-center text-white/70 text-xs sm:text-sm px-4">
+            <span className={`${currentStep === 'scan' ? 'text-white font-medium' : ''} truncate`}>Scan QR</span>
+            <span className={`${currentStep === 'location' ? 'text-white font-medium' : ''} truncate`}>Verify Location</span>
+            <span className={`${['minting', 'success'].includes(currentStep) ? 'text-white font-medium' : ''} truncate`}>Mint SBT</span>
           </div>
 
           {/* Content */}
           {currentStep === 'scan' && (
-            <QRScanner
-              onScanSuccess={handleScanSuccess}
-              onScanError={handleScanError}
-              width={400}
-              height={400}
-            />
+            <div className="px-2">
+              <QRScanner
+                onScanSuccess={handleScanSuccess}
+                onScanError={handleScanError}
+                width={300}
+                height={300}
+                className="max-w-full"
+              />
+            </div>
           )}
 
           {currentStep === 'location' && (
