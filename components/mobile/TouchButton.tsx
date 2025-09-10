@@ -1,32 +1,21 @@
 "use client"
 
-import type React from "react"
-
 import { forwardRef, type ButtonHTMLAttributes } from "react"
 import { cn } from "@/lib/utils"
 
 interface TouchButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "ghost" | "danger"
+  variant?: "primary" | "secondary" | "critical" | "ghost"
   size?: "sm" | "md" | "lg" | "xl"
-  haptic?: boolean
+  glow?: boolean
 }
 
 export const TouchButton = forwardRef<HTMLButtonElement, TouchButtonProps>(
-  ({ className, variant = "primary", size = "md", haptic = true, children, onClick, ...props }, ref) => {
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-      // Haptic feedback for supported devices
-      if (haptic && "vibrate" in navigator) {
-        navigator.vibrate(10)
-      }
-
-      onClick?.(e)
-    }
-
+  ({ className, variant = "primary", size = "md", glow = false, children, ...props }, ref) => {
     const variants = {
-      primary: "bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-lg hover:shadow-xl active:scale-95",
-      secondary: "bg-white/10 backdrop-blur-sm text-white border border-white/20 hover:bg-white/20 active:scale-95",
-      ghost: "text-white hover:bg-white/10 active:scale-95",
-      danger: "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg hover:shadow-xl active:scale-95",
+      primary: "bg-[#1a1aff] text-white hover:scale-[1.02] active:scale-95 shadow-lg shadow-blue-500/25",
+      secondary: "bg-white/10 backdrop-blur-sm border border-[#1a1aff]/50 text-white hover:bg-[#1a1aff]/20",
+      critical: "bg-[#ff3366] text-[#000011] hover:scale-[1.02] active:scale-95 shadow-lg",
+      ghost: "text-white hover:bg-white/10 active:bg-white/20",
     }
 
     const sizes = {
@@ -40,14 +29,14 @@ export const TouchButton = forwardRef<HTMLButtonElement, TouchButtonProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-200 touch-manipulation select-none",
-          "focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-black",
+          "inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-200 touch-manipulation",
+          "focus:outline-none focus:ring-2 focus:ring-[#1a1aff] focus:ring-offset-2 focus:ring-offset-[#000011]",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none",
           variants[variant],
           sizes[size],
+          glow && variant === "primary" && "shadow-[0_0_20px_rgba(26,26,255,0.4)]",
           className,
         )}
-        onClick={handleClick}
         {...props}
       >
         {children}
