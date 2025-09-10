@@ -50,15 +50,6 @@
   --text-primary: #ffffff;
   --text-secondary: rgba(255, 255, 255, 0.8);
   --text-muted: rgba(255, 255, 255, 0.6);
-}
-
-.psychedelic-bg {
-  background: url("data:image/svg+xml;utf8,<svg width='100%25' height='100%25' viewBox='0 0 800 800' xmlns='http://www.w3.org/2000/svg'><defs><radialGradient id='a' cx='50%' cy='50%' r='80%' fx='50%' fy='50%'><stop offset='0%' stop-color='%23FFFFFF'/><stop offset='40%' stop-color='%231A1AFF'/><stop offset='80%' stop-color='%23FF2222'/></radialGradient></defs><rect width='800' height='800' fill='url(%23a)'/><g><path d='M400,400 Q600,200 800,400 T400,800 T0,400 T400,0 Z' fill='none' stroke='%23FF2222' stroke-width='40'/><path d='M400,400 Q200,600 0,400 T400,0 T800,400 T400,800 Z' fill='none' stroke='%231A1AFF' stroke-width='40'/><path d='M400,400 Q600,600 800,400 T400,0 T0,400 T400,800 Z' fill='none' stroke='%23FFFFFF' stroke-width='40'/></g></svg>");
-  background-size: cover;
-  background-attachment: fixed;
-}
-
-:root {
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -160,6 +151,47 @@ body {
   }
 }
 
+/* Mobile PWA Animations */
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(6400%);
+  }
+}
+
+@keyframes bounce-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-scan {
+  animation: scan 2s linear infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
 /* Utility classes */
 .groovy-font {
   font-family: "Impact", "Arial Black", "Franklin Gothic Bold", "Helvetica Neue", Arial, sans-serif;
@@ -252,4 +284,23 @@ body {
 
 .rotate-y-180 {
   transform: rotateY(180deg);
+}
+
+/* Safe area handling for mobile devices */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Touch optimization */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* Gradient backgrounds */
+.bg-gradient-radial {
+  background: radial-gradient(circle, var(--tw-gradient-stops));
 }
