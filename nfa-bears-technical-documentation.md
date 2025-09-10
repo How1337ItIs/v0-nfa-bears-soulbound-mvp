@@ -16,7 +16,7 @@ This document compiles comprehensive research findings and best practices for ea
 ### 2025 Best Practices
 
 #### Project Structure
-```
+\`\`\`
 src/
 ├── app/                 # App Router pages and layouts
 ├── components/
@@ -27,7 +27,7 @@ src/
 ├── types/              # TypeScript type definitions
 ├── data/               # Static data files
 └── contracts/          # Smart contract files
-```
+\`\`\`
 
 #### Key Improvements for NFA Bears
 - **Server Components by Default**: Leverage server-side rendering for optimal SEO
@@ -53,7 +53,7 @@ src/
 ### 2025 Best Practices
 
 #### Authentication Flow Optimization
-```typescript
+\`\`\`typescript
 // Optimal Privy configuration for 2025
 const privyConfig = {
   loginMethods: ['email', 'google', 'twitter', 'sms'],
@@ -64,7 +64,7 @@ const privyConfig = {
   mfa: { noPromptOnMfaRequired: false },
   customizations: { loginMessage: 'Welcome to NFA Bears!' }
 };
-```
+\`\`\`
 
 #### Key Features to Leverage
 - **Gas Sponsorship**: Enable gasless transactions for user onboarding
@@ -92,7 +92,7 @@ const privyConfig = {
 ### 2025 Best Practices
 
 #### Configuration Pattern
-```typescript
+\`\`\`typescript
 // Optimal Wagmi v2 setup
 import { createConfig, http } from 'wagmi'
 import { berachainTestnet } from 'wagmi/chains'
@@ -105,7 +105,7 @@ export const config = createConfig({
   ssr: true,
   batch: { multicall: true }
 })
-```
+\`\`\`
 
 #### Performance Optimizations
 - **Bundle Size**: ~70kB (30% reduction from ethers.js)
@@ -120,7 +120,7 @@ export const config = createConfig({
 - Leverage VIEM actions for custom functionality
 
 #### Custom Hook Patterns
-```typescript
+\`\`\`typescript
 // Example custom hook for SBT minting
 const useMintSBT = () => {
   const { writeContract } = useWriteContract()
@@ -134,7 +134,7 @@ const useMintSBT = () => {
     })
   }, [writeContract])
 }
-```
+\`\`\`
 
 ---
 
@@ -148,16 +148,16 @@ const useMintSBT = () => {
 ### 2025 Security Best Practices
 
 #### Development Environment Security
-```json
+\`\`\`json
 // .npmrc security configuration
 audit-level=moderate
 fund=false
 package-lock=false
 save-exact=true
-```
+\`\`\`
 
 #### OpenZeppelin Integration
-```solidity
+\`\`\`solidity
 // Secure SBT implementation pattern
 contract NFABearsMembership is ERC721, Ownable, Initializable {
     using SafeMath for uint256;
@@ -170,7 +170,7 @@ contract NFABearsMembership is ERC721, Ownable, Initializable {
         _;
     }
 }
-```
+\`\`\`
 
 #### Security Checklist
 - [ ] Use exact dependency versions (no ^ or ~)
@@ -201,7 +201,7 @@ contract NFABearsMembership is ERC721, Ownable, Initializable {
 ### 2025 PWA Best Practices
 
 #### Essential Manifest Configuration
-```json
+\`\`\`json
 {
   "name": "NFA Bears - Not Fade Away",
   "short_name": "NFA Bears",
@@ -214,7 +214,7 @@ contract NFABearsMembership is ERC721, Ownable, Initializable {
     {"src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png"}
   ]
 }
-```
+\`\`\`
 
 #### Service Worker Optimization
 - Implement app shell architecture for instant loading
@@ -248,7 +248,7 @@ contract NFABearsMembership is ERC721, Ownable, Initializable {
 ### 2025 Best Practices
 
 #### Multi-Region Setup
-```typescript
+\`\`\`typescript
 // Global Redis configuration
 const redis = Redis.fromEnv()
 const ratelimit = new Ratelimit({
@@ -257,7 +257,7 @@ const ratelimit = new Ratelimit({
   analytics: true,
   prefix: "nfa-bears-rl"
 })
-```
+\`\`\`
 
 #### Advanced Features
 - **Edge Middleware**: Implement rate limiting at CDN level
@@ -285,7 +285,7 @@ const ratelimit = new Ratelimit({
 ### 2025 Security Best Practices
 
 #### HMAC Implementation
-```typescript
+\`\`\`typescript
 // Secure QR code generation
 const generateInviteCode = (venueId: string) => {
   const timestamp = Date.now()
@@ -299,7 +299,7 @@ const generateInviteCode = (venueId: string) => {
   
   return `${payload}-${signature.substring(0, 16)}` // Truncate to 16 bytes
 }
-```
+\`\`\`
 
 #### Security Requirements
 - Use single-use codes with Redis tracking
@@ -328,7 +328,7 @@ const generateInviteCode = (venueId: string) => {
 ### Best Practices
 
 #### Verification Strategy
-```typescript
+\`\`\`typescript
 // Multi-layer location verification
 const verifyLocation = async (userLat, userLng, venueId) => {
   // 1. GPS coordinates check
@@ -342,7 +342,7 @@ const verifyLocation = async (userLat, userLng, venueId) => {
   
   return distance <= venue.radius && ipLocation.isValid
 }
-```
+\`\`\`
 
 #### Anti-Spoofing Measures
 - Combine GPS with IP geolocation
@@ -363,7 +363,7 @@ const verifyLocation = async (userLat, userLng, venueId) => {
 ### 2025 Best Practices
 
 #### Testing Strategy
-```typescript
+\`\`\`typescript
 // Example test structure
 describe('Invite System', () => {
   it('should generate valid HMAC signatures', async () => {
@@ -379,7 +379,7 @@ describe('Invite System', () => {
     expect(isValid).toBe(false)
   })
 })
-```
+\`\`\`
 
 #### CI/CD Pipeline
 1. **Security Scanning**: Automated dependency audits
@@ -406,13 +406,13 @@ describe('Invite System', () => {
 ### Optimization Strategies
 
 #### Code Splitting
-```typescript
+\`\`\`typescript
 // Dynamic imports for Web3 components
 const QRGenerator = dynamic(() => import('@/components/QRGenerator'), {
   ssr: false,
   loading: () => <QRSkeletonLoader />
 })
-```
+\`\`\`
 
 #### Caching Strategy
 - Static assets: Long-term caching with versioning

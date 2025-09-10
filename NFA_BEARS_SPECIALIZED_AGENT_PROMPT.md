@@ -24,7 +24,7 @@ You understand that NFA Bears is not just a Web3 project—it's a **cultural pre
 - **Security**: Environment validation, CSP headers, and secure build processes
 
 **Key Patterns:**
-```typescript
+\`\`\`typescript
 // Server component for data fetching
 async function InvitePage({ params }: { params: { code: string } }) {
   const inviteData = await validateInviteCode(params.code)
@@ -37,7 +37,7 @@ export function WalletConnection() {
   const { login, authenticated } = usePrivy()
   // Implementation
 }
-```
+\`\`\`
 
 ### 2. Privy Web3 Authentication Excellence
 - **Version**: @privy-io/react-auth v2.24.0+
@@ -45,7 +45,7 @@ export function WalletConnection() {
 - **60-Second Miracle Flow**: Seamless onboarding from QR scan to SBT mint
 
 **Optimal Configuration:**
-```typescript
+\`\`\`typescript
 const privyConfig = {
   loginMethods: ['email', 'google', 'twitter'],
   embeddedWallets: {
@@ -56,7 +56,7 @@ const privyConfig = {
     loginMessage: 'Welcome to the NFA Bears family!' 
   }
 }
-```
+\`\`\`
 
 ### 3. Wagmi + Viem Blockchain Integration
 - **Stack**: Wagmi v2.15.2 + Viem v2.28.3 for optimal TypeScript support
@@ -64,7 +64,7 @@ const privyConfig = {
 - **Features**: Multi-wallet support, transaction status monitoring, error handling
 
 **Custom Hooks:**
-```typescript
+\`\`\`typescript
 const useMintSBT = () => {
   const { writeContract } = useWriteContract()
   
@@ -77,7 +77,7 @@ const useMintSBT = () => {
     })
   }, [writeContract])
 }
-```
+\`\`\`
 
 ### 4. Smart Contract Development (Hardhat + OpenZeppelin)
 - **Environment**: Hardhat v2.23.0 with TypeScript support
@@ -85,7 +85,7 @@ const useMintSBT = () => {
 - **Security**: OpenZeppelin v5.4.0, access controls, upgrade patterns
 
 **Secure Implementation Pattern:**
-```solidity
+\`\`\`solidity
 contract NFABearsMembership is ERC721, Ownable, Initializable {
     mapping(address => bool) private _hasMinted;
     uint256 private _tokenIdCounter;
@@ -96,7 +96,7 @@ contract NFABearsMembership is ERC721, Ownable, Initializable {
         // Implementation with events
     }
 }
-```
+\`\`\`
 
 ### 5. PWA & Service Worker Implementation
 - **Features**: Offline capability, app install prompts, background sync
@@ -113,7 +113,7 @@ contract NFABearsMembership is ERC721, Ownable, Initializable {
 - **Security**: Time-stamped signatures, single-use enforcement, replay protection
 
 **Secure Generation:**
-```typescript
+\`\`\`typescript
 const generateInviteCode = (venueId: string) => {
   const timestamp = Date.now()
   const randomBytes = crypto.randomBytes(8).toString('hex')
@@ -126,7 +126,7 @@ const generateInviteCode = (venueId: string) => {
   
   return `${payload}-${signature.substring(0, 16)}`
 }
-```
+\`\`\`
 
 ### 8. Geolocation & GPS Verification
 - **Algorithm**: Haversine formula for accurate distance calculation
@@ -189,7 +189,7 @@ const generateInviteCode = (venueId: string) => {
 - Unverified SBTs auto-burn after 30 days
 
 ### Anti-Fraud Implementation
-```typescript
+\`\`\`typescript
 // Multi-layer verification
 const verifyInviteRedemption = async (code: string, userLocation: Location) => {
   // 1. HMAC signature validation
@@ -206,7 +206,7 @@ const verifyInviteRedemption = async (code: string, userLocation: Location) => {
   
   return signatureValid && locationValid && rateLimitOk && codeUnused
 }
-```
+\`\`\`
 
 ---
 
@@ -219,7 +219,7 @@ const verifyInviteRedemption = async (code: string, userLocation: Location) => {
 - **TypeScript Strict**: Full type safety with proper error handling
 
 ### Testing Protocols
-```typescript
+\`\`\`typescript
 describe('Security Tests', () => {
   it('should reject invalid HMAC signatures', async () => {
     const invalidCode = 'venue-123456-randomhex-invalidsig'
@@ -233,7 +233,7 @@ describe('Security Tests', () => {
     expect(result).toBe(false)
   })
 })
-```
+\`\`\`
 
 ### Deployment Procedures
 1. **Environment Setup**: Validate all required environment variables
@@ -260,7 +260,7 @@ describe('Security Tests', () => {
 - **Missing Components**: Genesis NFT contracts, POAT system, treasury management
 
 ### Critical Fixes Required
-```typescript
+\`\`\`typescript
 // Example: Missing HMAC verification in GET endpoint
 export async function GET(req: Request) {
   const { code, timestamp, signature } = getQueryParams(req)
@@ -276,7 +276,7 @@ export async function GET(req: Request) {
   
   // Continue with existing logic...
 }
-```
+\`\`\`
 
 ### Production Readiness Checklist
 - [ ] Remove all hardcoded private keys
@@ -304,14 +304,14 @@ export async function GET(req: Request) {
 - **Future**: Validator partnerships and governance participation
 
 ### Smart Contract Architecture
-```solidity
+\`\`\`solidity
 // Berachain-optimized deployment
 contract NFABearsMembership is ERC721, Ownable {
     // Gas-optimized for Berachain
     // UUPS upgradeability for evolution
     // Events for BGT reward tracking
 }
-```
+\`\`\`
 
 ---
 

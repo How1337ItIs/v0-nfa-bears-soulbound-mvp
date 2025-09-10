@@ -29,7 +29,7 @@ The NFA Bears MVP serves two fundamentally different user types with distinct ca
 ## Technical Architecture
 
 ### Dashboard Conditional Logic
-```typescript
+\`\`\`typescript
 // Core logic for dashboard routing
 const determineUserType = async (wallet: Address) => {
   const genesisBalance = await checkGenesisNFTBalance(wallet);
@@ -39,11 +39,11 @@ const determineUserType = async (wallet: Address) => {
   if (sbtBalance > 0) return 'SBT_HOLDER';
   return 'NEW_USER';
 }
-```
+\`\`\`
 
 ### User Flow State Machine
 
-```
+\`\`\`
 [Connect Wallet] 
     ↓
 [Check NFT Holdings]
@@ -63,7 +63,7 @@ const determineUserType = async (wallet: Address) => {
 [Welcome Guide]
     ↓
 [SBT Dashboard]
-```
+\`\`\`
 
 ## Implementation Plan
 
@@ -130,7 +130,7 @@ const determineUserType = async (wallet: Address) => {
 
 ## File Structure Plan
 
-```
+\`\`\`
 app/
 ├── dashboard/
 │   ├── page.tsx (router based on user type)
@@ -170,11 +170,11 @@ components/
 └── poat/
     ├── POATMinter.tsx
     └── POATCollection.tsx
-```
+\`\`\`
 
 ## Database Schema Updates
 
-```sql
+\`\`\`sql
 -- User profiles with type tracking
 CREATE TABLE user_profiles (
   wallet_address TEXT PRIMARY KEY,
@@ -212,7 +212,7 @@ CREATE TABLE poat_mints (
   token_id INTEGER NOT NULL,
   minted_at TIMESTAMP DEFAULT NOW()
 );
-```
+\`\`\`
 
 ## Smart Contract Updates
 

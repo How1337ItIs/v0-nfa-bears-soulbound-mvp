@@ -243,4 +243,4 @@ const mintHandler = async (request: NextRequest) => {
   }
 };
 
-export const POST = withErrorHandling(mintHandler); 
+export const POST = withErrorHandling(mintHandler);

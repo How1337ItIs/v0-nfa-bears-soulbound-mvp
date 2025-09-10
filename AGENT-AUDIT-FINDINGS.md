@@ -29,13 +29,13 @@ This audit reveals a well-structured Next.js 15 Web3 application with solid arch
 - `scripts/verify_wallet.js:4`
 
 **Evidence:**
-```javascript
+\`\`\`javascript
 // scripts/deploy_membership.js:7
 const privateKey = '0x9d8b52f2b5269b8b32f03b0d22dcc9c28ce7be85a8752694487902fbff2e1b4e';
 
 // scripts/get-address.ts:4  
 const privateKey = '0x9d8b52f2b5269b8b32f03b0d22dcc9c28ce7be85a8752694487902fbff2e1b4e';
-```
+\`\`\`
 
 **Risk Analysis:**
 - Private key `0x9d8b52f2b5269b8b32f03b0d22dcc9c28ce7be85a8752694487902fbff2e1b4e` is exposed in multiple scripts
@@ -43,14 +43,14 @@ const privateKey = '0x9d8b52f2b5269b8b32f03b0d22dcc9c28ce7be85a8752694487902fbff
 - **IMMEDIATE ACTION REQUIRED:** This key is permanently compromised and must never be used in production
 
 **Mitigation:**
-```bash
+\`\`\`bash
 # IMMEDIATE STEPS:
 1. Generate new private key: openssl rand -hex 32
 2. Remove all hardcoded keys from scripts
 3. Use environment variables exclusively: process.env.DEPLOYER_PRIVATE_KEY
 4. Add scripts/* to .gitignore if containing secrets
 5. Rotate all associated credentials
-```
+\`\`\`
 
 ### 2. ENVIRONMENT SECRET KEY FALLBACKS (CRITICAL)
 
@@ -62,11 +62,11 @@ const privateKey = '0x9d8b52f2b5269b8b32f03b0d22dcc9c28ce7be85a8752694487902fbff
 - `lib/location.ts:58,67`
 
 **Evidence:**
-```typescript
+\`\`\`typescript
 // Insecure fallback allows predictable secrets
 const SECRET_KEY = process.env.INVITE_SECRET_KEY || 'fallback-dev-secret-key';
 const SECRET_KEY = process.env.SECRET_KEY || 'default-secret';
-```
+\`\`\`
 
 **Risk Analysis:**
 - Fallback secrets are predictable and publicly visible
@@ -74,13 +74,13 @@ const SECRET_KEY = process.env.SECRET_KEY || 'default-secret';
 - Breaks the entire security model of geofenced minting
 
 **Mitigation:**
-```typescript
+\`\`\`typescript
 // Secure implementation
 const SECRET_KEY = process.env.INVITE_SECRET_KEY;
 if (!SECRET_KEY) {
   throw new Error('INVITE_SECRET_KEY environment variable is required');
 }
-```
+\`\`\`
 
 ### 3. INCOMPLETE RATE LIMITING IMPLEMENTATION (HIGH)
 
@@ -97,16 +97,16 @@ if (!SECRET_KEY) {
 - No rate limit recovery mechanisms
 
 **Evidence:**
-```typescript
+\`\`\`typescript
 // Inconsistent rate limiting
 const ratelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(3, '1 m'), // Mint API
   limiter: Ratelimit.slidingWindow(10, "60 s"), // Verify API
 });
-```
+\`\`\`
 
 **Recommended Implementation:**
-```typescript
+\`\`\`typescript
 // Tiered rate limiting with user-specific limits
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -117,7 +117,7 @@ const ratelimit = new Ratelimit({
   timeout: 5000,
   enableProtection: true,
 });
-```
+\`\`\`
 
 ---
 
@@ -132,17 +132,17 @@ const ratelimit = new Ratelimit({
 **File:** `contracts/NFABearsMembership.sol`
 
 **Issues Identified:**
-```solidity
+\`\`\`solidity
 // Line 13: No access control on critical minting function
 function mintMembership(address to) external returns (uint256) {
     require(!_hasMinted[to], "Wallet already has an SBT");
     // ^^ ANYONE can call this function
-```
+\`\`\`
 
 **Risk:** Unauthorized minting, supply manipulation, economic exploitation
 
 **Recommended Fix:**
-```solidity
+\`\`\`solidity
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract NFABearsMembership is ERC721, Ownable, AccessControl {
@@ -153,19 +153,19 @@ contract NFABearsMembership is ERC721, Ownable, AccessControl {
         // Implementation...
     }
 }
-```
+\`\`\`
 
 #### 4.2 Gas Relayer Private Key Management  
 **File:** `app/api/mint/route.ts:17-33`
 
 **Current Implementation:**
-```typescript
+\`\`\`typescript
 // Validation exists but key is still exposed in environment
 if (!process.env.DEPLOYER_PRIVATE_KEY.startsWith('0x') || 
     process.env.DEPLOYER_PRIVATE_KEY.length !== 66) {
   throw new Error('DEPLOYER_PRIVATE_KEY must be valid');
 }
-```
+\`\`\`
 
 **Recommendations:**
 1. Implement AWS KMS or similar for key management
@@ -185,17 +185,17 @@ if (!process.env.DEPLOYER_PRIVATE_KEY.startsWith('0x') ||
 ✅ Social login integration reduces friction  
 
 **Security Concerns:**
-```typescript
+\`\`\`typescript
 // Missing security headers configuration
 config={{
   // No CSP headers defined
   // No request origin validation
   // Missing security event handlers
 }}
-```
+\`\`\`
 
 **Recommended Enhancements:**
-```typescript
+\`\`\`typescript
 config={{
   // Add security headers
   security: {
@@ -215,7 +215,7 @@ config={{
     logSecurityEvent('auth_success', { userId: user.id });
   },
 }}
-```
+\`\`\`
 
 ---
 
@@ -229,11 +229,11 @@ config={{
 - `app/api/invite/verify/route.ts:154-172`
 
 **Critical Development Bypass:**
-```typescript
+\`\`\`typescript
 // PRODUCTION VULNERABILITY: GPS bypass in development
 const shouldSkipGPS = process.env.NODE_ENV === 'development' && 
                      process.env.NEXT_PUBLIC_DEV_SKIP_GPS === 'true';
-```
+\`\`\`
 
 **Risk Analysis:**
 - Environment variable can be manipulated in production builds
@@ -246,7 +246,7 @@ const shouldSkipGPS = process.env.NODE_ENV === 'development' &&
 3. **API Direct Access:** Calling verify endpoint without location data
 
 **Secure Implementation:**
-```typescript
+\`\`\`typescript
 // Server-side only GPS validation
 export async function POST(request: NextRequest) {
   const { code, address, latitude, longitude } = await request.json();
@@ -270,7 +270,7 @@ export async function POST(request: NextRequest) {
     }
   }
 }
-```
+\`\`\`
 
 ### 7. HMAC INVITE CODE SECURITY
 
@@ -278,7 +278,7 @@ export async function POST(request: NextRequest) {
 **File:** `app/api/invite/route.ts:22-38`
 
 **Current Implementation Analysis:**
-```typescript
+\`\`\`typescript
 function generateSecureInvite(venueId: string): { code: string, expiresAt: number } {
   const timestamp = Date.now();
   const expiresAt = timestamp + INVITE_EXPIRY;
@@ -293,7 +293,7 @@ function generateSecureInvite(venueId: string): { code: string, expiresAt: numbe
   
   return { code: `${payload}:${signature}`, expiresAt };
 }
-```
+\`\`\`
 
 **Security Assessment:**
 ✅ **Strengths:**
@@ -309,7 +309,7 @@ function generateSecureInvite(venueId: string): { code: string, expiresAt: numbe
 - No venue-specific rate limiting
 
 **Recommended Enhancements:**
-```typescript
+\`\`\`typescript
 // Enhanced invite generation with deduplication
 async function generateSecureInvite(venueId: string, ambassadorId: string) {
   // Rate limit per ambassador
@@ -330,7 +330,7 @@ async function generateSecureInvite(venueId: string, ambassadorId: string) {
   
   return { code: `${payload}:${signature}`, expiresAt };
 }
-```
+\`\`\`
 
 ---
 
@@ -342,12 +342,12 @@ async function generateSecureInvite(venueId: string, ambassadorId: string) {
 **File:** `lib/redis.ts:1-6`
 
 **Current Implementation:**
-```typescript
+\`\`\`typescript
 export const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
-```
+\`\`\`
 
 **Security Analysis:**
 ✅ **Strengths:**
@@ -362,7 +362,7 @@ export const redis = new Redis({
 - Missing error handling for credential failures
 
 **Production Hardening:**
-```typescript
+\`\`\`typescript
 export const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
@@ -387,7 +387,7 @@ redis.ping().catch(error => {
   console.error('Redis connection failed:', error);
   process.exit(1);
 });
-```
+\`\`\`
 
 ### 9. CODE REUSE ATTACK PREVENTION
 
@@ -395,7 +395,7 @@ redis.ping().catch(error => {
 **File:** `app/api/invite/verify/route.ts:119-127`
 
 **Current Implementation:**
-```typescript
+\`\`\`typescript
 // Security: Prevent code reuse by tracking used codes
 const codeKey = `used-code:${crypto.createHash('sha256').update(code).digest('hex')}`;
 const codeUsed = await redis.get(codeKey);
@@ -405,7 +405,7 @@ if (codeUsed) {
     error: 'This invite code has already been used' 
   }, { status: 400 });
 }
-```
+\`\`\`
 
 **Security Assessment:**
 ✅ **Strengths:**
@@ -414,15 +414,15 @@ if (codeUsed) {
 - Redis-based distributed tracking
 
 ⚠️ **Potential Race Conditions:**
-```typescript
+\`\`\`typescript
 // RACE CONDITION: Check and set are not atomic
 const codeUsed = await redis.get(codeKey);  // Time A
 // Another request could use the same code here
 await redis.set(codeKey, ...);             // Time B
-```
+\`\`\`
 
 **Atomic Solution:**
-```typescript
+\`\`\`typescript
 // Use Redis SET NX (set if not exists) for atomicity
 const result = await redis.set(
   codeKey, 
@@ -435,7 +435,7 @@ if (!result) {
     error: 'This invite code has already been used' 
   }, { status: 400 });
 }
-```
+\`\`\`
 
 ---
 
@@ -447,7 +447,7 @@ if (!result) {
 **File:** `next.config.js:113-134`
 
 **Security Headers Analysis:**
-```javascript
+\`\`\`javascript
 async headers() {
   return [{
     source: '/api/:path*',
@@ -457,7 +457,7 @@ async headers() {
     ],
   }];
 }
-```
+\`\`\`
 
 **Security Issues:**
 1. **CORS Misconfiguration:** Wildcard origin allows any domain
@@ -465,7 +465,7 @@ async headers() {
 3. **Missing Security Headers:** No CSRF, HSTS, or referrer policy
 
 **Secure Configuration:**
-```javascript
+\`\`\`javascript
 async headers() {
   return [
     {
@@ -486,7 +486,7 @@ async headers() {
     },
   ];
 }
-```
+\`\`\`
 
 ### 11. ERROR HANDLING & INFORMATION DISCLOSURE
 
@@ -494,7 +494,7 @@ async headers() {
 **Multiple Files:** API routes expose internal details
 
 **Information Disclosure Examples:**
-```typescript
+\`\`\`typescript
 // app/api/invite/route.ts:114-121
 catch (error) {
   console.error(`Error in invite API after ${processingTime}ms:`, error);
@@ -504,12 +504,12 @@ catch (error) {
     processingTime // ⚠️ Information leakage
   }, { status: 500 });
 }
-```
+\`\`\`
 
 **Security Risk:** Error messages and timing information can reveal system architecture
 
 **Secure Error Handling:**
-```typescript
+\`\`\`typescript
 catch (error) {
   // Log detailed error server-side only
   console.error('Invite API error:', error);
@@ -521,7 +521,7 @@ catch (error) {
     // No internal details exposed
   }, { status: 500 });
 }
-```
+\`\`\`
 
 ---
 
@@ -537,7 +537,7 @@ catch (error) {
 5. ⚠️ Transaction confirmation handling incomplete
 
 **Critical Gap in `useMintSBT.ts:128-134`:**
-```typescript
+\`\`\`typescript
 // Missing gas estimation and error handling
 writeContract({
   address: CONTRACT_ADDRESS,
@@ -545,10 +545,10 @@ writeContract({
   functionName: 'mintMembership',
   args: [address]
 }); // No gas estimation, no transaction monitoring
-```
+\`\`\`
 
 **Enhanced Implementation:**
-```typescript
+\`\`\`typescript
 // Comprehensive transaction handling
 const { request } = await publicClient.simulateContract({
   address: CONTRACT_ADDRESS,
@@ -566,7 +566,7 @@ writeContract({
   gas: gasEstimate * 120n / 100n, // 20% buffer
   gasPrice: gasPrice * 110n / 100n, // 10% priority
 });
-```
+\`\`\`
 
 ### 13. USER TYPE DETECTION SECURITY
 
@@ -574,13 +574,13 @@ writeContract({
 **File:** `lib/useUserType.ts:37-50`
 
 **Current Logic:**
-```typescript
+\`\`\`typescript
 const determineUserType = useCallback((): UserType => {
   if (hasGenesis && genesisBalance > 0) return 'GENESIS_HOLDER';
   if (hasSBT) return 'SBT_HOLDER';
   return 'NEW_USER';
 }, [hasGenesis, genesisBalance, hasSBT]);
-```
+\`\`\`
 
 **Security Assessment:**
 ✅ Client-side logic is appropriate for UI decisions
@@ -608,7 +608,7 @@ const determineUserType = useCallback((): UserType => {
 - No automated security scanning integration
 
 **Recommended `.env.production` Template:**
-```bash
+\`\`\`bash
 # PRODUCTION SECURITY CHECKLIST
 # □ All fallback secrets removed from code
 # □ Private keys generated fresh (never from development)  
@@ -633,12 +633,12 @@ UPSTASH_REDIS_REST_TOKEN=__PRODUCTION_REDIS_TOKEN__
 # BLOCKCHAIN
 NEXT_PUBLIC_CONTRACT_ADDRESS=__PRODUCTION_CONTRACT_ADDRESS__
 NEXT_PUBLIC_BEPOLIA_RPC=https://bepolia.rpc.berachain.com/
-```
+\`\`\`
 
 ### 15. DEPLOYMENT SECURITY CHECKLIST
 
 **Container Security:**
-```dockerfile
+\`\`\`dockerfile
 # Recommended Dockerfile security practices
 FROM node:18-alpine AS base
 RUN addgroup --system --gid 1001 nodejs && \
@@ -650,7 +650,7 @@ RUN apk upgrade --update-cache --available && \
 
 # Non-root user
 USER nextjs
-```
+\`\`\`
 
 **Infrastructure Security:**
 1. **SSL/TLS:** Enforce HTTPS with proper certificate management
@@ -668,14 +668,14 @@ USER nextjs
 **Analysis Date:** September 9, 2025
 
 **High-Risk Dependencies:**
-```json
+\`\`\`json
 {
   "@privy-io/react-auth": "^2.24.0", // ✅ Recent, no known CVEs
   "wagmi": "^2.15.2",                // ✅ Recent, actively maintained
   "viem": "^2.28.3",                 // ✅ Recent, secure
   "crypto-js": "^4.2.0"              // ⚠️ Consider built-in crypto instead
 }
-```
+\`\`\`
 
 **Recommendations:**
 1. Run `npm audit` regularly for vulnerability scanning
@@ -683,11 +683,11 @@ USER nextjs
 3. Consider replacing `crypto-js` with Node.js built-in `crypto` module
 4. Implement SCA (Software Composition Analysis) in CI/CD
 
-```bash
+\`\`\`bash
 # Security scanning commands
 npm audit --audit-level=moderate
 npx audit-ci --moderate
-```
+\`\`\`
 
 ---
 
@@ -728,7 +728,7 @@ npx audit-ci --moderate
 ### Security Testing Strategy
 
 **Automated Testing:**
-```javascript
+\`\`\`javascript
 // API Security Tests
 describe('Invite API Security', () => {
   test('should reject invalid HMAC signatures', async () => {
@@ -746,7 +746,7 @@ describe('Invite API Security', () => {
     expect(responses.some(r => r.status === 429)).toBe(true);
   });
 });
-```
+\`\`\`
 
 **Manual Testing:**
 1. **GPS Spoofing:** Test with mock location services
@@ -761,7 +761,7 @@ describe('Invite API Security', () => {
 ### Database Performance
 
 **Redis Usage Optimization:**
-```typescript
+\`\`\`typescript
 // Connection pooling and optimization
 export const redis = new Redis({
   // ... existing config
@@ -776,7 +776,7 @@ export const redis = new Redis({
   family: 4,
   db: 0,
 });
-```
+\`\`\`
 
 **Scaling Considerations:**
 - Implement Redis Cluster for high availability

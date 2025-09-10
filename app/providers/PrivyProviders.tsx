@@ -47,4 +47,4 @@ export function PrivyProviders({ children }: { children: React.ReactNode }) {
       <LazyWeb3Setup>{children}</LazyWeb3Setup>
     </Suspense>
   );
-} 
+}

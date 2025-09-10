@@ -206,4 +206,4 @@ export function useMintSBT() {
     isSuccess: mintStatus === 'success' && isConfirmed,
     isError: mintStatus === 'error' || !!writeError,
   };
-} 
+}

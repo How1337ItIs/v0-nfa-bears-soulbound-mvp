@@ -8,17 +8,17 @@
 - `scripts/verify_wallet.js`
 
 **Before:**
-```javascript
+\`\`\`javascript
 const privateKey = '0x9d8b52f2b5269b8b32f03b0d22dcc9c28ce7be85a8752694487902fbff2e1b4e';
-```
+\`\`\`
 
 **After:**
-```javascript
+\`\`\`javascript
 const privateKey = process.env.DEPLOYER_PRIVATE_KEY;
 if (!privateKey) {
   throw new Error('DEPLOYER_PRIVATE_KEY environment variable is required');
 }
-```
+\`\`\`
 
 **Impact:** Prevents private key exposure in version control and ensures proper environment variable usage.
 
@@ -30,12 +30,12 @@ if (!privateKey) {
 - `app/api/invite/verify/route.ts`
 
 **Before:**
-```typescript
+\`\`\`typescript
 const SECRET_KEY = process.env.INVITE_SECRET_KEY || 'fallback-dev-secret-key';
-```
+\`\`\`
 
 **After:**
-```typescript
+\`\`\`typescript
 // Production enforcement with warnings for development
 if (!process.env.INVITE_SECRET_KEY) {
   if (process.env.NODE_ENV === 'production') {
@@ -45,7 +45,7 @@ if (!process.env.INVITE_SECRET_KEY) {
 }
 
 const SECRET_KEY = process.env.INVITE_SECRET_KEY || 'dev-fallback-secret-key-only-for-development';
-```
+\`\`\`
 
 **Impact:** Production deployments will fail without proper secrets; development maintains functionality with warnings.
 
@@ -56,17 +56,17 @@ const SECRET_KEY = process.env.INVITE_SECRET_KEY || 'dev-fallback-secret-key-onl
 - `app/invite/[code]/page.tsx`
 
 **Before:**
-```typescript
+\`\`\`typescript
 const shouldSkipGPS = process.env.NODE_ENV === 'development' && 
                      process.env.NEXT_PUBLIC_DEV_SKIP_GPS === 'true';
-```
+\`\`\`
 
 **After:**
-```typescript
+\`\`\`typescript
 const shouldSkipGPS = process.env.NODE_ENV === 'development' && 
                      process.env.NEXT_PUBLIC_DEV_SKIP_GPS === 'true' &&
                      process.env.NEXT_PUBLIC_VERCEL_ENV !== 'production';
-```
+\`\`\`
 
 **Impact:** GPS verification cannot be bypassed in production environments, preventing location spoofing attacks.
 
@@ -77,16 +77,16 @@ const shouldSkipGPS = process.env.NODE_ENV === 'development' &&
 - `app/api/invite/verify/route.ts`
 
 **Before:**
-```typescript
+\`\`\`typescript
 // Non-atomic check-then-set operation
 const codeUsed = await redis.get(codeKey);
 if (codeUsed) { /* reject */ }
 // ... later ...
 await redis.set(codeKey, usageData);
-```
+\`\`\`
 
 **After:**
-```typescript
+\`\`\`typescript
 // Atomic set-if-not-exists operation
 const setResult = await redis.set(codeKey, usageData, { 
   nx: true, // Only set if key doesn't exist (atomic)
@@ -98,7 +98,7 @@ if (!setResult) {
     error: 'This invite code has already been used' 
   }, { status: 400 });
 }
-```
+\`\`\`
 
 **Impact:** Prevents double-spending of invite codes through atomic Redis operations.
 

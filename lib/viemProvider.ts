@@ -44,4 +44,4 @@ export const walletClient = createWalletClient({
     retryCount: 3,
     retryDelay: 1000,
   })
-}); 
+});

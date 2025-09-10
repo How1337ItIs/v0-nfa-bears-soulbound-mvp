@@ -20,4 +20,4 @@ export function ClientPrivyProviders({ children }: { children: React.ReactNode }
   }
 
   return <PrivySetup>{children}</PrivySetup>;
-} 
+}

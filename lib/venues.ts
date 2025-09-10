@@ -20,4 +20,4 @@ export function allVenues(): Venue[] {
 
 export function validateVenue(venueId: string): boolean {
   return venuesData.venues.some(venue => venue.id === venueId);
-} 
+}

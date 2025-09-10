@@ -38,4 +38,4 @@ async function main() {
   console.log('Is relayer the owner?', (owner as string).toLowerCase() === relayerAddress.toLowerCase());
 }
 
-main().catch(console.error); 
+main().catch(console.error);

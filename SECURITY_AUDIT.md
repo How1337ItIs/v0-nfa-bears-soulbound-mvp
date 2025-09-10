@@ -21,10 +21,10 @@ The NFA Bears MVP has a solid foundational architecture but contains **3 CRITICA
 - **Risk:** Complete compromise of deployer wallet and all funds
 - **Impact:** Attacker can drain wallet, mint unlimited SBTs, control contract
 - **Fix:** 
-  ```javascript
+  \`\`\`javascript
   // Move to environment variable immediately
   accounts: [process.env.DEPLOYER_PRIVATE_KEY]
-  ```
+  \`\`\`
 
 ### 2. **MISSING HMAC SIGNATURE VERIFICATION** ⚠️ SEVERITY: CRITICAL
 - **Location:** `app/api/invite/route.ts` (GET endpoint)
@@ -36,7 +36,7 @@ The NFA Bears MVP has a solid foundational architecture but contains **3 CRITICA
   - GPS verification bypass
   - Forge any invite code
 - **Fix:** Add signature verification in GET endpoint:
-  ```typescript
+  \`\`\`typescript
   const hmac = createHmac('sha256', process.env.SECRET_KEY!);
   hmac.update(`${code}|${timestamp}`);
   const expectedSignature = hmac.digest('hex');
@@ -44,7 +44,7 @@ The NFA Bears MVP has a solid foundational architecture but contains **3 CRITICA
   if (signature !== expectedSignature) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
-  ```
+  \`\`\`
 
 ### 3. **WEAK SECRET KEY FALLBACKS** ⚠️ SEVERITY: CRITICAL
 - **Locations:** Multiple files using `process.env.SECRET_KEY || ''`
@@ -102,7 +102,7 @@ The NFA Bears MVP has a solid foundational architecture but contains **3 CRITICA
 - No maximum supply limit
 
 **🔧 Recommended Fixes:**
-```solidity
+\`\`\`solidity
 // Add access control
 function mintMembership(address to) external onlyOwner returns (uint256) {
     // existing code
@@ -112,7 +112,7 @@ function mintMembership(address to) external onlyOwner returns (uint256) {
 // Add emergency controls  
 function pause() external onlyOwner { _pause(); }
 function unpause() external onlyOwner { _unpause(); }
-```
+\`\`\`
 
 ### API Endpoint Security Analysis
 
@@ -310,7 +310,7 @@ Technical analysis reveals multiple bypass methods:
 
 No `.env.example` file found. Required variables:
 
-```env
+\`\`\`env
 # Authentication & Security
 SECRET_KEY=                    # HMAC signing key - CRITICAL
 DEPLOYER_PRIVATE_KEY=          # Gas relayer wallet - CRITICAL
@@ -327,7 +327,7 @@ UPSTASH_REDIS_REST_TOKEN=      # Redis auth token
 
 # Feature Flags (REMOVE IN PRODUCTION)
 NEXT_PUBLIC_DEV_SKIP_GPS=false # Must be false or removed
-```
+\`\`\`
 
 ### Network & Infrastructure Resilience
 **❌ SINGLE POINTS OF FAILURE:**
@@ -390,7 +390,7 @@ NEXT_PUBLIC_DEV_SKIP_GPS=false # Must be false or removed
 ### Phase 1: Critical Fixes (Before ANY Production Use)
 
 #### 1.1 Remove Hardcoded Private Key (IMMEDIATE)
-```bash
+\`\`\`bash
 # Generate new wallet
 cast wallet new
 
@@ -401,10 +401,10 @@ accounts: [process.env.DEPLOYER_PRIVATE_KEY]
 DEPLOYER_PRIVATE_KEY=0x...new_key_here...
 
 # Transfer funds from old wallet to new wallet
-```
+\`\`\`
 
 #### 1.2 Implement HMAC Verification (IMMEDIATE)
-```typescript
+\`\`\`typescript
 // app/api/invite/route.ts - Add to GET endpoint
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -436,10 +436,10 @@ export async function GET(req: Request) {
   
   // Continue with existing logic...
 }
-```
+\`\`\`
 
 #### 1.3 Environment Validation (IMMEDIATE)
-```typescript
+\`\`\`typescript
 // lib/env-validation.ts - New file
 const requiredEnvVars = [
   'SECRET_KEY',
@@ -468,12 +468,12 @@ export function validateEnvironment() {
 
 // Call in app/layout.tsx or middleware
 validateEnvironment();
-```
+\`\`\`
 
 ### Phase 2: High Priority Security (Within 1 Week)
 
 #### 2.1 Add Smart Contract Access Control
-```solidity
+\`\`\`solidity
 // contracts/NFABearsMembership.sol
 function mintMembership(address to) external onlyOwner returns (uint256) {
     require(!_hasMinted[to], "Wallet already has an SBT");
@@ -490,10 +490,10 @@ function mintMembership(address to) external onlyOwner returns (uint256) {
 
 // Add event declaration
 event MembershipMinted(address indexed to, uint256 indexed tokenId);
-```
+\`\`\`
 
 #### 2.2 Server-Side GPS Verification
-```typescript
+\`\`\`typescript
 // lib/location-verification.ts - New file
 import { getVenue } from './venues';
 
@@ -515,10 +515,10 @@ const locationValid = await verifyLocationServerSide(venueId, coordinates.lat, c
 if (!locationValid) {
   return NextResponse.json({ error: 'Invalid location' }, { status: 400 });
 }
-```
+\`\`\`
 
 #### 2.3 Enhanced Rate Limiting
-```typescript
+\`\`\`typescript
 // lib/enhanced-rate-limit.ts
 export class EnhancedRateLimit {
   // IP + Wallet based limiting
@@ -534,12 +534,12 @@ export class EnhancedRateLimit {
     // Implement escalating timeouts
   }
 }
-```
+\`\`\`
 
 ### Phase 3: Infrastructure Hardening (Production Ready)
 
 #### 3.1 Add Comprehensive Logging
-```typescript
+\`\`\`typescript
 // lib/logger.ts
 import winston from 'winston';
 
@@ -559,10 +559,10 @@ export const logger = winston.createLogger({
 // Usage in API routes
 logger.info('Invite generated', { venueId, ip, timestamp });
 logger.error('Minting failed', { error, walletAddress, code });
-```
+\`\`\`
 
 #### 3.2 Health Check System
-```typescript
+\`\`\`typescript
 // app/api/health/route.ts
 export async function GET() {
   const checks = await Promise.allSettled([
@@ -583,21 +583,21 @@ export async function GET() {
     timestamp: new Date().toISOString()
   }, { status: healthy ? 200 : 503 });
 }
-```
+\`\`\`
 
 #### 3.3 Database Integration
-```typescript
+\`\`\`typescript
 // For production scale, replace Redis-only with proper database
 // Recommended: PostgreSQL with Redis caching layer
 // Schema for persistent invite tracking, user analytics, etc.
-```
+\`\`\`
 
 ---
 
 ## 🧪 TESTING RECOMMENDATIONS
 
 ### Unit Tests (Missing - High Priority)
-```typescript
+\`\`\`typescript
 // tests/api/invite.test.ts
 describe('Invite API Security', () => {
   it('should reject invalid HMAC signatures', async () => {
@@ -613,7 +613,7 @@ describe('Invite API Security', () => {
     // Test with old timestamp...
   });
 });
-```
+\`\`\`
 
 ### Security Testing Checklist
 - [ ] HMAC signature validation tests

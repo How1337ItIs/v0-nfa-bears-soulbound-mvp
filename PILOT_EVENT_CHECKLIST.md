@@ -37,7 +37,7 @@
 
 Before the event, run these to verify everything works:
 
-```bash
+\`\`\`bash
 # Check contract status
 npx tsx scripts/sanity-check.ts
 
@@ -50,7 +50,7 @@ npm run dev
 # 3. Scan QR with phone 
 # 4. Complete authentication
 # 5. Verify SBT mint in member dashboard
-```
+\`\`\`
 
 ## Day of Event Setup (2-3 hours before)
 

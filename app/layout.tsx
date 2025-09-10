@@ -19,6 +19,7 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "NFA Bears",
   },
+    generator: 'v0.app'
 };
 
 export function generateViewport() {
@@ -52,4 +53,3 @@ export default function RootLayout({
     </html>
   );
 }
-

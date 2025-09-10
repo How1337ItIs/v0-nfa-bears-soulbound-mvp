@@ -45,4 +45,4 @@ export function CountdownCircle({ duration, onComplete }: CountdownCircleProps) 
       </CountdownCircleTimer>
     </div>
   );
-} 
+}

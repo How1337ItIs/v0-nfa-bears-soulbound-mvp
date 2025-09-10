@@ -49,4 +49,4 @@ export function WagmiSetup({ children }: { children: React.ReactNode }) {
       </WagmiProvider>
     </QueryClientProvider>
   );
-} 
+}

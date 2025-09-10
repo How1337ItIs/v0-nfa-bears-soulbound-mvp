@@ -21,4 +21,4 @@ export const membershipAbi = [
     "stateMutability": "view",
     "type": "function"
   }
-] as const; 
+] as const;

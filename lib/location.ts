@@ -70,4 +70,4 @@ export function verifyTimeSecret(secret: string): boolean {
     .slice(0, 8);
   
   return secret === currentSecret || secret === previousSecret;
-} 
+}

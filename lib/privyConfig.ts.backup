@@ -35,4 +35,4 @@ export const wagmiConfig = createConfig({
   transports: {
     [berachainBepolia.id]: http(process.env.NEXT_PUBLIC_BEPOLIA_RPC || 'https://bepolia.rpc.berachain.com/')
   }
-}); 
+});

@@ -327,4 +327,4 @@ function InvitePageClient({ code }: { code: string }) {
   }
 
   return null;
-} 
+}

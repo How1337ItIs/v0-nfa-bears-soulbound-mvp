@@ -13,4 +13,4 @@ redis.ping()
   .catch(err => {
     console.error('Failed to connect to Redis:', err);
     process.exit(1);
-  }); 
+  });

@@ -140,7 +140,7 @@
 
 ### Optimal Structure Design Based on Research + Analysis:
 
-```markdown
+\`\`\`markdown
 # CLAUDE.md
 
 # 🚨 CRITICAL REFERENCE (Tier 1)
@@ -165,7 +165,7 @@
 # 🎯 PROJECT CONTEXT (Tier 4 - Condensed)
 ## Cultural Foundation (Brief)
 ## Current Issues & TODOs
-```
+\`\`\`
 
 ### Design Principles Applied:
 1. **Inverted Pyramid**: Most critical info first, context later

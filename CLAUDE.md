@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 **YOU MUST** ensure these environment variables are properly configured:
 
-```bash
+\`\`\`bash
 # SECURITY CRITICAL - Never expose or log these
 DEPLOYER_PRIVATE_KEY=0x[64_char_hex_private_key]
 SECRET_KEY=[64_char_random_string_for_hmac]
@@ -27,7 +27,7 @@ REDIS_TOKEN=[upstash_redis_token]
 # Development (set to 'true' to bypass GPS verification)
 DEV_SKIP_GPS=false
 NEXT_PUBLIC_BASE_URL=http://localhost:3001
-```
+\`\`\`
 
 ## Contract Addresses & Chain Info
 
@@ -39,7 +39,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3001
 
 ## Development Commands
 
-```bash
+\`\`\`bash
 # Essential daily commands
 npm run dev              # Start development server (port 3001)
 npm run build           # Build for production
@@ -50,7 +50,7 @@ npm run typecheck       # TypeScript validation
 npm run compile:contracts    # Compile Solidity contracts
 npm run deploy:membership   # Deploy membership contract
 npm run mint:demo          # Test minting workflow
-```
+\`\`\`
 
 ## Security Warnings
 
@@ -79,7 +79,7 @@ npm run mint:demo          # Test minting workflow
 2. **SBT Members**: Own Miracle SBT → 10% discounts, community access  
 3. **Unverified Users**: No NFTs → Must donate $10 OR complete tasks to access features
 
-```typescript
+\`\`\`typescript
 // User type detection pattern (see lib/userTypeDetection.ts)
 const userType = await detectUserType(address);
 if (userType === 'genesis') {
@@ -89,25 +89,25 @@ if (userType === 'genesis') {
 } else {
   // Unverified user flow
 }
-```
+\`\`\`
 
 ## API Patterns & Examples
 
 ### Invite System (`/api/invite`)
-```typescript
+\`\`\`typescript
 // Generate invite (POST)
 { "venueId": "local-dev", "latitude": 37.7749, "longitude": -122.4194 }
 
 // Verify invite (GET)
 /api/invite/[code] → validates GPS + HMAC signature
-```
+\`\`\`
 
 ### Minting System (`/api/mint`)
-```typescript
+\`\`\`typescript
 // Mint SBT (POST)
 { "address": "0x...", "code": "invite_code" }
 // → Validates code, checks existing membership, mints via relayer
-```
+\`\`\`
 
 ## Code Conventions
 
@@ -119,25 +119,25 @@ if (userType === 'genesis') {
 ## Common Workflows
 
 ### Testing GPS System
-```bash
+\`\`\`bash
 # Use Chrome DevTools > Sensors > Location to spoof coordinates
 # Default test venue: SF (37.7749, -122.4194) with 100m radius
 # Set DEV_SKIP_GPS=true to bypass for development
-```
+\`\`\`
 
 ### Smart Contract Deployment
-```bash
+\`\`\`bash
 npm run compile:contracts
 npm run deploy:membership
 # Contract address automatically updates in .env
-```
+\`\`\`
 
 ### Debugging Invite Flow
-```javascript
+\`\`\`javascript
 // Check Redis invite storage
 const inviteData = await redis.get(`invite:${code}`);
 console.log('Invite data:', JSON.parse(inviteData));
-```
+\`\`\`
 
 # 📚 CONTEXTUAL KNOWLEDGE
 
@@ -162,11 +162,11 @@ console.log('Invite data:', JSON.parse(inviteData));
 - **Security**: HMAC-signed invite codes with timestamp
 - **Venues**: Configured in `data/venues.json`
 
-```javascript
+\`\`\`javascript
 // GPS validation pattern
 const distance = calculateHaversineDistance(userLat, userLon, venueLat, venueLon);
 if (distance > venue.radius) throw new Error('Outside venue radius');
-```
+\`\`\`
 
 ## Rate Limiting & Redis
 

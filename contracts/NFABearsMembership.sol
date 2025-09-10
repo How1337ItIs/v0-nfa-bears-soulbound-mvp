@@ -77,4 +77,4 @@ contract NFABearsMembership is ERC721, Ownable, AccessControl {
     {
         return super.supportsInterface(interfaceId);
     }
-} 
+}

@@ -115,4 +115,4 @@ export function PrivySetup({ children }: { children: React.ReactNode }) {
       </QueryClientProvider>
     </PrivyProvider>
   );
-} 
+}

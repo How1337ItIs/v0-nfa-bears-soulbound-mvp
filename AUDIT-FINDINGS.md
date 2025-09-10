@@ -13,7 +13,7 @@
 **Issue**: Users not redirected to Dead Easy Guide after SBT minting  
 **Root Cause**: Logic only handled new minting (`isSuccess && hasMinted`) but not returning users who already had SBTs  
 **Fix**: Updated redirect logic to handle both cases:
-```typescript
+\`\`\`typescript
 // Before: Only new minting
 if (isSuccess && hasMinted) { redirect(); }
 
@@ -21,7 +21,7 @@ if (isSuccess && hasMinted) { redirect(); }
 if ((isSuccess && hasMinted) || (hasMinted && status === 'success' && !isMintingState)) {
   redirect();
 }
-```
+\`\`\`
 **Impact**: 🟢 All users now properly redirected to onboarding guide
 
 ### 2. Network Switching Implementation ✅ CONFIRMED WORKING
@@ -40,11 +40,11 @@ if ((isSuccess && hasMinted) || (hasMinted && status === 'success' && !isMinting
 ## 🔒 Security Assessment
 
 ### Environment Variables - ⚠️ HIGH PRIVILEGE KEYS DETECTED
-```bash
+\`\`\`bash
 # CRITICAL: Production deployment private key in development
 DEPLOYER_PRIVATE_KEY=0x9d8b52f2b5269b8b32f03b0d22dcc9c28ce7be85a8752694487902fbff2e1b4e
 # Associated address: 0xC9ba78130433dfC58dBf0F94f4Ff3b29E1a050a4
-```
+\`\`\`
 
 **Risk Level**: 🟠 MEDIUM (development environment)  
 **Analysis**: 
@@ -65,11 +65,11 @@ DEPLOYER_PRIVATE_KEY=0x9d8b52f2b5269b8b32f03b0d22dcc9c28ce7be85a8752694487902fbf
 - `/api/mint`: 3 requests/minute
 
 **Cryptographic Security**: ✅ HMAC-signed invite codes
-```typescript
+\`\`\`typescript
 // HMAC verification prevents tampering
 const signature = crypto.createHmac('sha256', SECRET_KEY)
   .update(payload).digest('hex').substring(0, 16);
-```
+\`\`\`
 
 **Input Validation**: ✅ All user inputs validated
 **GPS Verification**: ✅ Haversine formula with radius checking
@@ -100,9 +100,9 @@ const signature = crypto.createHmac('sha256', SECRET_KEY)
 ## 🐛 Minor Issues & Improvements
 
 ### ESLint Warnings - 🟡 LOW PRIORITY
-```
+\`\`\`
 Unknown options: useEslintrc, extensions, resolvePluginsRelativeTo
-```
+\`\`\`
 **Impact**: Build warnings only, no functional impact  
 **Fix**: Update ESLint config for Next.js 15 compatibility
 

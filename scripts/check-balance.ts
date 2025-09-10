@@ -22,4 +22,4 @@ async function main() {
   console.log('Balance:', Number(balance) / 1e18, 'BERA');
 }
 
-main().catch(console.error); 
+main().catch(console.error);

@@ -148,4 +148,4 @@ export default function VendorPage() {
       </div>
     </div>
   );
-} 
+}

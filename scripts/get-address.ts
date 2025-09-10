@@ -6,4 +6,4 @@ const account = privateKeyToAccount(privateKey);
 
 console.log('Private Key:', privateKey);
 console.log('Address:', account.address);
-console.log('Public Key:', account.publicKey); 
+console.log('Public Key:', account.publicKey);

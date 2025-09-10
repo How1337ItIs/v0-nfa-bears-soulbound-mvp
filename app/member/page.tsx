@@ -332,4 +332,4 @@ if (typeof window !== 'undefined') {
   style.innerHTML = `.wavy-border { border-radius: 2rem; border-style: solid; border-width: 4px; box-shadow: 0 0 24px 4px #1A1AFFAA; }
   .wavy-border { border-image: repeating-linear-gradient(135deg, #FF2222 0 10px, #1A1AFF 10px 20px, #FFFFFF 20px 30px, #FF2222 30px 40px, #1A1AFF 40px 50px) 30; }`;
   document.head.appendChild(style);
-} 
+}
