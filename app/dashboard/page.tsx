@@ -19,8 +19,8 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-spin">🐻</div>
-          <p className="text-white/70">Loading your cosmic dashboard...</p>
+          <div className="text-6xl mb-4 animate-bounce">🐻</div>
+          <div className="text-white">Loading dashboard...</div>
         </div>
       </div>
     )

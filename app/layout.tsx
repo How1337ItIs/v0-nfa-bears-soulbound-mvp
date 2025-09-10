@@ -1,28 +1,18 @@
 import type React from "react"
 import type { Metadata } from "next"
+import { Inter } from "next/font/google"
 import "./globals.css"
-import { PrivyProviders } from "./providers/PrivyProviders"
 import { MobileAppShell } from "@/components/mobile/MobileAppShell"
+import { PrivyProvider } from "@privy-io/react-auth"
+
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "NFA Bears - Not Fade Away",
-  description: "Grateful Dead-inspired Web3 community for live music and authentic connections",
+  description: "Grateful Dead-inspired Web3 community preserving authentic connections",
   manifest: "/manifest.json",
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/icons/icon-192x192.png",
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "NFA Bears",
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    userScalable: false,
-    themeColor: "#ff3366",
-  },
+  themeColor: "#1a1aff",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
     generator: 'v0.app'
 }
 
@@ -32,17 +22,22 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <meta name="theme-color" content="#ff3366" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="mobile-web-app-capable" content="yes" />
-      </head>
-      <body className="antialiased min-h-screen overflow-x-hidden">
-        <PrivyProviders>
+    <html lang="en">
+      <body className={inter.className}>
+        <PrivyProvider
+          appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ""}
+          config={{
+            appearance: {
+              theme: "dark",
+              accentColor: "#1a1aff",
+            },
+            embeddedWallets: {
+              createOnLogin: "users-without-wallets",
+            },
+          }}
+        >
           <MobileAppShell>{children}</MobileAppShell>
-        </PrivyProviders>
+        </PrivyProvider>
       </body>
     </html>
   )
