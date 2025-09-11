@@ -2,7 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import "./globals.css"
 import { PrivyProviders } from "./providers/PrivyProviders"
-import { LayoutProvider } from "@/providers/LayoutProvider"
+import { LayoutProvider } from "../providers/LayoutProvider"
 import { ResponsiveAppShell } from "@/components/ResponsiveAppShell"
 
 export const metadata: Metadata = {

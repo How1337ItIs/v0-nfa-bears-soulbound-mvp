@@ -4,7 +4,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { usePrivy } from "@privy-io/react-auth"
-import { Home, Scan, LayoutDashboard, User } from "lucide-react"
+import { Home, Scan, LayoutDashboard, User, Coins } from "lucide-react"
 
 interface MobileAppShellProps {
   children: React.ReactNode
@@ -21,11 +21,13 @@ export function MobileAppShell({ children }: MobileAppShellProps) {
     else if (pathname === "/scan") setActiveTab("scan")
     else if (pathname === "/dashboard") setActiveTab("dashboard")
     else if (pathname === "/profile") setActiveTab("profile")
+    else if (pathname === "/mint-genesis") setActiveTab("mint")
   }, [pathname])
 
   const navItems = [
     { id: "home", label: "Home", icon: Home, path: "/", emoji: "🏠" },
     { id: "scan", label: "Scan", icon: Scan, path: "/scan", emoji: "📱", requiresAuth: true },
+    { id: "mint", label: "Mint", icon: Coins, path: "/mint-genesis", emoji: "💎", requiresAuth: true },
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, path: "/dashboard", emoji: "🎪", requiresAuth: true },
     { id: "profile", label: "Profile", icon: User, path: "/profile", emoji: "👤", requiresAuth: true },
   ]
