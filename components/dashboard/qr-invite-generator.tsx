@@ -69,7 +69,7 @@ export function QRInviteGenerator() {
       toast.success('QR invite generated! Valid for 15 minutes.');
     } catch (error) {
       console.error('Error generating invite:', error);
-      toast.error(error instanceof Error ? error.message : 'If you\\'d ever like to spend an idle half hour, come up here... beyond the pale');
+      toast.error(error instanceof Error ? error.message : "If you'd ever like to spend an idle half hour, come up here... beyond the pale");
     } finally {
       setIsGenerating(false);
     }
