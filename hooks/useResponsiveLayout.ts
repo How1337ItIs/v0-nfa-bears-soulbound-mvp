@@ -2,47 +2,36 @@
 
 import { useState, useEffect } from "react"
 
-export type LayoutMode = "mobile" | "desktop" | "auto"
-export type DetectedLayout = "mobile" | "desktop"
+export function useResponsiveLayout() {
+  const [dimensions, setDimensions] = useState({
+    width: 0,
+    height: 0,
+  })
 
-interface ResponsiveLayoutState {
-  mode: LayoutMode
-  detected: DetectedLayout
-  current: DetectedLayout
-  isMobile: boolean
-  isDesktop: boolean
-  setMode: (mode: LayoutMode) => void
-}
-
-export function useResponsiveLayout(): ResponsiveLayoutState {
-  const [mode, setMode] = useState<LayoutMode>("auto")
-  const [detected, setDetected] = useState<DetectedLayout>("desktop")
-  
   useEffect(() => {
-    const checkViewport = () => {
-      const isMobileViewport = window.innerWidth < 768
-      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-      
-      // Smart detection: mobile viewport OR touch device with small screen
-      const shouldUseMobile = isMobileViewport || (isTouchDevice && window.innerWidth < 1024)
-      
-      setDetected(shouldUseMobile ? "mobile" : "desktop")
+    function handleResize() {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
     }
-    
-    checkViewport()
-    window.addEventListener("resize", checkViewport)
-    
-    return () => window.removeEventListener("resize", checkViewport)
+
+    // Set initial dimensions
+    handleResize()
+
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
   }, [])
-  
-  const current = mode === "auto" ? detected : mode as DetectedLayout
-  
+
+  const isMobile = dimensions.width < 768
+  const isTablet = dimensions.width >= 768 && dimensions.width < 1024
+  const isDesktop = dimensions.width >= 1024
+
   return {
-    mode,
-    detected,
-    current,
-    isMobile: current === "mobile",
-    isDesktop: current === "desktop",
-    setMode,
+    isMobile,
+    isTablet,
+    isDesktop,
+    width: dimensions.width,
+    height: dimensions.height,
   }
 }

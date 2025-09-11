@@ -9,15 +9,15 @@ export const metadata: Metadata = {
   title: "NFA Bears - Not Fade Away",
   description: "Grateful Dead-inspired Web3 community preserving authentic connections",
   manifest: "/manifest.json",
-  generator: 'v0.app'
+  generator: "v0.app",
 }
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#1a1aff',
+  themeColor: "#1a1aff",
 }
 
 export default function RootLayout({

@@ -2,19 +2,15 @@
 
 import type React from "react"
 import { useLayout } from "@/providers/LayoutProvider"
-import { MobileAppShell } from "@/components/mobile/MobileAppShell"
-import { DesktopAppShell } from "@/components/desktop/DesktopAppShell"
+import { MobileAppShell } from "./mobile/MobileAppShell"
+import { DesktopAppShell } from "./desktop/DesktopAppShell"
 
-interface ResponsiveAppShellProps {
-  children: React.ReactNode
-}
-
-export function ResponsiveAppShell({ children }: ResponsiveAppShellProps) {
+export function ResponsiveAppShell({ children }: { children: React.ReactNode }) {
   const { isMobile } = useLayout()
-  
+
   if (isMobile) {
     return <MobileAppShell>{children}</MobileAppShell>
   }
-  
+
   return <DesktopAppShell>{children}</DesktopAppShell>
 }

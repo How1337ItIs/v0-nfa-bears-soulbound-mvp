@@ -13,23 +13,72 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Underwater Liquid Light Color System */
-:root {
-  --background: #000011; /* Deep space base */
-  --primary: #1a1aff; /* Electric blue - main interactive */
-  --accent: #ff3366; /* Rosy red - hot accents, never glows */
-  --highlight: #ffff00; /* Bright yellow - celebration only */
-  --success: #00ff88; /* Neon green - confirmations */
-  --text: #ffffff; /* Pure white */
-  --text-muted: rgba(255, 255, 255, 0.7);
-  --foreground: #ffffff;
+@layer base {
+  :root {
+    --background: #000011; /* Deep space base */
+    --primary: #1a1aff; /* Electric blue - main interactive */
+    --accent: #ff3366; /* Rosy red - hot accents, never glows */
+    --highlight: #ffff00; /* Bright yellow - celebration only */
+    --success: #00ff88; /* Neon green - confirmations */
+    --text: #ffffff; /* Pure white */
+    --text-muted: rgba(255, 255, 255, 0.7);
+    --foreground: #ffffff;
+    --card: #000011;
+    --card-foreground: #ffffff;
+    --popover: #000011;
+    --popover-foreground: #000011;
+    --secondary: #1a1aff;
+    --muted: #ff3366;
+    --destructive: #ff0000;
+    --border: #ffffff;
+    --input: #ffffff;
+    --ring: #1a1aff;
+    --radius: 0.5rem;
+    --chart-1: #127661;
+    --chart-2: #b13a27;
+    --chart-3: #333333;
+    --chart-4: #437466;
+    --chart-5: #278767;
+  }
+
+  .dark {
+    --background: #ffffff;
+    --foreground: #000011;
+    --card: #ffffff;
+    --card-foreground: #000011;
+    --popover: #ffffff;
+    --popover-foreground: #000011;
+    --primary: #000011;
+    --primary-foreground: #ffffff;
+    --secondary: #1a1aff;
+    --secondary-foreground: #000011;
+    --muted: #ff3366;
+    --muted-foreground: #333333;
+    --accent: #1a1aff;
+    --accent-foreground: #000011;
+    --destructive: #ff0000;
+    --destructive-foreground: #000011;
+    --border: #000011;
+    --input: #000011;
+    --ring: #ffffff;
+    --chart-1: #e8e8e8;
+    --chart-2: #e8e8e8;
+    --chart-3: #e8e8e8;
+    --chart-4: #e8e8e8;
+    --chart-5: #e8e8e8;
+  }
 }
 
-body {
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: var(--background);
-  color: var(--text);
-  @apply antialiased;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    @apply antialiased bg-background text-foreground;
+  }
 }
 
 /* Underwater Liquid Light Animations */
@@ -163,6 +212,99 @@ body {
   }
 }
 
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes float-delayed {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes spiral {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes aurora {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes dance {
+  0%,
+  100% {
+    transform: rotate(-5deg) scale(1);
+  }
+  25% {
+    transform: rotate(5deg) scale(1.05);
+  }
+  50% {
+    transform: rotate(-3deg) scale(1.1);
+  }
+  75% {
+    transform: rotate(3deg) scale(1.05);
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 /* Animation Classes */
 .animate-caustic {
   animation: caustic 12s ease-in-out infinite;
@@ -193,27 +335,64 @@ body {
 }
 
 .dancing-bear {
-  animation: dancing-bear 2s ease-in-out infinite;
+  animation: dance 2s ease-in-out infinite;
 }
 
 .liquid-morph {
   animation: liquid-morph 20s ease-in-out infinite;
 }
 
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 4s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+.spiral-animation {
+  animation: spiral 4s ease-in-out infinite;
+}
+
+.breathe-animation {
+  animation: breathe 2s ease-in-out infinite;
+}
+
 /* Component Classes */
 .glassmorphic {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .glow-text {
   text-shadow: 0 0 10px #1a1aff, 0 0 20px #1a1aff, 0 0 30px #1a1aff;
 }
 
+.psychedelic-glow {
+  text-shadow: 0 0 10px #ff3366, 0 0 20px #ff6b35, 0 0 30px #f7931e;
+}
+
 /* Gradient Utilities */
 .bg-gradient-radial {
   background: radial-gradient(circle, var(--tw-gradient-stops));
+}
+
+.tie-dye-bg {
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+.aurora-gradient {
+  background: linear-gradient(45deg, #ff3366, #ff6b35, #f7931e, #ffcc02, #00d4aa);
+  background-size: 300% 300%;
+  animation: aurora 3s ease infinite;
 }
 
 /* Safe Area Handling */
@@ -239,7 +418,12 @@ body {
   .animate-parade,
   .animate-float-particle,
   .liquid-morph,
-  .dancing-bear {
+  .dancing-bear,
+  .animate-float,
+  .animate-float-delayed,
+  .float-animation,
+  .spiral-animation,
+  .breathe-animation {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
@@ -292,19 +476,9 @@ body {
 }
 
 /* Additional utility classes for scan page */
-.tie-dye-bg {
-  background: var(--background);
-}
-
 .groovy-font {
-  font-family: "Inter", sans-serif;
-  font-weight: 700;
-}
-
-.script-font {
-  font-family: "Inter", sans-serif;
-  font-style: italic;
-  font-weight: 400;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .melting-progress {
@@ -313,72 +487,22 @@ body {
 }
 
 .melting-progress::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   animation: shimmer 2s infinite;
 }
 
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-.aurora-gradient {
-  background: linear-gradient(135deg, #1a1aff 0%, #ff3366 100%);
-}
-
+/* Interactive elements */
 .magnetic-button {
   transition: all 0.3s ease;
 }
 
 .magnetic-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(26, 26, 255, 0.3);
-}
-
-/* Additional animations */
-@keyframes spiral-animation {
-  0%, 100% {
-    transform: rotate(0deg) scale(1);
-  }
-  50% {
-    transform: rotate(180deg) scale(1.1);
-  }
-}
-
-@keyframes breathe-animation {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.8;
-  }
-}
-
-@keyframes float-animation {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.spiral-animation {
-  animation: spiral-animation 3s ease-in-out infinite;
-}
-
-.breathe-animation {
-  animation: breathe-animation 2s ease-in-out infinite;
-}
-
-.float-animation {
-  animation: float-animation 3s ease-in-out infinite;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }

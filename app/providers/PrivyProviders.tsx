@@ -1,50 +1,60 @@
-'use client';
+"use client"
 
-import dynamic from 'next/dynamic';
-import { Suspense } from 'react';
-
-// Ultra-minimal loading component to prevent any heavy imports
-const MinimalLoader = () => (
-  <div style={{
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-  }}>
-    <div style={{ textAlign: 'center', color: 'white' }}>
-      <div style={{
-        width: '40px',
-        height: '40px',
-        border: '4px solid rgba(255,255,255,0.3)',
-        borderTop: '4px solid white',
-        borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
-        margin: '0 auto 16px'
-      }}></div>
-      <p>Loading NFA Bears...</p>
-      <style dangerouslySetInnerHTML={{
-        __html: '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }'
-      }} />
-    </div>
-  </div>
-);
-
-// Aggressively lazy-loaded Web3 setup - ONLY loads when actually needed
-const LazyWeb3Setup = dynamic(
-  () => import('./PrivySetup').then(mod => ({ default: mod.PrivySetup })),
-  {
-    ssr: false,
-    loading: () => <MinimalLoader />,
-    // Prevent any imports until user interaction
-    // This is key to fixing the 115s compilation issue
-  }
-);
+import type React from "react"
+import { PrivyProvider } from "@privy-io/react-auth"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { useState } from "react"
+import { Toaster } from "react-hot-toast"
 
 export function PrivyProviders({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: 3,
+            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+            staleTime: 5 * 60 * 1000,
+            gcTime: 10 * 60 * 1000,
+          },
+        },
+      }),
+  )
+
   return (
-    <Suspense fallback={<MinimalLoader />}>
-      <LazyWeb3Setup>{children}</LazyWeb3Setup>
-    </Suspense>
-  );
+    <PrivyProvider
+      appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || "clpuxkbhq05ycl80fwvl8b8tw"}
+      config={{
+        loginMethods: ["email", "google", "twitter", "sms", "wallet"],
+        appearance: {
+          theme: "dark",
+          accentColor: "#ff3366",
+          logo: "/icons/icon-192x192.png",
+          landingHeader: "Welcome to NFA Bears",
+          loginMessage:
+            "Connect to access the member dashboard. Your Miracle SBT can only be claimed in-person at events.",
+          showWalletLoginFirst: false,
+        },
+        embeddedWallets: {
+          createOnLogin: "users-without-wallets",
+        },
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: "rgba(0, 0, 0, 0.8)",
+              color: "#fff",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              backdropFilter: "blur(10px)",
+            },
+          }}
+        />
+      </QueryClientProvider>
+    </PrivyProvider>
+  )
 }

@@ -1,32 +1,26 @@
 "use client"
 
-import React, { createContext, useContext } from "react"
-import { useResponsiveLayout, type LayoutMode, type DetectedLayout } from "@/hooks/useResponsiveLayout"
+import type React from "react"
+import { createContext, useContext } from "react"
+import { useResponsiveLayout } from "@/hooks/useResponsiveLayout"
 
 interface LayoutContextType {
-  mode: LayoutMode
-  detected: DetectedLayout
-  current: DetectedLayout
   isMobile: boolean
+  isTablet: boolean
   isDesktop: boolean
-  setMode: (mode: LayoutMode) => void
 }
 
-const LayoutContext = createContext<LayoutContextType | null>(null)
+const LayoutContext = createContext<LayoutContextType | undefined>(undefined)
 
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
-  const layout = useResponsiveLayout()
-  
-  return (
-    <LayoutContext.Provider value={layout}>
-      {children}
-    </LayoutContext.Provider>
-  )
+  const { isMobile, isTablet, isDesktop } = useResponsiveLayout()
+
+  return <LayoutContext.Provider value={{ isMobile, isTablet, isDesktop }}>{children}</LayoutContext.Provider>
 }
 
 export function useLayout() {
   const context = useContext(LayoutContext)
-  if (!context) {
+  if (context === undefined) {
     throw new Error("useLayout must be used within a LayoutProvider")
   }
   return context

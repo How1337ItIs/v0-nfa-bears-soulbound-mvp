@@ -1,127 +1,111 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { usePrivy } from "@privy-io/react-auth"
 import { useRouter } from "next/navigation"
-import { useUserType } from "@/lib/useUserType"
-import { useLayout } from "@/providers/LayoutProvider"
-import { MobileDashboard } from "@/components/mobile/MobileDashboard"
+import { useEffect } from "react"
 
 export default function DashboardPage() {
-  const { authenticated, ready } = usePrivy()
+  const { authenticated, ready, user } = usePrivy()
   const router = useRouter()
-  const { userType, loading: userTypeLoading, isConnected } = useUserType()
-  const { isMobile } = useLayout()
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  // Redirect based on authentication
-  useEffect(() => {
-    if (mounted && ready && !authenticated) {
+    if (ready && !authenticated) {
       router.push("/")
     }
-  }, [authenticated, ready, mounted, router])
+  }, [ready, authenticated, router])
 
-  // Conditional routing based on user type - only redirect when data is fully loaded
-  useEffect(() => {
-    if (mounted && ready && authenticated && isConnected && !userTypeLoading) {
-      switch (userType) {
-        case "GENESIS_HOLDER":
-          router.push("/dashboard/genesis")
-          break
-        case "SBT_HOLDER":
-          router.push("/dashboard/sbt")
-          break
-        case "NEW_USER":
-          // Keep new users on main dashboard to show onboarding options
-          break
-        default:
-          break
-      }
-    }
-  }, [mounted, ready, authenticated, isConnected, userType, userTypeLoading, router])
-
-  if (!mounted || !ready || userTypeLoading) {
+  if (!ready) {
     return (
-      <div className="min-h-screen flex items-center justify-center tie-dye-bg">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-white/80">Loading your journey...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </div>
     )
   }
 
-  if (!authenticated) return null
-
-  // For mobile users, show the mobile dashboard
-  if (isMobile) {
-    return <MobileDashboard />
+  if (!authenticated) {
+    return null
   }
 
-  // For desktop users, show onboarding options
   return (
-    <div className="min-h-screen tie-dye-bg relative overflow-hidden">
-      <div className="fixed inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-white/10 text-2xl float-animation"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${3 + Math.random() * 2}s`,
-            }}
-          >
-            ♪
-          </div>
-        ))}
-      </div>
-
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-white mb-4">Welcome to the NFA Bears</h1>
-          <p className="text-xl text-white/80 mb-8">Choose your path into the family</p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Genesis Option */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-center border border-white/20">
-            <div className="text-6xl mb-4">🐻</div>
-            <h2 className="text-2xl font-bold text-white mb-4">Genesis Bears</h2>
-            <p className="text-white/80 mb-6">Own a founding member NFT with governance rights and premium benefits.</p>
-            <div className="text-3xl font-bold text-yellow-400 mb-6">$333</div>
-            <button
-              onClick={() => router.push("/mint-genesis")}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200"
-            >
-              Mint Genesis Bear
-            </button>
+    <div className="min-h-screen p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 md:p-8 border border-white/20">
+          <div className="text-center mb-8">
+            <div className="text-6xl mb-4 dancing-bear">🐻</div>
+            <h1 className="text-3xl font-bold text-white mb-2">Welcome to the Family!</h1>
+            <p className="text-white/80">Your NFA Bears Dashboard</p>
           </div>
 
-          {/* SBT Option */}
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 text-center border border-white/20">
-            <div className="text-6xl mb-4">⚡</div>
-            <h2 className="text-2xl font-bold text-white mb-4">Miracle SBT</h2>
-            <p className="text-white/80 mb-6">Get onboarded by scanning a QR code from an existing member.</p>
-            <div className="text-lg text-green-400 mb-6">Invitation Required</div>
-            <button
-              onClick={() => router.push("/scan")}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200"
-            >
-              Scan QR Code
-            </button>
-          </div>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Profile Card */}
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+              <h3 className="text-white font-semibold mb-4 flex items-center">
+                <span className="mr-2">👤</span>
+                Profile
+              </h3>
+              <div className="space-y-2 text-sm">
+                <p className="text-white/80">
+                  Email: <span className="text-white">{user?.email?.address || "Not provided"}</span>
+                </p>
+                <p className="text-white/80">
+                  Wallet:{" "}
+                  <span className="text-white font-mono text-xs">
+                    {user?.wallet?.address
+                      ? `${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`
+                      : "Not connected"}
+                  </span>
+                </p>
+              </div>
+            </div>
 
-        <div className="text-center mt-12">
-          <p className="text-white/60">
-            Already have an NFT? Your dashboard will automatically detect your membership tier.
-          </p>
+            {/* SBT Status */}
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+              <h3 className="text-white font-semibold mb-4 flex items-center">
+                <span className="mr-2">🎫</span>
+                Miracle SBT
+              </h3>
+              <div className="text-center">
+                <div className="text-2xl mb-2">🔒</div>
+                <p className="text-white/80 text-sm">Not minted yet</p>
+                <p className="text-white/60 text-xs mt-2">Scan QR at events to claim</p>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white/5 rounded-lg p-6 border border-white/10">
+              <h3 className="text-white font-semibold mb-4 flex items-center">
+                <span className="mr-2">⚡</span>
+                Quick Actions
+              </h3>
+              <div className="space-y-3">
+                <button
+                  onClick={() => router.push("/scan")}
+                  className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm"
+                >
+                  Scan QR Code
+                </button>
+                <button
+                  onClick={() => router.push("/profile")}
+                  className="w-full py-2 px-4 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors text-sm"
+                >
+                  Edit Profile
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="mt-8 bg-white/5 rounded-lg p-6 border border-white/10">
+            <h3 className="text-white font-semibold mb-4 flex items-center">
+              <span className="mr-2">📈</span>
+              Recent Activity
+            </h3>
+            <div className="text-center py-8">
+              <div className="text-4xl mb-4 opacity-50">🌟</div>
+              <p className="text-white/60">No activity yet</p>
+              <p className="text-white/40 text-sm mt-2">Your journey begins when you mint your first Miracle SBT</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ Transform NFA Bears into a **mobile-first PWA** with a **high-psychedelic "under
 ## 📱 MOBILE-FIRST REQUIREMENTS (PRIORITY 1)
 
 ### App Shell Architecture
-```
+\`\`\`
 Bottom Navigation (4 tabs):
 🏠 Home     📱 Scan     🎪 Dashboard     👤 Profile
 
@@ -23,7 +23,7 @@ Modal System:
 - Full-screen slide-up modals for critical flows
 - Swipe-down to dismiss
 - Background blur when modal active
-```
+\`\`\`
 
 ### Touch Targets & Spacing
 - **Minimum 44px** touch targets (iOS/Android standard)
@@ -33,11 +33,11 @@ Modal System:
 - **Thumb-friendly navigation** at bottom
 
 ### Responsive Typography Scale
-```css
+\`\`\`css
 Mobile:  14px body, 20px h3, 28px h2, 36px h1
 Tablet:  16px body, 24px h3, 32px h2, 40px h1  
 Desktop: 16px body, 24px h3, 36px h2, 48px h1
-```
+\`\`\`
 
 ---
 
@@ -47,7 +47,7 @@ Desktop: 16px body, 24px h3, 36px h2, 48px h1
 **"Oil projector light show underwater"** - Caustic water light patterns + morphing oil film blobs + fish/terrapin motifs swimming through the interface.
 
 ### Color System (EXACT VALUES)
-```css
+\`\`\`css
 --background: #000011     /* Deep space base */
 --primary: #1a1aff       /* Electric blue - main interactive color */
 --accent: #ff3366        /* Rosy red - hot accents only, never glows */
@@ -55,7 +55,7 @@ Desktop: 16px body, 24px h3, 36px h2, 48px h1
 --success: #00ff88       /* Neon green - confirmations */
 --text: #ffffff          /* Pure white */
 --text-muted: rgba(255,255,255,0.7)
-```
+\`\`\`
 
 **Usage Rules**:
 - **Blue (#1a1aff)**: Primary actions, glows, focus states, navigation
@@ -63,7 +63,7 @@ Desktop: 16px body, 24px h3, 36px h2, 48px h1
 - **Yellow (#ffff00)**: Tiny celebration elements only (badges, success sparkles)
 
 ### Background Layer System
-```
+\`\`\`
 Layer 1: Deep Space Base
 - Solid #000011 or subtle radial gradient
 - Anchors the entire composition
@@ -84,7 +84,7 @@ Layer 4: Micro Particles (Optional Enhancement)
 - Small bubble/star particles
 - Very slow vertical drift
 - 8% opacity maximum
-```
+\`\`\`
 
 ---
 
@@ -98,7 +98,7 @@ Create these as **SVG outline graphics**:
 - **13-Point Lightning Bolt**: Exact Grateful Dead iconography (watermarks at 5% opacity)
 
 ### Motif Usage Patterns
-```
+\`\`\`
 Hero Sections:
 - Large fish pair in slow orbital dance behind content
 - Very subtle, 15% opacity maximum
@@ -115,14 +115,14 @@ Empty States:
 Loading States:
 - Fish school gentle swimming animation
 - Bubbles rising effect for longer loads
-```
+\`\`\`
 
 ---
 
 ## 🎨 COMPONENT DESIGN SYSTEM
 
 ### Preserve Existing Classes
-```css
+\`\`\`css
 .glassmorphic {
   /* Keep: backdrop-blur(10px), rgba borders */
   /* Add: subtle scale-tessellation texture on large cards */
@@ -137,10 +137,10 @@ Loading States:
   /* Apply to: background blobs, hero masks, section dividers */
   /* 0.3s for interactive, infinite slow for decorative */
 }
-```
+\`\`\`
 
 ### Button System
-```
+\`\`\`
 Primary Button:
 - Electric blue solid background
 - White text, subtle scale(1.02) on hover
@@ -160,10 +160,10 @@ Critical/Destructive:
 
 Disabled:
 - Lower opacity, remove all effects
-```
+\`\`\`
 
 ### Card/Container System
-```
+\`\`\`
 Standard Card:
 - .glassmorphic base
 - Blue focus ring (2px, #1a1aff)
@@ -179,14 +179,14 @@ Status Cards:
 - Success: Green accent border
 - Warning: Yellow dot indicator  
 - Error: Red flat border (no glow)
-```
+\`\`\`
 
 ---
 
 ## 📋 SPECIFIC SCREEN DESIGNS
 
 ### Mobile Homepage
-```
+\`\`\`
 Background: Full liquid light layer system
 Hero Content:
 - Giant fish pair yin/yang orbital dance (20% opacity)
@@ -199,10 +199,10 @@ Stats Section:
 - 3 glassmorphic cards
 - Terrapin badges for member counts
 - Fish school animation between cards
-```
+\`\`\`
 
 ### Mobile Dashboard  
-```
+\`\`\`
 Navigation: Bottom tab bar with blue active states
 Content: 
 - Card grid with liquid divider strips in gutters
@@ -210,17 +210,17 @@ Content:
 - Action cards with fish pair icons
 - "Hot" items get tiny red dot (flat, no glow)
 - Celebration states get yellow starburst (3% max)
-```
+\`\`\`
 
 ### QR Scanner
-```
+\`\`\`
 Full-screen modal over dimmed liquid background
 Scanner Frame:
 - Blue caustic light edge effect
 - Terrapin corner decorations (subtle)
 - Success: Green bloom animation
 - Error: Flat red underline text
-```
+\`\`\`
 
 ---
 
@@ -239,13 +239,13 @@ Scanner Frame:
 - **Loading**: Fish school gentle swim or terrapin walk cycle
 
 ### Performance Considerations
-```css
+\`\`\`css
 @media (prefers-reduced-motion: reduce) {
   /* Pause morphing animations */
   /* Reduce parallax to zero */
   /* Keep essential UI feedback only */
 }
-```
+\`\`\`
 
 ---
 

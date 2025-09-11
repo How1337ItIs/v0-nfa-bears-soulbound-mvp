@@ -8,7 +8,7 @@
 ## 🎨 Design Language & Brand Identity
 
 ### Color Palette
-```css
+\`\`\`css
 --primary: #ff3366 (hot pink/red - brand color)
 --secondary: #1a1aff (electric blue)
 --accent: #ffff00 (bright yellow)
@@ -16,7 +16,7 @@
 --background: #000011 (deep space blue)
 --text: #ffffff (white)
 --text-muted: rgba(255,255,255,0.7)
-```
+\`\`\`
 
 ### Visual Style
 - **Psychedelic glassmorphic** aesthetic with Grateful Dead parking lot vibes
@@ -115,13 +115,13 @@ Focus on these **mobile-optimized components**:
 8. **`<ShareSheet>`** - Native-style sharing interface
 
 ### Responsive Breakpoints
-```css
+\`\`\`css
 /* Mobile First Approach */
 sm: '640px'   // Large phones, small tablets
 md: '768px'   // Tablets  
 lg: '1024px'  // Laptops
 xl: '1280px'  // Desktops
-```
+\`\`\`
 
 ### Animation & Interactions
 - **Framer Motion** for page transitions
