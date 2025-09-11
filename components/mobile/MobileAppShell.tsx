@@ -43,30 +43,23 @@ export function MobileAppShell({ children }: MobileAppShellProps) {
       {/* Layer 1: Deep Space Base */}
       <div className="absolute inset-0 bg-gradient-radial from-[#000011] via-[#000022] to-[#000011]"></div>
 
-      {/* Layer 2: Caustic Water Light */}
-      <div className="absolute inset-0 opacity-40">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1aff]/20 via-transparent to-[#1a1aff]/10 animate-caustic"></div>
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-[#1a1aff]/15 to-transparent rounded-full animate-drift-slow"></div>
-        <div className="absolute bottom-1/3 right-1/3 w-64 h-64 bg-gradient-radial from-[#1a1aff]/10 to-transparent rounded-full animate-drift-reverse"></div>
-      </div>
+      {/* Layer 2: Psychedelic Oil Projection Background */}
+      <div className="absolute inset-0 oil-projection-bg opacity-40"></div>
 
-      {/* Layer 3: Oil Film Morphing Blobs */}
+      {/* Layer 3: Lava Lamp Blobs */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-1/6 left-1/6 w-80 h-80 bg-gradient-radial from-[#1a1aff]/20 via-[#ff3366]/10 to-transparent rounded-full liquid-morph"></div>
-          <div
-            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-radial from-[#1a1aff]/15 via-transparent to-[#ff3366]/5 rounded-full liquid-morph"
-            style={{ animationDelay: "10s" }}
-          ></div>
-        </div>
+        <div className="absolute top-1/6 left-1/6 w-80 h-80 psychedelic-gradient-1 oil-blob"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 psychedelic-gradient-2 oil-blob-2" style={{ animationDelay: "5s" }}></div>
+        <div className="absolute top-1/2 right-1/6 w-64 h-64 psychedelic-gradient-3 oil-blob-3" style={{ animationDelay: "10s" }}></div>
+        <div className="absolute bottom-1/6 left-1/3 w-72 h-72 psychedelic-gradient-1 oil-blob" style={{ animationDelay: "15s" }}></div>
       </div>
 
-      {/* Layer 4: Micro Particles */}
-      <div className="absolute inset-0 opacity-8">
-        {[...Array(12)].map((_, i) => (
+      {/* Layer 4: Floating Oil Droplets */}
+      <div className="absolute inset-0 opacity-20">
+        {[...Array(20)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-white rounded-full animate-float-particle"
+            className="absolute w-2 h-2 psychedelic-gradient-2 oil-blob-3 animate-float-particle"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -80,35 +73,31 @@ export function MobileAppShell({ children }: MobileAppShellProps) {
       {/* Status Bar Safe Area */}
       <div className="safe-area-top"></div>
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-black/20 backdrop-blur-md border-b border-white/10">
+      {/* Header - Melting Liquid Style */}
+      <header className="sticky top-0 z-50 oil-glassmorphic border-b border-white/10">
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            {/* Fish Pair Logo */}
+            {/* Psychedelic Logo */}
             <div className="relative">
-              <svg width="32" height="32" viewBox="0 0 32 32" className="text-[#1a1aff]">
-                <path
-                  d="M8 16c0-4 2-6 6-6s6 2 6 6-2 6-6 6-6-2-6-6zm10 0c0 4 2 6 6 6s6-2 6-6-2-6-6-6-6 2-6 6z"
-                  fill="currentColor"
-                  opacity="0.7"
-                />
-              </svg>
-              <div className="absolute inset-0 bg-[#1a1aff] rounded-full blur-sm opacity-30 animate-pulse"></div>
+              <div className="w-8 h-8 psychedelic-gradient-1 oil-blob flex items-center justify-center">
+                <span className="text-white text-sm font-bold">🐻</span>
+              </div>
+              <div className="absolute inset-0 psychedelic-gradient-2 oil-blob-2 blur-sm opacity-50 animate-pulse"></div>
             </div>
             <div>
-              <h1 className="text-white font-bold text-lg glow-text">NFA Bears</h1>
-              <p className="text-white/60 text-xs">Not Fade Away</p>
+              <h1 className="text-white font-bold text-lg psychedelic-text">NFA Bears</h1>
+              <p className="text-white/60 text-xs liquid-chrome">Not Fade Away</p>
             </div>
           </div>
 
-          {/* Connection Status */}
+          {/* Connection Status - Oil Blob Style */}
           <div className="flex items-center space-x-2">
             {ready && (
               <div
-                className={`w-2 h-2 rounded-full ${authenticated ? "bg-[#00ff88] animate-pulse" : "bg-[#ff3366]"}`}
+                className={`w-3 h-3 oil-blob-3 ${authenticated ? "psychedelic-gradient-1 animate-pulse" : "psychedelic-gradient-2"}`}
               ></div>
             )}
-            <span className="text-white/80 text-sm">
+            <span className="text-white/80 text-sm liquid-chrome">
               {!ready ? "Loading..." : authenticated ? "Connected" : "Disconnected"}
             </span>
           </div>
@@ -118,8 +107,8 @@ export function MobileAppShell({ children }: MobileAppShellProps) {
       {/* Main Content */}
       <main className="flex-1 pb-20 relative z-10">{children}</main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-xl border-t border-white/10 safe-area-bottom">
+      {/* Bottom Navigation - Melting Liquid Style */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 oil-glassmorphic border-t border-white/10 safe-area-bottom">
         <div className="flex items-center justify-around py-2">
           {navItems.map((item) => {
             const Icon = item.icon
@@ -131,23 +120,23 @@ export function MobileAppShell({ children }: MobileAppShellProps) {
                 key={item.id}
                 onClick={() => handleNavigation(item)}
                 disabled={isDisabled}
-                className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-300 min-w-[60px] ${
+                className={`flex flex-col items-center justify-center p-3 syrupy-button min-w-[60px] ${
                   isActive
-                    ? "bg-[#1a1aff]/30 text-white shadow-lg shadow-[#1a1aff]/25 scale-105"
+                    ? "psychedelic-gradient-1 oil-blob text-white shadow-lg scale-105"
                     : isDisabled
                       ? "text-white/30"
-                      : "text-white/70 hover:text-white hover:bg-white/10"
+                      : "text-white/70 hover:text-white hover:psychedelic-gradient-2 oil-blob-2"
                 }`}
               >
                 <div className="relative">
                   <span className="text-xl mb-1 block">{item.emoji}</span>
                   {isActive && (
-                    <div className="absolute -inset-1 bg-[#1a1aff] rounded-full blur opacity-50 animate-pulse"></div>
+                    <div className="absolute -inset-1 psychedelic-gradient-2 oil-blob-3 blur opacity-50 animate-pulse"></div>
                   )}
                 </div>
-                <span className="text-xs font-medium">{item.label}</span>
+                <span className="text-xs font-medium liquid-chrome">{item.label}</span>
                 {isActive && (
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-[#1a1aff] rounded-full"></div>
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 psychedelic-gradient-3 oil-blob animate-pulse"></div>
                 )}
               </button>
             )

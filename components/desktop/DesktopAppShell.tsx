@@ -53,30 +53,24 @@ export function DesktopAppShell({ children }: DesktopAppShellProps) {
       {/* Background Layers */}
       <div className="absolute inset-0 bg-gradient-radial from-[#000011] via-[#000022] to-[#000011]"></div>
       
-      {/* Caustic Water Light */}
-      <div className="absolute inset-0 opacity-40">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1aff]/20 via-transparent to-[#1a1aff]/10 animate-caustic"></div>
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-radial from-[#1a1aff]/15 to-transparent rounded-full animate-drift-slow"></div>
-        <div className="absolute bottom-1/3 right-1/3 w-64 h-64 bg-gradient-radial from-[#1a1aff]/10 to-transparent rounded-full animate-drift-reverse"></div>
-      </div>
+      {/* Psychedelic Oil Projection Background */}
+      <div className="absolute inset-0 oil-projection-bg opacity-40"></div>
 
-      {/* Oil Film Morphing Blobs */}
+      {/* Lava Lamp Blobs */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-1/6 left-1/6 w-80 h-80 bg-gradient-radial from-[#1a1aff]/20 via-[#ff3366]/10 to-transparent rounded-full liquid-morph"></div>
-          <div
-            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-radial from-[#1a1aff]/15 via-transparent to-[#ff3366]/5 rounded-full liquid-morph"
-            style={{ animationDelay: "10s" }}
-          ></div>
-        </div>
+        <div className="absolute top-1/6 left-1/6 w-80 h-80 psychedelic-gradient-1 oil-blob"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 psychedelic-gradient-2 oil-blob-2" style={{ animationDelay: "5s" }}></div>
+        <div className="absolute top-1/2 right-1/6 w-64 h-64 psychedelic-gradient-3 oil-blob-3" style={{ animationDelay: "10s" }}></div>
+        <div className="absolute bottom-1/6 left-1/3 w-72 h-72 psychedelic-gradient-1 oil-blob" style={{ animationDelay: "15s" }}></div>
+        <div className="absolute top-1/3 left-1/2 w-56 h-56 psychedelic-gradient-2 oil-blob-2" style={{ animationDelay: "20s" }}></div>
       </div>
 
-      {/* Micro Particles */}
-      <div className="absolute inset-0 opacity-8">
-        {[...Array(16)].map((_, i) => (
+      {/* Floating Oil Droplets */}
+      <div className="absolute inset-0 opacity-20">
+        {[...Array(24)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-white rounded-full animate-float-particle"
+            className="absolute w-2 h-2 psychedelic-gradient-2 oil-blob-3 animate-float-particle"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -87,29 +81,25 @@ export function DesktopAppShell({ children }: DesktopAppShellProps) {
         ))}
       </div>
 
-      {/* Desktop Header */}
-      <header className="sticky top-0 z-50 bg-black/30 backdrop-blur-xl border-b border-white/10">
+      {/* Desktop Header - Melting Liquid Style */}
+      <header className="sticky top-0 z-50 oil-glassmorphic border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo & Brand */}
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <svg width="40" height="40" viewBox="0 0 40 40" className="text-[#1a1aff]">
-                  <path
-                    d="M10 20c0-5 2.5-7.5 7.5-7.5s7.5 2.5 7.5 7.5-2.5 7.5-7.5 7.5S10 25 10 20zm15 0c0 5 2.5 7.5 7.5 7.5s7.5-2.5 7.5-7.5-2.5-7.5-7.5-7.5S25 15 25 20z"
-                    fill="currentColor"
-                    opacity="0.7"
-                  />
-                </svg>
-                <div className="absolute inset-0 bg-[#1a1aff] rounded-full blur-sm opacity-30 animate-pulse"></div>
+                <div className="w-10 h-10 psychedelic-gradient-1 oil-blob flex items-center justify-center">
+                  <span className="text-white text-lg font-bold">🐻</span>
+                </div>
+                <div className="absolute inset-0 psychedelic-gradient-2 oil-blob-2 blur-sm opacity-50 animate-pulse"></div>
               </div>
               <div>
-                <h1 className="text-white font-bold text-xl glow-text">NFA Bears</h1>
-                <p className="text-white/60 text-sm">Not Fade Away</p>
+                <h1 className="text-white font-bold text-xl psychedelic-text">NFA Bears</h1>
+                <p className="text-white/60 text-sm liquid-chrome">Not Fade Away</p>
               </div>
             </div>
 
-            {/* Navigation */}
+            {/* Navigation - Syrupy Buttons */}
             <nav className="flex items-center space-x-1">
               {navItems.map((item) => {
                 const Icon = item.icon
@@ -121,16 +111,16 @@ export function DesktopAppShell({ children }: DesktopAppShellProps) {
                     key={item.id}
                     onClick={() => handleNavigation(item)}
                     disabled={isDisabled}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                    className={`flex items-center space-x-2 px-4 py-2 syrupy-button ${
                       isActive
-                        ? "bg-[#1a1aff]/30 text-white shadow-lg shadow-[#1a1aff]/25"
+                        ? "psychedelic-gradient-1 oil-blob text-white shadow-lg"
                         : isDisabled
                           ? "text-white/30"
-                          : "text-white/70 hover:text-white hover:bg-white/10"
+                          : "text-white/70 hover:text-white hover:psychedelic-gradient-2 oil-blob-2"
                     }`}
                   >
                     <span className="text-lg">{item.emoji}</span>
-                    <span className="text-sm font-medium">{item.label}</span>
+                    <span className="text-sm font-medium liquid-chrome">{item.label}</span>
                   </button>
                 )
               })}
@@ -138,12 +128,12 @@ export function DesktopAppShell({ children }: DesktopAppShellProps) {
 
             {/* Right Side - Auth & Layout Toggle */}
             <div className="flex items-center space-x-4">
-              {/* Layout Toggle */}
-              <div className="flex items-center space-x-2 bg-white/10 rounded-lg p-1">
+              {/* Layout Toggle - Oil Blob Style */}
+              <div className="flex items-center space-x-2 oil-glassmorphic oil-blob-2 p-1">
                 <button
                   onClick={() => setMode("desktop")}
-                  className={`p-2 rounded transition-all ${
-                    mode === "desktop" ? "bg-[#1a1aff]/50 text-white" : "text-white/60 hover:text-white"
+                  className={`p-2 syrupy-button ${
+                    mode === "desktop" ? "psychedelic-gradient-1 oil-blob text-white" : "text-white/60 hover:text-white hover:psychedelic-gradient-2 oil-blob-2"
                   }`}
                   title="Desktop Mode"
                 >
@@ -151,17 +141,17 @@ export function DesktopAppShell({ children }: DesktopAppShellProps) {
                 </button>
                 <button
                   onClick={() => setMode("auto")}
-                  className={`p-2 rounded transition-all ${
-                    mode === "auto" ? "bg-[#1a1aff]/50 text-white" : "text-white/60 hover:text-white"
+                  className={`p-2 syrupy-button ${
+                    mode === "auto" ? "psychedelic-gradient-1 oil-blob text-white" : "text-white/60 hover:text-white hover:psychedelic-gradient-2 oil-blob-2"
                   }`}
                   title="Auto Detect"
                 >
-                  Auto
+                  <span className="liquid-chrome">Auto</span>
                 </button>
                 <button
                   onClick={() => setMode("mobile")}
-                  className={`p-2 rounded transition-all ${
-                    mode === "mobile" ? "bg-[#1a1aff]/50 text-white" : "text-white/60 hover:text-white"
+                  className={`p-2 syrupy-button ${
+                    mode === "mobile" ? "psychedelic-gradient-1 oil-blob text-white" : "text-white/60 hover:text-white hover:psychedelic-gradient-2 oil-blob-2"
                   }`}
                   title="Mobile Mode"
                 >
@@ -174,23 +164,23 @@ export function DesktopAppShell({ children }: DesktopAppShellProps) {
                 {ready && (
                   <>
                     <div
-                      className={`w-2 h-2 rounded-full ${
-                        authenticated ? "bg-[#00ff88] animate-pulse" : "bg-[#ff3366]"
+                      className={`w-3 h-3 oil-blob-3 ${
+                        authenticated ? "psychedelic-gradient-1 animate-pulse" : "psychedelic-gradient-2"
                       }`}
                     ></div>
                     {!authenticated ? (
                       <button
                         onClick={handleConnect}
-                        className="px-4 py-2 bg-[#1a1aff]/30 border border-[#1a1aff]/50 text-white text-sm rounded-lg hover:bg-[#1a1aff]/50 transition-all"
+                        className="px-4 py-2 psychedelic-gradient-1 oil-blob text-white text-sm syrupy-button"
                       >
-                        Connect Wallet
+                        <span className="liquid-chrome">Connect Wallet</span>
                       </button>
                     ) : (
-                      <span className="text-white/80 text-sm">Connected</span>
+                      <span className="text-white/80 text-sm liquid-chrome">Connected</span>
                     )}
                   </>
                 )}
-                {!ready && <span className="text-white/60 text-sm">Loading...</span>}
+                {!ready && <span className="text-white/60 text-sm liquid-chrome">Loading...</span>}
               </div>
             </div>
           </div>

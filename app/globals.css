@@ -382,3 +382,347 @@ body {
 .float-animation {
   animation: float-animation 3s ease-in-out infinite;
 }
+
+/* ========================================
+   PSYCHEDELIC OIL PROJECTION LIGHT SHOW
+   ======================================== */
+
+/* Oil Slick Color Shifting */
+@keyframes oil-slick-shift {
+  0% {
+    filter: hue-rotate(0deg) saturate(1.5) contrast(1.2);
+    background-position: 0% 50%;
+  }
+  25% {
+    filter: hue-rotate(90deg) saturate(2) contrast(1.4);
+    background-position: 100% 50%;
+  }
+  50% {
+    filter: hue-rotate(180deg) saturate(1.8) contrast(1.3);
+    background-position: 50% 100%;
+  }
+  75% {
+    filter: hue-rotate(270deg) saturate(2.2) contrast(1.5);
+    background-position: 50% 0%;
+  }
+  100% {
+    filter: hue-rotate(360deg) saturate(1.5) contrast(1.2);
+    background-position: 0% 50%;
+  }
+}
+
+/* Viscous Dripping Animation */
+@keyframes viscous-drip {
+  0% {
+    transform: translateY(0) scaleY(1);
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  25% {
+    transform: translateY(5px) scaleY(1.1);
+    border-radius: 40% 60% 70% 30% / 50% 60% 30% 60%;
+  }
+  50% {
+    transform: translateY(10px) scaleY(0.9);
+    border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%;
+  }
+  75% {
+    transform: translateY(5px) scaleY(1.05);
+    border-radius: 60% 40% 60% 30% / 70% 30% 60% 50%;
+  }
+  100% {
+    transform: translateY(0) scaleY(1);
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+}
+
+/* Lava Lamp Blob Morphing */
+@keyframes lava-blob {
+  0% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: rotate(0deg) scale(1);
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    transform: rotate(72deg) scale(1.1);
+    filter: hue-rotate(72deg);
+  }
+  40% {
+    border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%;
+    transform: rotate(144deg) scale(0.9);
+    filter: hue-rotate(144deg);
+  }
+  60% {
+    border-radius: 60% 40% 60% 30% / 70% 30% 60% 50%;
+    transform: rotate(216deg) scale(1.05);
+    filter: hue-rotate(216deg);
+  }
+  80% {
+    border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%;
+    transform: rotate(288deg) scale(0.95);
+    filter: hue-rotate(288deg);
+  }
+  100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: rotate(360deg) scale(1);
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* Melting Button Effect */
+@keyframes melt-button {
+  0% {
+    transform: scale(1) rotate(0deg);
+    border-radius: 12px;
+  }
+  50% {
+    transform: scale(1.05) rotate(1deg);
+    border-radius: 20px 8px 16px 12px;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    border-radius: 12px;
+  }
+}
+
+/* Kaleidoscope Color Wheel */
+@keyframes kaleidoscope {
+  0% {
+    background: conic-gradient(from 0deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000, #ff0080);
+    transform: rotate(0deg);
+  }
+  100% {
+    background: conic-gradient(from 360deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000, #ff0080);
+    transform: rotate(360deg);
+  }
+}
+
+/* Psychedelic Text Shimmer */
+@keyframes psychedelic-shimmer {
+  0% {
+    background-position: -200% center;
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    background-position: 200% center;
+    filter: hue-rotate(180deg);
+  }
+  100% {
+    background-position: -200% center;
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* Thick Syrupy Movement */
+@keyframes syrupy-flow {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+    filter: blur(0px);
+  }
+  25% {
+    transform: translateX(10px) translateY(-5px) rotate(1deg);
+    filter: blur(0.5px);
+  }
+  50% {
+    transform: translateX(-5px) translateY(10px) rotate(-1deg);
+    filter: blur(0px);
+  }
+  75% {
+    transform: translateX(-10px) translateY(-8px) rotate(0.5deg);
+    filter: blur(0.3px);
+  }
+  100% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+    filter: blur(0px);
+  }
+}
+
+/* Oil Projection Background */
+@keyframes oil-projection {
+  0% {
+    background: radial-gradient(circle at 20% 20%, rgba(255, 0, 128, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(128, 0, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(0, 128, 255, 0.3) 0%, transparent 50%);
+    transform: scale(1) rotate(0deg);
+  }
+  33% {
+    background: radial-gradient(circle at 60% 40%, rgba(0, 255, 128, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 0, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 128, 0, 0.3) 0%, transparent 50%);
+    transform: scale(1.1) rotate(120deg);
+  }
+  66% {
+    background: radial-gradient(circle at 80% 60%, rgba(255, 0, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(0, 255, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 60% 80%, rgba(255, 128, 128, 0.3) 0%, transparent 50%);
+    transform: scale(0.9) rotate(240deg);
+  }
+  100% {
+    background: radial-gradient(circle at 20% 20%, rgba(255, 0, 128, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(128, 0, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(0, 128, 255, 0.3) 0%, transparent 50%);
+    transform: scale(1) rotate(360deg);
+  }
+}
+
+/* Animation Classes */
+.oil-slick-shift {
+  animation: oil-slick-shift 8s ease-in-out infinite;
+}
+
+.viscous-drip {
+  animation: viscous-drip 6s ease-in-out infinite;
+}
+
+.lava-blob {
+  animation: lava-blob 12s ease-in-out infinite;
+}
+
+.melt-button {
+  animation: melt-button 0.3s ease-in-out;
+}
+
+.kaleidoscope {
+  animation: kaleidoscope 4s linear infinite;
+}
+
+.psychedelic-shimmer {
+  background: linear-gradient(90deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000, #ff0080);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: psychedelic-shimmer 3s ease-in-out infinite;
+}
+
+.syrupy-flow {
+  animation: syrupy-flow 10s ease-in-out infinite;
+}
+
+.oil-projection-bg {
+  animation: oil-projection 15s ease-in-out infinite;
+}
+
+/* Psychedelic Gradient Utilities */
+.psychedelic-gradient-1 {
+  background: linear-gradient(135deg, #ff0080 0%, #8000ff 25%, #0080ff 50%, #00ff80 75%, #ffff00 100%);
+  background-size: 400% 400%;
+  animation: oil-slick-shift 8s ease-in-out infinite;
+}
+
+.psychedelic-gradient-2 {
+  background: linear-gradient(45deg, #ff3366 0%, #ff6600 20%, #ffcc00 40%, #66ff00 60%, #0066ff 80%, #cc00ff 100%);
+  background-size: 300% 300%;
+  animation: oil-slick-shift 6s ease-in-out infinite;
+}
+
+.psychedelic-gradient-3 {
+  background: conic-gradient(from 0deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000, #ff0080);
+  animation: kaleidoscope 4s linear infinite;
+}
+
+/* Oil Blob Shapes */
+.oil-blob {
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  animation: lava-blob 12s ease-in-out infinite;
+}
+
+.oil-blob-2 {
+  border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  animation: lava-blob 10s ease-in-out infinite reverse;
+}
+
+.oil-blob-3 {
+  border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%;
+  animation: lava-blob 14s ease-in-out infinite;
+}
+
+/* Liquid Chrome Effects */
+.liquid-chrome {
+  background: linear-gradient(45deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: oil-slick-shift 4s ease-in-out infinite;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* Melting Card Effect */
+.melting-card {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.melting-card:hover {
+  transform: scale(1.02) rotate(0.5deg);
+  border-radius: 25px 15px 20px 18px;
+  filter: hue-rotate(10deg) saturate(1.2);
+}
+
+/* Thick Syrupy Buttons */
+.syrupy-button {
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.syrupy-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+}
+
+.syrupy-button:hover::before {
+  left: 100%;
+}
+
+.syrupy-button:hover {
+  transform: translateY(-3px) scale(1.05);
+  filter: hue-rotate(15deg) saturate(1.3);
+  box-shadow: 0 10px 30px rgba(255, 0, 128, 0.3);
+}
+
+/* Oil Slick Glassmorphism */
+.oil-glassmorphic {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: oil-slick-shift 10s ease-in-out infinite;
+}
+
+/* Psychedelic Text Effects */
+.psychedelic-text {
+  background: linear-gradient(45deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000, #ff0080);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: oil-slick-shift 6s ease-in-out infinite;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+/* Reduced Motion Support for Psychedelic Effects */
+@media (prefers-reduced-motion: reduce) {
+  .oil-slick-shift,
+  .viscous-drip,
+  .lava-blob,
+  .kaleidoscope,
+  .psychedelic-shimmer,
+  .syrupy-flow,
+  .oil-projection-bg,
+  .psychedelic-gradient-1,
+  .psychedelic-gradient-2,
+  .psychedelic-gradient-3,
+  .oil-blob,
+  .oil-blob-2,
+  .oil-blob-3 {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

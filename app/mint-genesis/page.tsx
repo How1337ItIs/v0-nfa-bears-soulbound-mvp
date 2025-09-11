@@ -110,19 +110,30 @@ export default function MintGenesisPage() {
   const isWrongNetwork = isConnected && chainId !== BERACHAIN_TESTNET_ID;
 
   return (
-    <div className="min-h-screen tie-dye-bg p-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Network Warning */}
+    <div className="min-h-screen tie-dye-bg p-4 relative overflow-hidden">
+      {/* Psychedelic Oil Projection Background */}
+      <div className="absolute inset-0 oil-projection-bg opacity-30"></div>
+      
+      {/* Floating Lava Lamp Blobs */}
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 psychedelic-gradient-1 oil-blob"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 psychedelic-gradient-2 oil-blob-2" style={{ animationDelay: "5s" }}></div>
+        <div className="absolute top-1/2 right-1/3 w-64 h-64 psychedelic-gradient-3 oil-blob-3" style={{ animationDelay: "10s" }}></div>
+        <div className="absolute bottom-1/4 left-1/3 w-72 h-72 psychedelic-gradient-1 oil-blob" style={{ animationDelay: "15s" }}></div>
+      </div>
+
+      <div className="max-w-2xl mx-auto relative z-10">
+        {/* Network Warning - Oil Slick Style */}
         {isWrongNetwork && (
-          <div className="mb-6 p-4 bg-red-500/90 border border-red-600 rounded-xl">
+          <div className="mb-6 p-4 psychedelic-gradient-2 oil-blob-2 border border-white/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white font-semibold">⚠️ Wrong Network</p>
-                <p className="text-red-100 text-sm">Please switch to Berachain testnet to mint Genesis Bears</p>
+                <p className="text-white font-semibold liquid-chrome">⚠️ Wrong Network</p>
+                <p className="text-white/80 text-sm">Please switch to Berachain testnet to mint Genesis Bears</p>
               </div>
               <button
                 onClick={() => switchChainAsync({ chainId: BERACHAIN_TESTNET_ID }).catch(console.error)}
-                className="bg-white text-red-600 px-4 py-2 rounded-lg font-semibold hover:bg-red-50 transition-colors"
+                className="bg-white text-red-600 px-4 py-2 rounded-lg font-semibold hover:bg-red-50 transition-colors syrupy-button"
               >
                 Switch Network
               </button>
@@ -130,84 +141,107 @@ export default function MintGenesisPage() {
           </div>
         )}
 
-
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl shadow-lg p-8 border border-white/20">
-          <h1 className="text-3xl font-bold text-white mb-6">🐻 Genesis Bears Mint</h1>
+        {/* Main Mint Card - Lava Lamp Style */}
+        <div className="oil-glassmorphic oil-blob-2 shadow-lg p-8 relative overflow-hidden">
+          {/* Kaleidoscope Background */}
+          <div className="absolute inset-0 kaleidoscope opacity-10"></div>
           
-          <div className="space-y-6">
+          <h1 className="text-3xl font-bold text-white mb-6 psychedelic-text relative z-10">🐻 Genesis Bears Mint</h1>
+          
+          <div className="space-y-6 relative z-10">
+            {/* Wallet Address - Oil Blob Style */}
             <div>
-              <label className="block text-sm font-medium text-white/90 mb-2">
+              <label className="block text-sm font-medium text-white/90 mb-2 liquid-chrome">
                 Wallet Address
               </label>
-              <p className="font-mono text-sm bg-black/20 text-white p-3 rounded border border-white/20">
-                {address || 'Not connected'}
-              </p>
+              <div className="psychedelic-gradient-1 oil-blob-3 p-3">
+                <p className="font-mono text-sm text-white">
+                  {address || 'Not connected'}
+                </p>
+              </div>
             </div>
 
+            {/* Contract Address - Oil Blob Style */}
             <div>
-              <label className="block text-sm font-medium text-white/90 mb-2">
+              <label className="block text-sm font-medium text-white/90 mb-2 liquid-chrome">
                 Genesis Bears Contract (Berachain Testnet)
               </label>
-              <p className="font-mono text-sm bg-black/20 text-white p-3 rounded border border-white/20">
-                {GENESIS_BEARS_ADDRESS || 'Not configured'}
-              </p>
+              <div className="psychedelic-gradient-2 oil-blob p-3">
+                <p className="font-mono text-sm text-white">
+                  {GENESIS_BEARS_ADDRESS || 'Not configured'}
+                </p>
+              </div>
             </div>
 
+            {/* Quantity Selector - Melting Style */}
             <div>
-              <label className="block text-sm font-medium text-white/90 mb-2">
+              <label className="block text-sm font-medium text-white/90 mb-2 liquid-chrome">
                 Quantity (max 3 per transaction, 5 per wallet)
               </label>
-              <input
-                type="number"
-                min="1"
-                max="3"
-                value={quantity}
-                onChange={(e) => setQuantity(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-white/90 text-gray-900 placeholder-gray-500 border border-white/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white"
-              />
+              <div className="relative">
+                <input
+                  type="number"
+                  min="1"
+                  max="3"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
+                  className="w-full px-3 py-2 bg-white/90 text-gray-900 placeholder-gray-500 border border-white/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white syrupy-button"
+                />
+                {/* Floating Oil Droplets around input */}
+                <div className="absolute -top-2 -right-2 w-3 h-3 psychedelic-gradient-3 oil-blob-2 opacity-60"></div>
+                <div className="absolute -bottom-2 -left-2 w-2 h-2 psychedelic-gradient-1 oil-blob-3 opacity-50"></div>
+              </div>
             </div>
 
+            {/* Mint Button - Psychedelic Style */}
             <button
               onClick={mintGenesisBears}
               disabled={isMintingLocal || isPending || isConfirming || !address || isWrongNetwork}
-              className="w-full bg-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full psychedelic-gradient-1 oil-blob text-white font-bold py-3 px-6 syrupy-button disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
             >
               {isMintingLocal || isPending || isConfirming ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  {isMintingLocal ? 'Preparing mint...' : isPending ? 'Confirming...' : 'Waiting for confirmation...'}
+                  <span className="liquid-chrome">
+                    {isMintingLocal ? 'Preparing mint...' : isPending ? 'Confirming...' : 'Waiting for confirmation...'}
+                  </span>
                 </div>
               ) : (
-                `Mint ${quantity} Genesis Bear${quantity !== 1 ? 's' : ''} (FREE on Testnet)`
+                <span className="liquid-chrome">
+                  `Mint ${quantity} Genesis Bear${quantity !== 1 ? 's' : ''} (FREE on Testnet)`
+                </span>
               )}
             </button>
 
+            {/* Error State - Trippy Morphing Style */}
             {error && (
-              <div className="p-4 bg-red-500/20 border border-red-400 rounded-lg">
-                <p className="text-red-300 font-semibold">Transaction Failed</p>
-                <p className="text-red-200 text-sm">{error.message}</p>
+              <div className="p-4 psychedelic-gradient-2 oil-blob-2 border border-white/20">
+                <p className="text-white font-semibold liquid-chrome">Transaction Failed</p>
+                <p className="text-white/80 text-sm">{error.message}</p>
               </div>
             )}
 
+            {/* Success State - Psychedelic Style */}
             {hash && (
-              <div className="p-4 bg-green-500/20 border border-green-400 rounded-lg">
-                <p className="text-green-300 font-semibold">Transaction Submitted!</p>
-                <p className="text-green-200 text-sm">
+              <div className="p-4 psychedelic-gradient-1 oil-blob-3 border border-white/20">
+                <p className="text-white font-semibold liquid-chrome">Transaction Submitted!</p>
+                <p className="text-white/80 text-sm">
                   Hash: <span className="font-mono break-all">{hash}</span>
                 </p>
-                <p className="text-green-200 text-sm mt-2">
-                  Check <a href={`https://bepolia.beratrail.io/tx/${hash}`} target="_blank" rel="noopener noreferrer" className="underline hover:text-green-100">Berachain Explorer</a>
+                <p className="text-white/80 text-sm mt-2">
+                  Check <a href={`https://bepolia.beratrail.io/tx/${hash}`} target="_blank" rel="noopener noreferrer" className="underline hover:text-white liquid-chrome">Berachain Explorer</a>
                 </p>
               </div>
             )}
           </div>
 
-          <div className="mt-8 p-4 bg-blue-500/20 border border-blue-400 rounded-lg">
-            <h3 className="font-semibold text-blue-200 mb-2">📋 Instructions:</h3>
-            <ol className="text-blue-100 text-sm space-y-1 list-decimal list-inside">
+          {/* Instructions - Oil Slick Style */}
+          <div className="mt-8 p-4 psychedelic-gradient-3 oil-blob border border-white/20 relative z-10">
+            <h3 className="font-semibold text-white mb-2 liquid-chrome">📋 Instructions:</h3>
+            <ol className="text-white/80 text-sm space-y-1 list-decimal list-inside">
               <li>Connect your wallet</li>
               <li>Switch to Berachain testnet (will auto-prompt)</li>
-              <li>Get testnet BERA from <a href="https://bepolia.faucet.berachain.com/" target="_blank" rel="noopener noreferrer" className="text-blue-300 underline hover:text-blue-200">Bepolia Faucet</a></li>
+              <li>Get testnet BERA from <a href="https://bepolia.faucet.berachain.com/" target="_blank" rel="noopener noreferrer" className="text-white underline hover:text-white/80 liquid-chrome">Bepolia Faucet</a></li>
               <li>Choose quantity (1-3 bears per transaction)</li>
               <li>Click "Mint Genesis Bears" and approve transaction</li>
               <li>Wait for confirmation - you'll become a Genesis holder!</li>
