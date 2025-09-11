@@ -56,11 +56,11 @@ export default function VendorPage() {
         if (hasMembership) {
           toast.success('Valid membership found!');
         } else {
-          toast.error('No membership found');
+          toast.error('Can\'t hear nothing, man - no membership found');
         }
       } catch (error) {
         setHasSBT(false);
-        toast.error('Failed to verify membership');
+        toast.error('We\'re gonna fix it! Membership verification temporarily down');
       } finally {
         setIsChecking(false);
       }

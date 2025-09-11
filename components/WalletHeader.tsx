@@ -33,7 +33,7 @@ export default function WalletHeader() {
     const activeWallet = wallets.find(wallet => wallet.address === address);
     
     if (!activeWallet) {
-      toast.error('No active wallet found');
+      toast.error('There\'s not much coming out of those monitors - no active wallet found');
       return;
     }
 
@@ -42,11 +42,11 @@ export default function WalletHeader() {
       toast.success('✅ Switched to Berachain Bepolia testnet');
     } catch (switchError: any) {      
       if (switchError?.code === 4001) {
-        toast.error('🚫 Network switch rejected');
+        toast.error('🚫 It\'s like he wants to show us who\'s boss - network switch rejected');
       } else if (switchError?.message?.includes('not configured') || switchError?.message?.includes('not supported')) {
-        toast.error('⚠️ Berachain Bepolia not supported by your wallet');
+        toast.error('⚠️ You can\'t play electrical instruments in the rain - wrong network environment');
       } else {
-        toast.error('⚠️ Unable to switch networks');
+        toast.error('⚠️ The electricity wasn\'t grounded - network connection failed');
       }
     }
   };

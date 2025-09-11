@@ -31,23 +31,30 @@ export function DashboardHeader({ daysOnBus }: DashboardHeaderProps) {
   const genesisBears = tokenIds.map(id => parseInt(id))
   const votingPower = balance
   
-  const mockUserData = {
+  // Get real SBT mint date from transaction hash if available
+  const getSBTMintDate = () => {
+    // This would ideally come from indexing the blockchain or storing mint dates
+    // For now, we'll use a placeholder that indicates it's from real SBT data
+    return hasMinted ? "Real SBT Verified" : "Pending Verification";
+  };
+
+  const userData = {
     membershipType,
     genesisBears,
     votingPower,
-    poatCount: 7, // TODO: Implement POAT tracking
-    streetTeamRank: "Silver", // TODO: Implement referral tracking  
-    referralCount: 28, // TODO: Implement referral tracking
-    discountsSaved: 143, // TODO: Implement discount tracking
-    verificationDate: "Jan 2024", // TODO: Get from SBT mint date
+    poatCount: 0, // Start at 0, will be implemented when POAT system is built
+    streetTeamRank: isHolder ? "Genesis" : hasMinted ? "Member" : "Unverified",
+    referralCount: 0, // Start at 0, will track real onboarding data
+    discountsSaved: 0, // Start at 0, will track real vendor usage
+    verificationDate: getSBTMintDate(),
   }
 
   const getMembershipDisplay = () => {
-    switch (mockUserData.membershipType) {
+    switch (userData.membershipType) {
       case "genesis":
         return {
           title: "Genesis Bear Holder",
-          subtitle: `Bears #${mockUserData.genesisBears.join(", #")}`,
+          subtitle: `Bears #${userData.genesisBears.join(", #")}`,
           benefits: "20% Vendor Discounts • DAO Voting Power • Can Miracle Others",
           badge: "OG Deadhead",
           theme: "from-yellow-500/20 to-purple-500/20 border-yellow-500/30",
@@ -55,7 +62,7 @@ export function DashboardHeader({ daysOnBus }: DashboardHeaderProps) {
       case "miracle":
         return {
           title: "Miracle SBT Member",
-          subtitle: `Verified ${mockUserData.verificationDate}`,
+          subtitle: `Verified ${userData.verificationDate}`,
           benefits: "10% Vendor Discounts • Community Access",
           badge: "Verified Member",
           theme: "from-blue-500/20 to-green-500/20 border-blue-500/30",
@@ -105,7 +112,7 @@ export function DashboardHeader({ daysOnBus }: DashboardHeaderProps) {
           <div className={`bg-gradient-to-r ${membershipInfo.theme} rounded-2xl p-4 mb-4`}>
             <div className="flex items-center justify-center gap-2 mb-2">
               <Badge className="aurora-gradient border-0 text-white">{membershipInfo.badge}</Badge>
-              {mockUserData.membershipType === "genesis" && <div className="text-xl dancing-bear">👑</div>}
+              {userData.membershipType === "genesis" && <div className="text-xl dancing-bear">👑</div>}
             </div>
             <h3 className="groovy-font text-xl text-white mb-1">{membershipInfo.title}</h3>
             <p className="text-white/80 text-sm mb-2">{membershipInfo.subtitle}</p>
@@ -133,20 +140,20 @@ export function DashboardHeader({ daysOnBus }: DashboardHeaderProps) {
               <div className="text-center">
                 <div className="text-6xl mb-4 spiral-animation">🎭</div>
                 <h3 className="groovy-font text-2xl mb-2 text-red-400">
-                  {mockUserData.membershipType === "genesis" ? "Genesis Bear Token" : "Miracle SBT"}
+                  {userData.membershipType === "genesis" ? "Genesis Bear Token" : "Miracle SBT"}
                 </h3>
                 <p className="text-white/80 mb-2">
-                  {mockUserData.membershipType === "genesis"
-                    ? `${mockUserData.genesisBears.length} Bears Owned`
+                  {userData.membershipType === "genesis"
+                    ? `${userData.genesisBears.length} Bears Owned`
                     : "Community Member"}
                 </p>
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-2 text-xs text-white/60 mb-4">
-                  <div>POATs: {mockUserData.poatCount}</div>
-                  <div>Rank: {mockUserData.streetTeamRank}</div>
-                  <div>Referrals: {mockUserData.referralCount}</div>
-                  <div>Saved: ${mockUserData.discountsSaved}</div>
+                  <div>POATs: {userData.poatCount}</div>
+                  <div>Rank: {userData.streetTeamRank}</div>
+                  <div>Referrals: {userData.referralCount}</div>
+                  <div>Saved: ${userData.discountsSaved}</div>
                 </div>
 
                 <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
@@ -162,13 +169,13 @@ export function DashboardHeader({ daysOnBus }: DashboardHeaderProps) {
               <div className="text-center">
                 <div className="w-32 h-32 mx-auto mb-4 bg-white rounded-lg flex items-center justify-center spiral-animation">
                   <div className="text-black text-xs font-bold">
-                    {mockUserData.membershipType === "genesis" ? "GENESIS QR" : "MEMBER QR"}
+                    {userData.membershipType === "genesis" ? "GENESIS QR" : "MEMBER QR"}
                   </div>
                 </div>
                 <p className="text-sm text-white/80 mb-2">
-                  {mockUserData.membershipType === "genesis" ? "20% Discount" : "10% Discount"}
+                  {userData.membershipType === "genesis" ? "20% Discount" : "10% Discount"}
                 </p>
-                <p className="text-xs text-white/60">Member since: {mockUserData.verificationDate}</p>
+                <p className="text-xs text-white/60">Member since: {userData.verificationDate}</p>
                 <p className="text-xs text-white/40 mt-2 font-mono">{user?.wallet?.address || "0x1234...5678"}</p>
 
                 {/* Blockchain Status */}

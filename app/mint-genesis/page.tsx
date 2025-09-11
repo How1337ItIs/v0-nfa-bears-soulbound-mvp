@@ -66,13 +66,13 @@ export default function MintGenesisPage() {
       
       // Handle specific error types
       if (error?.code === 4001) {
-        toast.error('🚫 Transaction was rejected');
+        toast.error('🚫 Looks like you changed your mind - that\'s cool, we\'ll get everything just exactly perfect when you\'re ready');
       } else if (error?.message?.includes('Chain not configured')) {
-        toast.error('⚠️ Berachain Bepolia not configured in your wallet');
+        toast.error('⚠️ Our crack equipment team needs Berachain Bepolia to get everything just exactly perfect!');
       } else if (error?.message?.includes('User rejected')) {
-        toast.error('🚫 Network switch was rejected');
+        toast.error('🚫 Come on, Bear, get it together! Network switch rejected.');
       } else {
-        toast.error(`Minting failed: ${error.message || 'Unknown error'}`);
+        toast.error(`Things are really weird up here: ${error.message || 'Beyond the pale, man'}`);
       }
       throw error;
     }
@@ -82,12 +82,12 @@ export default function MintGenesisPage() {
 
   const mintGenesisBears = async () => {
     if (!isConnected || !address) {
-      toast.error('Please connect your wallet first');
+      toast.error('Alright, alright... you don\'t have to scream at us - connect your wallet first!');
       return;
     }
 
     if (!GENESIS_BEARS_ADDRESS) {
-      toast.error('Genesis Bears contract not configured');
+      toast.error('We lost the keys to the wardrobe - Genesis Bears contract not configured');
       return;
     }
 

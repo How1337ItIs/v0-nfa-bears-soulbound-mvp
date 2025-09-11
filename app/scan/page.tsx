@@ -29,7 +29,7 @@ export default function ScanPage() {
           handleMintWithLocation(decodedText, position);
         },
         (error) => {
-          toast.error('Location access required for venue verification');
+          toast.error('Might want to watch out - we need your location for this to work');
           // Continue without location for development
           handleMintWithLocation(decodedText, null);
         },
@@ -48,7 +48,7 @@ export default function ScanPage() {
   // Handle minting with location verification
   const handleMintWithLocation = async (code: string, position: GeolocationPosition | null) => {
     if (!authenticated) {
-      toast.error('Please connect your wallet first');
+      toast.error('Hold on there, friend - we need your wallet connected to get everything just exactly perfect!');
       return;
     }
 
@@ -77,7 +77,7 @@ export default function ScanPage() {
 
   // Handle scan error
   const handleScanError = (error: string) => {
-    toast.error('QR code scanning failed. Please try again.');
+    toast.error('Things are really weird up here - scanner malfunction!');
   };
 
   // Reset to start scanning again

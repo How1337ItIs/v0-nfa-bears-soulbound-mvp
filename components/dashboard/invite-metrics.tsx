@@ -22,28 +22,43 @@ export function InviteMetrics() {
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState<'7d' | '30d' | 'all'>('30d');
 
-  // Mock data for now - would integrate with backend analytics
+  // Fetch real invite analytics from backend API
   useEffect(() => {
     const fetchStats = async () => {
       setLoading(true);
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock data - replace with real API call
-      setStats({
-        totalInvitesGenerated: 12,
-        totalRedemptions: 8,
-        successfulMints: 6,
-        conversionRate: 75, // (6/8) * 100
-        recentActivity: [
-          { date: '2025-09-08', action: 'sbt_minted', code: 'ABC123', venue: 'berkeley-art-museum' },
-          { date: '2025-09-08', action: 'invite_redeemed', code: 'XYZ789', venue: 'sf-moma' },
-          { date: '2025-09-07', action: 'invite_generated', venue: 'local-dev' },
-          { date: '2025-09-06', action: 'sbt_minted', code: 'DEF456', venue: 'berkeley-art-museum' },
-          { date: '2025-09-05', action: 'invite_generated', venue: 'sf-moma' },
-        ]
-      });
+      try {
+        // Call real analytics API
+        const response = await fetch(`/api/analytics/invites?address=${address}&timeframe=${timeframe}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        } else {
+          // Fallback to empty stats if API not implemented yet
+          console.warn('Analytics API not implemented yet, showing empty state');
+          setStats({
+            totalInvitesGenerated: 0,
+            totalRedemptions: 0,
+            successfulMints: 0,
+            conversionRate: 0,
+            recentActivity: []
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching invite stats:', error);
+        // Show empty state on error
+        setStats({
+          totalInvitesGenerated: 0,
+          totalRedemptions: 0,
+          successfulMints: 0,
+          conversionRate: 0,
+          recentActivity: []
+        });
+      }
       
       setLoading(false);
     };

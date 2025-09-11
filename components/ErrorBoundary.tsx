@@ -79,7 +79,7 @@ export function ErrorBoundary({
     }
     
     // Show toast notification
-    toast.error('Something went wrong. Please try again.');
+    toast.error('Things are really weird up here - something went wrong!');
     
     // Custom error handler
     onError?.(error, errorInfo);

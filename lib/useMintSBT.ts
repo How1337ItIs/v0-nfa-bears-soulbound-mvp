@@ -74,18 +74,18 @@ export function useMintSBT() {
 
   const mintWithCode = useCallback(async (inviteCode: string): Promise<void> => {
     if (!address || !isConnected) {
-      toast.error('Please connect your wallet first');
+      toast.error('Hold on there, friend - we need your wallet connected to get everything just exactly perfect!');
       throw new Error('Wallet not connected');
     }
 
     if (!CONTRACT_ADDRESS) {
-      toast.error('Contract not configured');
+      toast.error('We lost the keys to the wardrobe - contract needs configuration');
       throw new Error('Contract address not set');
     }
 
     // Check if already minted
     if (hasMinted) {
-      toast.error('You already have a Miracle SBT');
+      toast.error('We\'re already high, thank you - you\'ve been miracled!');
       throw new Error('Already minted');
     }
 
@@ -145,18 +145,18 @@ export function useMintSBT() {
 
   const mintDirectly = useCallback(async (): Promise<void> => {
     if (!address || !isConnected) {
-      toast.error('Please connect your wallet first');
+      toast.error('Hold on there, friend - we need your wallet connected to get everything just exactly perfect!');
       throw new Error('Wallet not connected');
     }
 
     if (!CONTRACT_ADDRESS) {
-      toast.error('Contract not configured');
+      toast.error('We lost the keys to the wardrobe - contract needs configuration');
       throw new Error('Contract address not set');
     }
 
     // Check if already minted
     if (hasMinted) {
-      toast.error('You already have a Miracle SBT');
+      toast.error('We\'re already high, thank you - you\'ve been miracled!');
       throw new Error('Already minted');
     }
 

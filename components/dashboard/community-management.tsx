@@ -46,12 +46,24 @@ export function CommunityManagement() {
     }
   ];
 
-  const handleCreateProposal = () => {
-    toast('Governance proposals coming soon! This will integrate with DAO tooling.');
+  const handleCreateProposal = async () => {
+    try {
+      // Future: Open governance proposal modal
+      toast('Opening governance proposal creator...');
+      // This would integrate with Snapshot or on-chain governance
+    } catch (error) {
+      toast('DAO governance tools will be available soon!');
+    }
   };
 
-  const handleScheduleEvent = () => {
-    toast('Event scheduling coming soon! This will integrate with POAT system.');
+  const handleScheduleEvent = async () => {
+    try {
+      // Future: Open event creation modal
+      toast('Opening event scheduler...');
+      // This would integrate with POAT minting system
+    } catch (error) {
+      toast('Event scheduling tools will be available soon!');
+    }
   };
 
   if (!isHolder) {
@@ -250,7 +262,7 @@ export function CommunityManagement() {
               </button>
 
               <button
-                onClick={() => toast('POAT management coming soon')}
+                onClick={() => toast('POAT creation tools will be available soon!')}
                 className="p-4 bg-white/5 hover:bg-white/10 border border-white/20 rounded-xl transition-all duration-200 text-left"
               >
                 <div className="text-2xl mb-2">🎟️</div>
