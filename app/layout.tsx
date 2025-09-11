@@ -2,7 +2,8 @@ import type React from "react"
 import type { Metadata } from "next"
 import "./globals.css"
 import { PrivyProviders } from "./providers/PrivyProviders"
-import { MobileAppShell } from "@/components/mobile/MobileAppShell"
+import { LayoutProvider } from "@/providers/LayoutProvider"
+import { ResponsiveAppShell } from "@/components/ResponsiveAppShell"
 
 export const metadata: Metadata = {
   title: "NFA Bears - Not Fade Away",
@@ -27,7 +28,9 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <PrivyProviders>
-          <MobileAppShell>{children}</MobileAppShell>
+          <LayoutProvider>
+            <ResponsiveAppShell>{children}</ResponsiveAppShell>
+          </LayoutProvider>
         </PrivyProviders>
       </body>
     </html>

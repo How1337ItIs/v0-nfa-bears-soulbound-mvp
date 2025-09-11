@@ -38,7 +38,8 @@ export default function HomePage() {
           <div className="text-8xl mb-6 dancing-bear">🐻</div>
           <h1 className="text-4xl font-bold text-white glow-text mb-4">NFA Bears</h1>
           <p className="text-xl text-white/80 mb-2">Not Fade Away</p>
-          <p className="text-lg text-[#ff3366] font-semibold mb-8">Fuck crypto, real family shit</p>
+          <p className="text-lg text-[#ff3366] font-semibold mb-2">Fuck crypto, real family shit</p>
+          <p className="text-lg text-white/60 mb-8">NFA Bears what!?!?</p>
 
           <TouchButton size="lg" onClick={handleConnect} disabled={!ready} className="w-full max-w-sm mx-auto">
             {!ready ? "Loading..." : authenticated ? "Enter Dashboard" : "Join the Family"}

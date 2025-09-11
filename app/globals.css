@@ -290,3 +290,68 @@ body {
     font-size: 24px;
   }
 }
+
+/* Additional utility classes for scan page */
+.tie-dye-bg {
+  background: var(--background);
+}
+
+.groovy-font {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+}
+
+.aurora-gradient {
+  background: linear-gradient(135deg, #1a1aff 0%, #ff3366 100%);
+}
+
+.magnetic-button {
+  transition: all 0.3s ease;
+}
+
+.magnetic-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(26, 26, 255, 0.3);
+}
+
+/* Additional animations */
+@keyframes spiral-animation {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+}
+
+@keyframes breathe-animation {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes float-animation {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.spiral-animation {
+  animation: spiral-animation 3s ease-in-out infinite;
+}
+
+.breathe-animation {
+  animation: breathe-animation 2s ease-in-out infinite;
+}
+
+.float-animation {
+  animation: float-animation 3s ease-in-out infinite;
+}

@@ -3,28 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
-import dynamic from 'next/dynamic';
 import { useMintSBT } from '@/lib/useMintSBT';
 import { toast } from 'react-hot-toast';
-
-// Dynamic import for QRScanner to reduce initial bundle size
-const QRScanner = dynamic(() => import('@/components/QRScanner'), {
-  ssr: false,
-  loading: () => (
-    <div className="glassmorphic rounded-xl p-8 liquid-morph">
-      <div className="text-center">
-        <div className="text-6xl mb-6 spiral-animation">📷</div>
-        <h3 className="text-xl font-bold text-white mb-4 groovy-font">
-          Loading Scanner
-        </h3>
-        <p className="text-white/80 mb-6">
-          Initializing QR code scanner...
-        </p>
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
-      </div>
-    </div>
-  ),
-});
+import { ClientOnlyQRScanner } from '@/components/ClientOnlyQRScanner';
 
 export default function ScanPage() {
   const router = useRouter();
@@ -205,7 +186,7 @@ export default function ScanPage() {
           {/* Content */}
           {currentStep === 'scan' && (
             <div className="px-2">
-              <QRScanner
+              <ClientOnlyQRScanner
                 onScanSuccess={handleScanSuccess}
                 onScanError={handleScanError}
                 width={300}
