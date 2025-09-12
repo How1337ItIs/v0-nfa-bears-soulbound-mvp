@@ -124,8 +124,8 @@ export default function ScanPage() {
 
   return (
     <div className="min-h-screen tie-dye-bg relative overflow-hidden">
-      {/* Psychedelic Oil Projection Background */}
-      <div className="absolute inset-0 oil-projection-bg opacity-40"></div>
+      {/* 60s Liquid Light Show Background */}
+      <div className="absolute inset-0 liquid-light-flow opacity-25"></div>
       
       {/* Floating Lava Lamp Blobs */}
       <div className="absolute inset-0 opacity-20">

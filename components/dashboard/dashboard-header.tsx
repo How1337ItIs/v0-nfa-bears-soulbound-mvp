@@ -82,8 +82,8 @@ export function DashboardHeader({ daysOnBus }: DashboardHeaderProps) {
 
   return (
     <div className="mb-8 relative">
-      {/* Psychedelic Oil Projection Background */}
-      <div className="absolute inset-0 oil-projection-bg opacity-30 rounded-3xl"></div>
+      {/* 60s Liquid Light Show Background */}
+      <div className="absolute inset-0 liquid-light-flow opacity-20 rounded-3xl"></div>
       
       {/* Core Branding */}
       <div className="text-center mb-8 relative z-10">

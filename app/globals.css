@@ -1,728 +1,125 @@
-/* ------------------------------------------------------------------
- NFA Bears: Underwater Liquid Light Show PWA
- – Mobile-first design system
- – Grateful Dead cultural motifs
- – Psychedelic glassmorphic aesthetic
-------------------------------------------------------------------- */
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
-/* Inter font */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+@custom-variant dark (&:is(.dark *));
 
-/* Tailwind layers */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Underwater Liquid Light Color System */
 :root {
-  --background: #000011; /* Deep space base */
-  --primary: #1a1aff; /* Electric blue - main interactive */
-  --accent: #ff3366; /* Rosy red - hot accents, never glows */
-  --highlight: #ffff00; /* Bright yellow - celebration only */
-  --success: #00ff88; /* Neon green - confirmations */
-  --text: #ffffff; /* Pure white */
-  --text-muted: rgba(255, 255, 255, 0.7);
-  --foreground: #ffffff;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
-body {
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: var(--background);
-  color: var(--text);
-  @apply antialiased;
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
 }
 
-/* Underwater Liquid Light Animations */
-@keyframes caustic {
-  0%,
-  100% {
-    transform: translateX(0) translateY(0) scale(1);
-    filter: hue-rotate(0deg);
-  }
-  25% {
-    transform: translateX(10px) translateY(-5px) scale(1.02);
-    filter: hue-rotate(5deg);
-  }
-  50% {
-    transform: translateX(-5px) translateY(10px) scale(0.98);
-    filter: hue-rotate(-3deg);
-  }
-  75% {
-    transform: translateX(-10px) translateY(-8px) scale(1.01);
-    filter: hue-rotate(2deg);
-  }
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@keyframes drift-slow {
-  0%,
-  100% {
-    transform: translate(0, 0) rotate(0deg);
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-  25% {
-    transform: translate(20px, -10px) rotate(2deg);
-  }
-  50% {
-    transform: translate(-10px, 20px) rotate(-1deg);
-  }
-  75% {
-    transform: translate(-15px, -15px) rotate(1deg);
-  }
-}
-
-@keyframes drift-reverse {
-  0%,
-  100% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  25% {
-    transform: translate(-20px, 10px) rotate(-2deg);
-  }
-  50% {
-    transform: translate(10px, -20px) rotate(1deg);
-  }
-  75% {
-    transform: translate(15px, 15px) rotate(-1deg);
-  }
-}
-
-@keyframes orbital {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes parade {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes float-particle {
-  0%,
-  100% {
-    transform: translateY(0px) translateX(0px);
-    opacity: 0.1;
-  }
-  50% {
-    transform: translateY(-20px) translateX(5px);
-    opacity: 0.3;
-  }
-}
-
-@keyframes liquid-morph {
-  0% {
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-    transform: rotate(0deg) scale(1);
-  }
-  25% {
-    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
-    transform: rotate(90deg) scale(1.05);
-  }
-  50% {
-    border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%;
-    transform: rotate(180deg) scale(0.95);
-  }
-  75% {
-    border-radius: 60% 40% 60% 30% / 70% 30% 60% 50%;
-    transform: rotate(270deg) scale(1.02);
-  }
-  100% {
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-    transform: rotate(360deg) scale(1);
-  }
-}
-
-@keyframes scan {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(6400%);
-  }
-}
-
-@keyframes dancing-bear {
-  0%,
-  100% {
-    transform: rotate(-5deg) translateY(0px);
-  }
-  25% {
-    transform: rotate(5deg) translateY(-5px);
-  }
-  50% {
-    transform: rotate(-3deg) translateY(-8px);
-  }
-  75% {
-    transform: rotate(3deg) translateY(-3px);
-  }
-}
-
-/* Animation Classes */
-.animate-caustic {
-  animation: caustic 12s ease-in-out infinite;
-}
-
-.animate-drift-slow {
-  animation: drift-slow 15s ease-in-out infinite;
-}
-
-.animate-drift-reverse {
-  animation: drift-reverse 18s ease-in-out infinite;
-}
-
-.animate-orbital {
-  animation: orbital 30s linear infinite;
-}
-
-.animate-parade {
-  animation: parade 20s linear infinite;
-}
-
-.animate-float-particle {
-  animation: float-particle 8s ease-in-out infinite;
-}
-
-.animate-scan {
-  animation: scan 2s linear infinite;
-}
-
-.dancing-bear {
-  animation: dancing-bear 2s ease-in-out infinite;
-}
-
-.liquid-morph {
-  animation: liquid-morph 20s ease-in-out infinite;
-}
-
-/* Component Classes */
-.glassmorphic {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.glow-text {
-  text-shadow: 0 0 10px #1a1aff, 0 0 20px #1a1aff, 0 0 30px #1a1aff;
-}
-
-/* Gradient Utilities */
-.bg-gradient-radial {
-  background: radial-gradient(circle, var(--tw-gradient-stops));
-}
-
-/* Safe Area Handling */
-.safe-area-top {
-  padding-top: env(safe-area-inset-top);
-}
-
-.safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* Touch Optimization */
-.touch-manipulation {
-  touch-action: manipulation;
-}
-
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-  .animate-caustic,
-  .animate-drift-slow,
-  .animate-drift-reverse,
-  .animate-orbital,
-  .animate-parade,
-  .animate-float-particle,
-  .liquid-morph,
-  .dancing-bear {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-  }
-}
-
-/* Mobile Typography Scale */
-@media (max-width: 640px) {
   body {
-    font-size: 14px;
-  }
-  h1 {
-    font-size: 36px;
-  }
-  h2 {
-    font-size: 28px;
-  }
-  h3 {
-    font-size: 20px;
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-  body {
-    font-size: 16px;
-  }
-  h1 {
-    font-size: 40px;
-  }
-  h2 {
-    font-size: 32px;
-  }
-  h3 {
-    font-size: 24px;
-  }
-}
-
-@media (min-width: 1025px) {
-  body {
-    font-size: 16px;
-  }
-  h1 {
-    font-size: 48px;
-  }
-  h2 {
-    font-size: 36px;
-  }
-  h3 {
-    font-size: 24px;
-  }
-}
-
-/* Additional utility classes for scan page */
-.tie-dye-bg {
-  background: var(--background);
-}
-
-.groovy-font {
-  font-family: "Inter", sans-serif;
-  font-weight: 700;
-}
-
-.script-font {
-  font-family: "Inter", sans-serif;
-  font-style: italic;
-  font-weight: 400;
-}
-
-.melting-progress {
-  position: relative;
-  overflow: hidden;
-}
-
-.melting-progress::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-.aurora-gradient {
-  background: linear-gradient(135deg, #1a1aff 0%, #ff3366 100%);
-}
-
-.magnetic-button {
-  transition: all 0.3s ease;
-}
-
-.magnetic-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(26, 26, 255, 0.3);
-}
-
-/* Additional animations */
-@keyframes spiral-animation {
-  0%, 100% {
-    transform: rotate(0deg) scale(1);
-  }
-  50% {
-    transform: rotate(180deg) scale(1.1);
-  }
-}
-
-@keyframes breathe-animation {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.8;
-  }
-}
-
-@keyframes float-animation {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.spiral-animation {
-  animation: spiral-animation 3s ease-in-out infinite;
-}
-
-.breathe-animation {
-  animation: breathe-animation 2s ease-in-out infinite;
-}
-
-.float-animation {
-  animation: float-animation 3s ease-in-out infinite;
-}
-
-/* ========================================
-   PSYCHEDELIC OIL PROJECTION LIGHT SHOW
-   ======================================== */
-
-/* Oil Slick Color Shifting */
-@keyframes oil-slick-shift {
-  0% {
-    filter: hue-rotate(0deg) saturate(1.5) contrast(1.2);
-    background-position: 0% 50%;
-  }
-  25% {
-    filter: hue-rotate(90deg) saturate(2) contrast(1.4);
-    background-position: 100% 50%;
-  }
-  50% {
-    filter: hue-rotate(180deg) saturate(1.8) contrast(1.3);
-    background-position: 50% 100%;
-  }
-  75% {
-    filter: hue-rotate(270deg) saturate(2.2) contrast(1.5);
-    background-position: 50% 0%;
-  }
-  100% {
-    filter: hue-rotate(360deg) saturate(1.5) contrast(1.2);
-    background-position: 0% 50%;
-  }
-}
-
-/* Viscous Dripping Animation */
-@keyframes viscous-drip {
-  0% {
-    transform: translateY(0) scaleY(1);
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-  }
-  25% {
-    transform: translateY(5px) scaleY(1.1);
-    border-radius: 40% 60% 70% 30% / 50% 60% 30% 60%;
-  }
-  50% {
-    transform: translateY(10px) scaleY(0.9);
-    border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%;
-  }
-  75% {
-    transform: translateY(5px) scaleY(1.05);
-    border-radius: 60% 40% 60% 30% / 70% 30% 60% 50%;
-  }
-  100% {
-    transform: translateY(0) scaleY(1);
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-  }
-}
-
-/* Lava Lamp Blob Morphing */
-@keyframes lava-blob {
-  0% {
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-    transform: rotate(0deg) scale(1);
-    filter: hue-rotate(0deg);
-  }
-  20% {
-    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
-    transform: rotate(72deg) scale(1.1);
-    filter: hue-rotate(72deg);
-  }
-  40% {
-    border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%;
-    transform: rotate(144deg) scale(0.9);
-    filter: hue-rotate(144deg);
-  }
-  60% {
-    border-radius: 60% 40% 60% 30% / 70% 30% 60% 50%;
-    transform: rotate(216deg) scale(1.05);
-    filter: hue-rotate(216deg);
-  }
-  80% {
-    border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%;
-    transform: rotate(288deg) scale(0.95);
-    filter: hue-rotate(288deg);
-  }
-  100% {
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-    transform: rotate(360deg) scale(1);
-    filter: hue-rotate(360deg);
-  }
-}
-
-/* Melting Button Effect */
-@keyframes melt-button {
-  0% {
-    transform: scale(1) rotate(0deg);
-    border-radius: 12px;
-  }
-  50% {
-    transform: scale(1.05) rotate(1deg);
-    border-radius: 20px 8px 16px 12px;
-  }
-  100% {
-    transform: scale(1) rotate(0deg);
-    border-radius: 12px;
-  }
-}
-
-/* Kaleidoscope Color Wheel */
-@keyframes kaleidoscope {
-  0% {
-    background: conic-gradient(from 0deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000, #ff0080);
-    transform: rotate(0deg);
-  }
-  100% {
-    background: conic-gradient(from 360deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000, #ff0080);
-    transform: rotate(360deg);
-  }
-}
-
-/* Psychedelic Text Shimmer */
-@keyframes psychedelic-shimmer {
-  0% {
-    background-position: -200% center;
-    filter: hue-rotate(0deg);
-  }
-  50% {
-    background-position: 200% center;
-    filter: hue-rotate(180deg);
-  }
-  100% {
-    background-position: -200% center;
-    filter: hue-rotate(360deg);
-  }
-}
-
-/* Thick Syrupy Movement */
-@keyframes syrupy-flow {
-  0% {
-    transform: translateX(0) translateY(0) rotate(0deg);
-    filter: blur(0px);
-  }
-  25% {
-    transform: translateX(10px) translateY(-5px) rotate(1deg);
-    filter: blur(0.5px);
-  }
-  50% {
-    transform: translateX(-5px) translateY(10px) rotate(-1deg);
-    filter: blur(0px);
-  }
-  75% {
-    transform: translateX(-10px) translateY(-8px) rotate(0.5deg);
-    filter: blur(0.3px);
-  }
-  100% {
-    transform: translateX(0) translateY(0) rotate(0deg);
-    filter: blur(0px);
-  }
-}
-
-/* Oil Projection Background */
-@keyframes oil-projection {
-  0% {
-    background: radial-gradient(circle at 20% 20%, rgba(255, 0, 128, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(128, 0, 255, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 60%, rgba(0, 128, 255, 0.3) 0%, transparent 50%);
-    transform: scale(1) rotate(0deg);
-  }
-  33% {
-    background: radial-gradient(circle at 60% 40%, rgba(0, 255, 128, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 20% 80%, rgba(255, 255, 0, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 128, 0, 0.3) 0%, transparent 50%);
-    transform: scale(1.1) rotate(120deg);
-  }
-  66% {
-    background: radial-gradient(circle at 80% 60%, rgba(255, 0, 255, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(0, 255, 255, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 60% 80%, rgba(255, 128, 128, 0.3) 0%, transparent 50%);
-    transform: scale(0.9) rotate(240deg);
-  }
-  100% {
-    background: radial-gradient(circle at 20% 20%, rgba(255, 0, 128, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(128, 0, 255, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 60%, rgba(0, 128, 255, 0.3) 0%, transparent 50%);
-    transform: scale(1) rotate(360deg);
-  }
-}
-
-/* Animation Classes */
-.oil-slick-shift {
-  animation: oil-slick-shift 8s ease-in-out infinite;
-}
-
-.viscous-drip {
-  animation: viscous-drip 6s ease-in-out infinite;
-}
-
-.lava-blob {
-  animation: lava-blob 12s ease-in-out infinite;
-}
-
-.melt-button {
-  animation: melt-button 0.3s ease-in-out;
-}
-
-.kaleidoscope {
-  animation: kaleidoscope 4s linear infinite;
-}
-
-.psychedelic-shimmer {
-  background: linear-gradient(90deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000, #ff0080);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: psychedelic-shimmer 3s ease-in-out infinite;
-}
-
-.syrupy-flow {
-  animation: syrupy-flow 10s ease-in-out infinite;
-}
-
-.oil-projection-bg {
-  animation: oil-projection 15s ease-in-out infinite;
-}
-
-/* Psychedelic Gradient Utilities */
-.psychedelic-gradient-1 {
-  background: linear-gradient(135deg, #ff0080 0%, #8000ff 25%, #0080ff 50%, #00ff80 75%, #ffff00 100%);
-  background-size: 400% 400%;
-  animation: oil-slick-shift 8s ease-in-out infinite;
-}
-
-.psychedelic-gradient-2 {
-  background: linear-gradient(45deg, #ff3366 0%, #ff6600 20%, #ffcc00 40%, #66ff00 60%, #0066ff 80%, #cc00ff 100%);
-  background-size: 300% 300%;
-  animation: oil-slick-shift 6s ease-in-out infinite;
-}
-
-.psychedelic-gradient-3 {
-  background: conic-gradient(from 0deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000, #ff0080);
-  animation: kaleidoscope 4s linear infinite;
-}
-
-/* Oil Blob Shapes */
-.oil-blob {
-  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-  animation: lava-blob 12s ease-in-out infinite;
-}
-
-.oil-blob-2 {
-  border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
-  animation: lava-blob 10s ease-in-out infinite reverse;
-}
-
-.oil-blob-3 {
-  border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%;
-  animation: lava-blob 14s ease-in-out infinite;
-}
-
-/* Liquid Chrome Effects */
-.liquid-chrome {
-  background: linear-gradient(45deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000);
-  background-size: 400% 400%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: oil-slick-shift 4s ease-in-out infinite;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-}
-
-/* Melting Card Effect */
-.melting-card {
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.melting-card:hover {
-  transform: scale(1.02) rotate(0.5deg);
-  border-radius: 25px 15px 20px 18px;
-  filter: hue-rotate(10deg) saturate(1.2);
-}
-
-/* Thick Syrupy Buttons */
-.syrupy-button {
-  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  position: relative;
-  overflow: hidden;
-}
-
-.syrupy-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.6s ease;
-}
-
-.syrupy-button:hover::before {
-  left: 100%;
-}
-
-.syrupy-button:hover {
-  transform: translateY(-3px) scale(1.05);
-  filter: hue-rotate(15deg) saturate(1.3);
-  box-shadow: 0 10px 30px rgba(255, 0, 128, 0.3);
-}
-
-/* Oil Slick Glassmorphism */
-.oil-glassmorphic {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px) saturate(1.5);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  animation: oil-slick-shift 10s ease-in-out infinite;
-}
-
-/* Psychedelic Text Effects */
-.psychedelic-text {
-  background: linear-gradient(45deg, #ff0080, #8000ff, #0080ff, #00ff80, #ffff00, #ff8000, #ff0080);
-  background-size: 400% 400%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: oil-slick-shift 6s ease-in-out infinite;
-  text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-}
-
-/* Reduced Motion Support for Psychedelic Effects */
-@media (prefers-reduced-motion: reduce) {
-  .oil-slick-shift,
-  .viscous-drip,
-  .lava-blob,
-  .kaleidoscope,
-  .psychedelic-shimmer,
-  .syrupy-flow,
-  .oil-projection-bg,
-  .psychedelic-gradient-1,
-  .psychedelic-gradient-2,
-  .psychedelic-gradient-3,
-  .oil-blob,
-  .oil-blob-2,
-  .oil-blob-3 {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+    @apply bg-background text-foreground;
   }
 }

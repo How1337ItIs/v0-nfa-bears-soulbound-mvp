@@ -1,0 +1,348 @@
+/* Advanced Psychedelic Effects - Modern Techniques */
+
+/* WebGL-inspired fluid backgrounds using CSS */
+@keyframes fluid-dynamics {
+  0% {
+    background: 
+      conic-gradient(from 0deg at 20% 30%, 
+        rgba(255, 0, 128, 0.1) 0deg,
+        rgba(128, 0, 255, 0.08) 60deg,
+        rgba(0, 128, 255, 0.06) 120deg,
+        rgba(255, 255, 0, 0.04) 180deg,
+        rgba(255, 0, 128, 0.1) 360deg);
+    filter: blur(2px) hue-rotate(0deg) saturate(1.2);
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    background: 
+      conic-gradient(from 90deg at 40% 20%, 
+        rgba(128, 0, 255, 0.1) 0deg,
+        rgba(0, 128, 255, 0.08) 60deg,
+        rgba(255, 255, 0, 0.06) 120deg,
+        rgba(255, 0, 128, 0.04) 180deg,
+        rgba(128, 0, 255, 0.1) 360deg);
+    filter: blur(2px) hue-rotate(15deg) saturate(1.3);
+    transform: scale(1.05) rotate(5deg);
+  }
+  50% {
+    background: 
+      conic-gradient(from 180deg at 60% 50%, 
+        rgba(0, 128, 255, 0.1) 0deg,
+        rgba(255, 255, 0, 0.08) 60deg,
+        rgba(255, 0, 128, 0.06) 120deg,
+        rgba(128, 0, 255, 0.04) 180deg,
+        rgba(0, 128, 255, 0.1) 360deg);
+    filter: blur(2px) hue-rotate(30deg) saturate(1.4);
+    transform: scale(1.1) rotate(10deg);
+  }
+  75% {
+    background: 
+      conic-gradient(from 270deg at 80% 70%, 
+        rgba(255, 255, 0, 0.1) 0deg,
+        rgba(255, 0, 128, 0.08) 60deg,
+        rgba(128, 0, 255, 0.06) 120deg,
+        rgba(0, 128, 255, 0.04) 180deg,
+        rgba(255, 255, 0, 0.1) 360deg);
+    filter: blur(2px) hue-rotate(15deg) saturate(1.3);
+    transform: scale(1.05) rotate(5deg);
+  }
+  100% {
+    background: 
+      conic-gradient(from 360deg at 20% 30%, 
+        rgba(255, 0, 128, 0.1) 0deg,
+        rgba(128, 0, 255, 0.08) 60deg,
+        rgba(0, 128, 255, 0.06) 120deg,
+        rgba(255, 255, 0, 0.04) 180deg,
+        rgba(255, 0, 128, 0.1) 360deg);
+    filter: blur(2px) hue-rotate(0deg) saturate(1.2);
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Advanced glassmorphism with backdrop-filter */
+@keyframes glassmorphic-flow {
+  0% {
+    backdrop-filter: blur(20px) saturate(1.5) hue-rotate(0deg);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 32px rgba(255, 0, 128, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    backdrop-filter: blur(25px) saturate(1.8) hue-rotate(180deg);
+    background: rgba(128, 0, 255, 0.05);
+    border: 1px solid rgba(128, 0, 255, 0.1);
+    box-shadow: 
+      0 8px 32px rgba(128, 0, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  100% {
+    backdrop-filter: blur(20px) saturate(1.5) hue-rotate(360deg);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 32px rgba(255, 0, 128, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Organic blob morphing with SVG-like effects */
+@keyframes organic-morph {
+  0% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    background: 
+      radial-gradient(ellipse 300px 200px at 30% 20%, rgba(255, 0, 128, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse 200px 300px at 70% 80%, rgba(128, 0, 255, 0.12) 0%, transparent 50%);
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    background: 
+      radial-gradient(ellipse 250px 250px at 50% 30%, rgba(128, 0, 255, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse 300px 200px at 20% 70%, rgba(0, 128, 255, 0.12) 0%, transparent 50%);
+    transform: rotate(90deg) scale(1.1);
+  }
+  50% {
+    border-radius: 70% 30% 40% 60% / 40% 70% 60% 30%;
+    background: 
+      radial-gradient(ellipse 200px 300px at 70% 50%, rgba(0, 128, 255, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse 250px 250px at 30% 20%, rgba(255, 255, 0, 0.12) 0%, transparent 50%);
+    transform: rotate(180deg) scale(1.2);
+  }
+  75% {
+    border-radius: 40% 70% 60% 30% / 70% 40% 30% 60%;
+    background: 
+      radial-gradient(ellipse 300px 200px at 80% 20%, rgba(255, 255, 0, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse 200px 300px at 20% 80%, rgba(255, 0, 128, 0.12) 0%, transparent 50%);
+    transform: rotate(270deg) scale(1.1);
+  }
+  100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    background: 
+      radial-gradient(ellipse 300px 200px at 30% 20%, rgba(255, 0, 128, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse 200px 300px at 70% 80%, rgba(128, 0, 255, 0.12) 0%, transparent 50%);
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+/* Advanced mix-blend-mode effects */
+@keyframes blend-mode-shift {
+  0% {
+    mix-blend-mode: multiply;
+    filter: hue-rotate(0deg) saturate(1.2);
+  }
+  25% {
+    mix-blend-mode: screen;
+    filter: hue-rotate(90deg) saturate(1.4);
+  }
+  50% {
+    mix-blend-mode: overlay;
+    filter: hue-rotate(180deg) saturate(1.6);
+  }
+  75% {
+    mix-blend-mode: soft-light;
+    filter: hue-rotate(270deg) saturate(1.4);
+  }
+  100% {
+    mix-blend-mode: multiply;
+    filter: hue-rotate(360deg) saturate(1.2);
+  }
+}
+
+/* Viscous liquid flow simulation */
+@keyframes viscous-flow {
+  0% {
+    background: 
+      linear-gradient(45deg, 
+        rgba(255, 0, 128, 0.1) 0%,
+        rgba(128, 0, 255, 0.08) 25%,
+        rgba(0, 128, 255, 0.06) 50%,
+        rgba(255, 255, 0, 0.04) 75%,
+        rgba(255, 0, 128, 0.1) 100%);
+    transform: translateX(0) translateY(0) skew(0deg, 0deg);
+    filter: blur(1px);
+  }
+  25% {
+    background: 
+      linear-gradient(135deg, 
+        rgba(128, 0, 255, 0.1) 0%,
+        rgba(0, 128, 255, 0.08) 25%,
+        rgba(255, 255, 0, 0.06) 50%,
+        rgba(255, 0, 128, 0.04) 75%,
+        rgba(128, 0, 255, 0.1) 100%);
+    transform: translateX(10px) translateY(-5px) skew(2deg, 1deg);
+    filter: blur(1.5px);
+  }
+  50% {
+    background: 
+      linear-gradient(225deg, 
+        rgba(0, 128, 255, 0.1) 0%,
+        rgba(255, 255, 0, 0.08) 25%,
+        rgba(255, 0, 128, 0.06) 50%,
+        rgba(128, 0, 255, 0.04) 75%,
+        rgba(0, 128, 255, 0.1) 100%);
+    transform: translateX(0) translateY(10px) skew(-1deg, 2deg);
+    filter: blur(2px);
+  }
+  75% {
+    background: 
+      linear-gradient(315deg, 
+        rgba(255, 255, 0, 0.1) 0%,
+        rgba(255, 0, 128, 0.08) 25%,
+        rgba(128, 0, 255, 0.06) 50%,
+        rgba(0, 128, 255, 0.04) 75%,
+        rgba(255, 255, 0, 0.1) 100%);
+    transform: translateX(-10px) translateY(5px) skew(1deg, -1deg);
+    filter: blur(1.5px);
+  }
+  100% {
+    background: 
+      linear-gradient(45deg, 
+        rgba(255, 0, 128, 0.1) 0%,
+        rgba(128, 0, 255, 0.08) 25%,
+        rgba(0, 128, 255, 0.06) 50%,
+        rgba(255, 255, 0, 0.04) 75%,
+        rgba(255, 0, 128, 0.1) 100%);
+    transform: translateX(0) translateY(0) skew(0deg, 0deg);
+    filter: blur(1px);
+  }
+}
+
+/* Utility classes for modern psychedelic effects */
+.fluid-dynamics-bg {
+  animation: fluid-dynamics 45s ease-in-out infinite;
+  background-attachment: fixed;
+}
+
+.glassmorphic-flow {
+  animation: glassmorphic-flow 20s ease-in-out infinite;
+  backdrop-filter: blur(20px) saturate(1.5);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(255, 0, 128, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.organic-morph {
+  animation: organic-morph 30s ease-in-out infinite;
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+}
+
+.blend-mode-shift {
+  animation: blend-mode-shift 25s ease-in-out infinite;
+  mix-blend-mode: multiply;
+}
+
+.viscous-flow {
+  animation: viscous-flow 35s ease-in-out infinite;
+  background-attachment: fixed;
+}
+
+/* Advanced text effects */
+.psychedelic-text-advanced {
+  background: linear-gradient(45deg, 
+    #ff0080, #8000ff, #0080ff, #ffff00, #ff0080);
+  background-size: 400% 400%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fluid-dynamics 8s ease-in-out infinite;
+  text-shadow: 
+    0 0 10px rgba(255, 0, 128, 0.3),
+    0 0 20px rgba(128, 0, 255, 0.2),
+    0 0 30px rgba(0, 128, 255, 0.1);
+}
+
+/* Modern button effects */
+.modern-psychedelic-button {
+  position: relative;
+  background: linear-gradient(45deg, 
+    rgba(255, 0, 128, 0.8), 
+    rgba(128, 0, 255, 0.8));
+  border: none;
+  border-radius: 20px;
+  padding: 12px 24px;
+  color: white;
+  font-weight: 600;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.modern-psychedelic-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2), 
+    transparent);
+  transition: left 0.5s ease;
+}
+
+.modern-psychedelic-button:hover::before {
+  left: 100%;
+}
+
+.modern-psychedelic-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 10px 25px rgba(255, 0, 128, 0.3),
+    0 0 20px rgba(128, 0, 255, 0.2);
+}
+
+/* Advanced card effects */
+.psychedelic-card-advanced {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(255, 0, 128, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.psychedelic-card-advanced::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, 
+    rgba(255, 0, 128, 0.1) 0deg,
+    rgba(128, 0, 255, 0.08) 60deg,
+    rgba(0, 128, 255, 0.06) 120deg,
+    rgba(255, 255, 0, 0.04) 180deg,
+    rgba(255, 0, 128, 0.1) 360deg);
+  animation: fluid-dynamics 20s linear infinite;
+  z-index: -1;
+}
+
+/* Performance optimizations */
+.psychedelic-optimized {
+  will-change: transform, filter, background;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .fluid-dynamics-bg,
+  .glassmorphic-flow,
+  .organic-morph,
+  .blend-mode-shift,
+  .viscous-flow,
+  .psychedelic-text-advanced,
+  .modern-psychedelic-button,
+  .psychedelic-card-advanced::before {
+    animation: none;
+  }
+}

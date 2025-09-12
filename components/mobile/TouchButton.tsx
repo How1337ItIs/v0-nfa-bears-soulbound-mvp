@@ -21,10 +21,10 @@ export function TouchButton({
     "touch-manipulation transition-all duration-200 font-medium rounded-xl flex items-center justify-center"
 
   const variants = {
-    primary: "bg-[#1a1aff] text-white shadow-lg shadow-[#1a1aff]/25 hover:shadow-[#1a1aff]/40 active:scale-95",
-    secondary: "bg-white/10 text-white border border-white/20 hover:bg-white/20 active:scale-95",
-    ghost: "text-white hover:bg-white/10 active:scale-95",
-    destructive: "bg-[#ff3366] text-white hover:bg-[#ff3366]/90 active:scale-95",
+    primary: "modern-psychedelic-button bg-gradient-to-r from-[#1a1aff] to-[#8000ff] text-white shadow-lg active:scale-95 psychedelic-optimized",
+    secondary: "glassmorphic-flow bg-white/10 text-white border border-white/20 hover:bg-white/20 active:scale-95 psychedelic-optimized",
+    ghost: "text-white hover:glassmorphic-flow hover:bg-white/10 active:scale-95 transition-all duration-300",
+    destructive: "modern-psychedelic-button bg-gradient-to-r from-[#ff3366] to-[#ff0080] text-white hover:shadow-[#ff3366]/40 active:scale-95 psychedelic-optimized",
   }
 
   const sizes = {
