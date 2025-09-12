@@ -81,65 +81,76 @@ export function DashboardHeader({ daysOnBus }: DashboardHeaderProps) {
   const membershipInfo = getMembershipDisplay()
 
   return (
-    <div className="mb-8">
+    <div className="mb-8 relative">
+      {/* 60s Liquid Light Show Background */}
+      <div className="absolute inset-0 liquid-light-flow opacity-20 rounded-3xl"></div>
+      
       {/* Core Branding */}
-      <div className="text-center mb-8">
+      <div className="text-center mb-8 relative z-10">
         <div className="mb-4">
-          <h1 className="groovy-font text-4xl md:text-6xl mb-2 glow-text text-white">Fuck Crypto, Real Family Shit</h1>
+          <h1 className="groovy-font text-4xl md:text-6xl mb-2 psychedelic-text">Fuck Crypto, Real Family Shit</h1>
           <div className="flex flex-wrap justify-center gap-2 text-sm md:text-base text-white/80">
-            <span className="script-font">Not Fade Away</span>
-            <span>•</span>
-            <span className="script-font">Not Financial Advice</span>
-            <span>•</span>
-            <span className="script-font">Non-Fungible Acid Bears</span>
+            <span className="script-font liquid-chrome">Not Fade Away</span>
+            <span className="psychedelic-shimmer">•</span>
+            <span className="script-font liquid-chrome">Not Financial Advice</span>
+            <span className="psychedelic-shimmer">•</span>
+            <span className="script-font liquid-chrome">Non-Fungible Acid Bears</span>
           </div>
         </div>
         <p className="text-lg text-white/60 mb-2">710 Genesis Bears • Unlimited Miracle SBTs • Built on Berachain</p>
         <p className="text-xl text-white/80">
-          Hey there, <span className="script-font text-red-400">{user?.email?.address || "Beautiful Soul"}</span> ✨
+          Hey there, <span className="script-font liquid-chrome">{user?.email?.address || "Beautiful Soul"}</span> ✨
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-8 items-center">
-        {/* Days on Bus Counter */}
-        <Card className="glassmorphic rounded-3xl p-8 text-center breathe-animation">
-          <div className="text-6xl md:text-8xl groovy-font aurora-gradient bg-clip-text text-transparent mb-4">
+      <div className="grid md:grid-cols-2 gap-8 items-center relative z-10">
+        {/* Days on Bus Counter - Lava Lamp Style */}
+        <Card className="oil-glassmorphic oil-blob p-8 text-center syrupy-flow relative overflow-hidden">
+          {/* Floating Oil Blobs */}
+          <div className="absolute top-4 left-4 w-8 h-8 psychedelic-gradient-1 oil-blob-2 opacity-60"></div>
+          <div className="absolute top-8 right-6 w-6 h-6 psychedelic-gradient-2 oil-blob-3 opacity-50"></div>
+          <div className="absolute bottom-6 left-8 w-10 h-10 psychedelic-gradient-3 oil-blob opacity-40"></div>
+          
+          <div className="text-6xl md:text-8xl groovy-font psychedelic-text mb-4 relative z-10">
             {daysOnBus}
           </div>
-          <p className="text-2xl text-white/80 mb-4">Days on the Bus</p>
+          <p className="text-2xl text-white/80 mb-4 liquid-chrome">Days on the Bus</p>
 
-          {/* Membership Status */}
-          <div className={`bg-gradient-to-r ${membershipInfo.theme} rounded-2xl p-4 mb-4`}>
+          {/* Membership Status - Oil Slick Style */}
+          <div className={`psychedelic-gradient-1 oil-blob-2 p-4 mb-4 relative z-10`}>
             <div className="flex items-center justify-center gap-2 mb-2">
-              <Badge className="aurora-gradient border-0 text-white">{membershipInfo.badge}</Badge>
+              <Badge className="psychedelic-gradient-2 border-0 text-white oil-blob-3">{membershipInfo.badge}</Badge>
               {userData.membershipType === "genesis" && <div className="text-xl dancing-bear">👑</div>}
             </div>
-            <h3 className="groovy-font text-xl text-white mb-1">{membershipInfo.title}</h3>
+            <h3 className="groovy-font text-xl text-white mb-1 liquid-chrome">{membershipInfo.title}</h3>
             <p className="text-white/80 text-sm mb-2">{membershipInfo.subtitle}</p>
             <p className="text-white/60 text-xs">{membershipInfo.benefits}</p>
           </div>
 
-          <div className="flex justify-center space-x-2">
+          <div className="flex justify-center space-x-2 relative z-10">
             {[...Array(5)].map((_, i) => (
               <div
                 key={i}
-                className="w-3 h-3 bg-red-400 rounded-full dancing-bear"
+                className="w-3 h-3 psychedelic-gradient-1 oil-blob dancing-bear"
                 style={{ animationDelay: `${i * 0.2}s` }}
               />
             ))}
           </div>
         </Card>
 
-        {/* Enhanced Membership Card */}
+        {/* Enhanced Membership Card - Melting Liquid Style */}
         <div className="perspective-1000">
           <Card
-            className={`glassmorphic rounded-3xl p-8 cursor-pointer transition-transform duration-700 transform-style-preserve-3d ${isFlipped ? "rotate-y-180" : ""}`}
+            className={`oil-glassmorphic oil-blob-2 p-8 cursor-pointer melting-card transition-transform duration-700 transform-style-preserve-3d relative overflow-hidden ${isFlipped ? "rotate-y-180" : ""}`}
             onClick={() => setIsFlipped(!isFlipped)}
           >
-            <div className={`${isFlipped ? "opacity-0" : "opacity-100"} transition-opacity duration-300`}>
+            {/* Kaleidoscope Background */}
+            <div className="absolute inset-0 kaleidoscope opacity-20"></div>
+            
+            <div className={`${isFlipped ? "opacity-0" : "opacity-100"} transition-opacity duration-300 relative z-10`}>
               <div className="text-center">
-                <div className="text-6xl mb-4 spiral-animation">🎭</div>
-                <h3 className="groovy-font text-2xl mb-2 text-red-400">
+                <div className="text-6xl mb-4 spiral-animation psychedelic-shimmer">🎭</div>
+                <h3 className="groovy-font text-2xl mb-2 liquid-chrome">
                   {userData.membershipType === "genesis" ? "Genesis Bear Token" : "Miracle SBT"}
                 </h3>
                 <p className="text-white/80 mb-2">
@@ -148,31 +159,43 @@ export function DashboardHeader({ daysOnBus }: DashboardHeaderProps) {
                     : "Community Member"}
                 </p>
 
-                {/* Stats */}
+                {/* Stats in Oil Blobs */}
                 <div className="grid grid-cols-2 gap-2 text-xs text-white/60 mb-4">
-                  <div>POATs: {userData.poatCount}</div>
-                  <div>Rank: {userData.streetTeamRank}</div>
-                  <div>Referrals: {userData.referralCount}</div>
-                  <div>Saved: ${userData.discountsSaved}</div>
+                  <div className="psychedelic-gradient-1 oil-blob-3 p-2 text-center">
+                    <div className="text-white font-bold">POATs</div>
+                    <div>{userData.poatCount}</div>
+                  </div>
+                  <div className="psychedelic-gradient-2 oil-blob p-2 text-center">
+                    <div className="text-white font-bold">Rank</div>
+                    <div>{userData.streetTeamRank}</div>
+                  </div>
+                  <div className="psychedelic-gradient-3 oil-blob-2 p-2 text-center">
+                    <div className="text-white font-bold">Referrals</div>
+                    <div>{userData.referralCount}</div>
+                  </div>
+                  <div className="psychedelic-gradient-1 oil-blob p-2 text-center">
+                    <div className="text-white font-bold">Saved</div>
+                    <div>${userData.discountsSaved}</div>
+                  </div>
                 </div>
 
-                <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden">
-                  <div className="h-full aurora-gradient w-3/4 rounded-full"></div>
+                <div className="mt-4 h-2 bg-white/20 rounded-full overflow-hidden oil-blob">
+                  <div className="h-full psychedelic-gradient-2 w-3/4 rounded-full viscous-drip"></div>
                 </div>
-                <p className="text-sm text-white/60 mt-2">Click to flip</p>
+                <p className="text-sm text-white/60 mt-2 liquid-chrome">Click to flip</p>
               </div>
             </div>
 
             <div
-              className={`absolute inset-0 p-8 ${isFlipped ? "opacity-100" : "opacity-0"} transition-opacity duration-300 rotate-y-180`}
+              className={`absolute inset-0 p-8 ${isFlipped ? "opacity-100" : "opacity-0"} transition-opacity duration-300 rotate-y-180 relative z-10`}
             >
               <div className="text-center">
-                <div className="w-32 h-32 mx-auto mb-4 bg-white rounded-lg flex items-center justify-center spiral-animation">
-                  <div className="text-black text-xs font-bold">
+                <div className="w-32 h-32 mx-auto mb-4 psychedelic-gradient-3 oil-blob flex items-center justify-center spiral-animation">
+                  <div className="text-white text-xs font-bold liquid-chrome">
                     {userData.membershipType === "genesis" ? "GENESIS QR" : "MEMBER QR"}
                   </div>
                 </div>
-                <p className="text-sm text-white/80 mb-2">
+                <p className="text-sm text-white/80 mb-2 liquid-chrome">
                   {userData.membershipType === "genesis" ? "20% Discount" : "10% Discount"}
                 </p>
                 <p className="text-xs text-white/60">Member since: {userData.verificationDate}</p>
@@ -180,8 +203,8 @@ export function DashboardHeader({ daysOnBus }: DashboardHeaderProps) {
 
                 {/* Blockchain Status */}
                 <div className="mt-3 flex items-center justify-center gap-2 text-xs">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-white/60">Berachain Verified</span>
+                  <div className="w-2 h-2 psychedelic-gradient-1 oil-blob animate-pulse"></div>
+                  <span className="text-white/60 liquid-chrome">Berachain Verified</span>
                 </div>
               </div>
             </div>

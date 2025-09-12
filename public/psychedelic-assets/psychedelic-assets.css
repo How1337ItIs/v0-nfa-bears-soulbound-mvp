@@ -1,0 +1,36 @@
+
+/* Psychedelic Asset CSS Classes */
+.psychedelic-oil-blob-oilslick {
+  background-image: url('/psychedelic-assets/oil-blob-oilSlick.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.psychedelic-oil-blob-lavalamp {
+  background-image: url('/psychedelic-assets/oil-blob-lavaLamp.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.psychedelic-oil-blob-tiedye {
+  background-image: url('/psychedelic-assets/oil-blob-tieDye.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.psychedelic-kaleidoscope-frame {
+  background-image: url('/psychedelic-assets/kaleidoscope-frame.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.psychedelic-background {
+  background-image: url('/psychedelic-assets/psychedelic-background.svg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}

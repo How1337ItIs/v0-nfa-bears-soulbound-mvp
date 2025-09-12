@@ -63,7 +63,7 @@ export default function DesktopHomePage() {
             <div className="text-6xl dancing-bear">🐻</div>
             
             {/* Main Heading */}
-            <h1 className="text-6xl lg:text-7xl font-bold text-white leading-tight glow-text">
+            <h1 className="text-6xl lg:text-7xl font-bold leading-tight psychedelic-text-advanced glow-text">
               NFA Bears
             </h1>
             
@@ -113,12 +113,6 @@ export default function DesktopHomePage() {
               </svg>
             </div>
             
-            {/* Floating Elements */}
-            <div className="absolute inset-0">
-              <div className="absolute top-10 right-20 text-2xl animate-float-particle">⚡</div>
-              <div className="absolute bottom-20 left-10 text-2xl animate-float-particle" style={{animationDelay: "2s"}}>🌹</div>
-              <div className="absolute top-1/2 left-0 text-2xl animate-float-particle" style={{animationDelay: "4s"}}>💀</div>
-            </div>
           </div>
         </div>
       </div>
@@ -139,7 +133,7 @@ export default function DesktopHomePage() {
 
       {/* Features Grid */}
       <div className="mb-16">
-        <h2 className="text-4xl font-bold text-white text-center mb-12 glow-text">
+        <h2 className="text-4xl font-bold text-center mb-12 psychedelic-text-advanced glow-text">
           What Awaits You in the Family
         </h2>
         

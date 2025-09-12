@@ -1,0 +1,15 @@
+
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="oilGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ff0080;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#8000ff;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#0080ff;stop-opacity:0.4" />
+    </radialGradient>
+    <filter id="oilSlick">
+      <feGaussianBlur stdDeviation="2"/>
+      <feColorMatrix values="1.2 0 0 0 0  0 1.2 0 0 0  0 0 1.2 0 0  0 0 0 1 0"/>
+    </filter>
+  </defs>
+  <path d="M 184.3841104585838,100 Q 191.1040541251204,191.1040541251204 100.00000000000001,220.46134305024952 Q 51.344639553954636,148.65536044604536 -38.9544499640171,100.00000000000001 Q 42.953791182861096,42.95379118286112 99.99999999999999,32.170508820029724 Q 190.74036774189628,9.259632258103679 184.3841104585838,100 Z" fill="url(#oilGradient)" filter="url(#oilSlick)" opacity="0.7"/>
+</svg>

@@ -2,11 +2,6 @@
 
 # dependencies
 /node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
 
 # next.js
 /.next/
@@ -15,33 +10,14 @@
 # production
 /build
 
-# misc
-.DS_Store
-*.pem
-
 # debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
-# local env files - CRITICAL SECURITY
-.env*.local
-.env
-.env.production
-.env.development
-.env.staging
-*.env
-
-# Private keys and secrets - NEVER COMMIT THESE
-*.key
-secrets/
-keys/
-hardhat.config.*.key
-
-# Blockchain artifacts
-cache/
-artifacts/
-typechain-types/
+# env files
+.env*
 
 # vercel
 .vercel

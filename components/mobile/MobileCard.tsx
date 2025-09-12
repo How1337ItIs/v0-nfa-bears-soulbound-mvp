@@ -14,9 +14,9 @@ export function MobileCard({ children, variant = "default", className, onClick }
   const baseClasses = "rounded-2xl p-6 transition-all duration-300"
 
   const variants = {
-    default: "bg-white/5 border border-white/10",
-    glassmorphic: "bg-white/5 backdrop-blur-md border border-white/10 shadow-lg",
-    hero: "bg-gradient-to-br from-[#1a1aff]/20 to-[#ff3366]/10 border border-[#1a1aff]/30 shadow-xl shadow-[#1a1aff]/20",
+    default: "bg-white/5 border border-white/10 psychedelic-optimized",
+    glassmorphic: "psychedelic-card-advanced glassmorphic-flow backdrop-blur-md shadow-lg psychedelic-optimized",
+    hero: "psychedelic-card-advanced organic-morph bg-gradient-to-br from-[#1a1aff]/20 to-[#ff3366]/10 border border-[#1a1aff]/30 shadow-xl shadow-[#1a1aff]/20 psychedelic-optimized",
   }
 
   const interactiveClasses = onClick ? "cursor-pointer hover:scale-[1.02] active:scale-[0.98]" : ""
