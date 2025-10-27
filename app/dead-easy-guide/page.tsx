@@ -1,12 +1,6 @@
-'use client';
-
-import { useAccount } from 'wagmi';
-import { usePrivy } from '@privy-io/react-auth';
 import Link from 'next/link';
 
 export default function DeadEasyGuidePage() {
-  const { address } = useAccount();
-  const { authenticated } = usePrivy();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">

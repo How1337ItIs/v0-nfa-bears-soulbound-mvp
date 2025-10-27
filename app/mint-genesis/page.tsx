@@ -1,139 +1,171 @@
-'use client';
+'use client'
 
-export const dynamic = 'force-dynamic';
+import { useState, useEffect } from 'react'
+import {
+  ThirdwebProvider,
+  ConnectWallet,
+  Web3Button,
+  useContract,
+  useContractRead,
+  useAddress,
+  useChainId,
+  useSwitchChain,
+} from "@thirdweb-dev/react"
+import { Berachain } from "@thirdweb-dev/chains"
+import { ethers } from "ethers"
 
+const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_GENESIS_BEARS_CONTRACT || ""
+const THIRDWEB_CLIENT_ID = process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || ""
+const BASE_PRICE = "333"
+const MAX_SUPPLY = 710
+const GIFT_BOX_THRESHOLD = 100
 
-import { useState, useEffect } from 'react';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useSwitchChain } from 'wagmi';
-import { parseEther } from 'viem';
-import { toast } from 'react-hot-toast';
-import { usePrivy, useWallets } from '@privy-io/react-auth';
-
-const GENESIS_BEARS_ADDRESS = process.env.NEXT_PUBLIC_GENESIS_BEARS_CONTRACT as `0x${string}`;
-const BERACHAIN_TESTNET_ID = 80069; // Berachain Bepolia testnet
-
-const GENESIS_BEARS_ABI = [
-  {
-    "inputs": [{"internalType": "uint256", "name": "quantity", "type": "uint256"}],
-    "name": "publicMint",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
-] as const;
+// Berachain Bepolia configuration
+const bepoliaChain = {
+  ...Berachain,
+  chainId: 80069,
+  rpc: ["https://bepolia.rpc.berachain.com/"],
+  nativeCurrency: {
+    name: "BERA",
+    symbol: "BERA",
+    decimals: 18,
+  },
+  testnet: true,
+  name: "Berachain Bepolia Testnet",
+}
 
 export default function MintGenesisPage() {
-  const { address, isConnected, chain } = useAccount();
-  const chainId = useChainId();
-  const { switchChainAsync } = useSwitchChain();
-  const { login } = usePrivy();
-  const { wallets } = useWallets();
-  const [quantity, setQuantity] = useState(1);
-  const [isMintingLocal, setIsMintingLocal] = useState(false);
-  const { writeContractAsync, data: hash, error, isPending } = useWriteContract();
-  
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
-    hash,
-  });
+  return (
+    <ThirdwebProvider
+      activeChain={bepoliaChain}
+      clientId={THIRDWEB_CLIENT_ID}
+      supportedChains={[bepoliaChain]}
+    >
+      <MintPageContent />
+    </ThirdwebProvider>
+  )
+}
 
-  // wagmi v2 pattern: Atomic chain switching + transaction
-  const mintWithChainSwitch = async () => {
+function MintPageContent() {
+  const address = useAddress()
+  const chainId = useChainId()
+  const switchChain = useSwitchChain()
+  const { contract } = useContract(CONTRACT_ADDRESS)
+
+  const [discountCode, setDiscountCode] = useState('')
+  const [finalPrice, setFinalPrice] = useState(BASE_PRICE)
+  const [appliedDiscount, setAppliedDiscount] = useState(0)
+  const [isCheckingCode, setIsCheckingCode] = useState(false)
+  const [quantity, setQuantity] = useState(1)
+
+  // Read contract state
+  const { data: totalSupply } = useContractRead(contract, "totalSupply")
+  const minted = totalSupply ? totalSupply.toNumber() : 0
+  const remaining = MAX_SUPPLY - minted
+  const boxesRemaining = Math.max(0, GIFT_BOX_THRESHOLD - minted)
+  const isWrongNetwork = chainId !== 80069
+
+  // Calculate final price based on quantity
+  useEffect(() => {
+    const baseTotal = parseFloat(BASE_PRICE) * quantity
+    const discountedTotal = baseTotal * (1 - appliedDiscount / 100)
+    setFinalPrice(discountedTotal.toFixed(2))
+  }, [quantity, appliedDiscount])
+
+  // Check discount code
+  const checkDiscountCode = async () => {
+    if (!contract || !discountCode.trim()) {
+      alert('Please enter a discount code')
+      return
+    }
+
+    setIsCheckingCode(true)
     try {
-      // Step 1: Check if we need to switch chains
-      if (chain?.id !== BERACHAIN_TESTNET_ID) {
-        console.log(`Switching from chain ${chain?.id} to Bepolia (${BERACHAIN_TESTNET_ID})`);
-        toast('Switching to Berachain Bepolia testnet...');
-        
-        await switchChainAsync({ chainId: BERACHAIN_TESTNET_ID });
-        toast.success('✅ Switched to Berachain Bepolia testnet');
-      }
+      // Hash the code to check on-chain
+      const codeHash = ethers.utils.keccak256(
+        ethers.utils.toUtf8Bytes(discountCode.toUpperCase())
+      )
 
-      // Step 2: Execute the transaction atomically
-      console.log('Executing mint transaction on Bepolia...');
-      const result = await writeContractAsync({
-        address: GENESIS_BEARS_ADDRESS,
-        abi: GENESIS_BEARS_ABI,
-        functionName: 'publicMint',
-        args: [BigInt(quantity)],
-        // Let wagmi handle gas estimation automatically
-      });
-      
-      toast.success('Genesis Bears mint transaction submitted!');
-      return result;
-      
-    } catch (error: any) {
-      console.error('Mint with chain switch failed:', error);
-      
-      // Handle specific error types
-      if (error?.code === 4001) {
-        toast.error('🚫 Looks like you changed your mind - that\'s cool, we\'ll get everything just exactly perfect when you\'re ready');
-      } else if (error?.message?.includes('Chain not configured')) {
-        toast.error('⚠️ Our crack equipment team needs Berachain Bepolia to get everything just exactly perfect!');
-      } else if (error?.message?.includes('User rejected')) {
-        toast.error('🚫 Come on, Bear, get it together! Network switch rejected.');
+      const discountPercent = await contract.call("discountPercents", [codeHash])
+      const discount = discountPercent.toNumber()
+
+      if (discount > 0) {
+        // Check if user already used a discount
+        const hasUsed = await contract.call("hasUsedDiscount", [address])
+
+        if (hasUsed) {
+          alert('You have already used a discount code')
+        } else {
+          setAppliedDiscount(discount)
+          alert(`✓ ${discount}% discount applied!`)
+        }
       } else {
-        toast.error(`Things are really weird up here: ${error.message || 'Beyond the pale, man'}`);
+        alert('Invalid discount code')
       }
-      throw error;
-    }
-  };
-
-  // Only display network status, don't auto-switch on connection (2025 UX best practice)
-
-  const mintGenesisBears = async () => {
-    if (!isConnected || !address) {
-      toast.error('Alright, alright... you don\'t have to scream at us - connect your wallet first!');
-      return;
-    }
-
-    if (!GENESIS_BEARS_ADDRESS) {
-      toast.error('We lost the keys to the wardrobe - Genesis Bears contract not configured');
-      return;
-    }
-
-    if (isMintingLocal) {
-      return; // Prevent multiple clicks
-    }
-
-    setIsMintingLocal(true);
-    try {
-      // Use the new atomic chain switching + transaction pattern
-      await mintWithChainSwitch();
     } catch (error) {
-      // Error already handled in mintWithChainSwitch
+      console.error('Error checking code:', error)
+      alert('Invalid discount code')
     } finally {
-      setIsMintingLocal(false);
+      setIsCheckingCode(false)
     }
-  };
+  }
 
-  // Show network warning if on wrong chain
-  const isWrongNetwork = isConnected && chainId !== BERACHAIN_TESTNET_ID;
+  const handleMintSuccess = () => {
+    // Check if user should fill out shipping form
+    if (minted < GIFT_BOX_THRESHOLD) {
+      window.location.href = `/shipping/${minted + 1}`
+    } else {
+      alert('Successfully minted! Check your wallet.')
+    }
+  }
 
   return (
-    <div className="min-h-screen tie-dye-bg p-4 relative overflow-hidden">
-      {/* 60s Liquid Light Show Background */}
-      <div className="absolute inset-0 liquid-light-flow opacity-25"></div>
-      
-      {/* Floating Lava Lamp Blobs */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 psychedelic-gradient-1 oil-blob"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 psychedelic-gradient-2 oil-blob-2" style={{ animationDelay: "5s" }}></div>
-        <div className="absolute top-1/2 right-1/3 w-64 h-64 psychedelic-gradient-3 oil-blob-3" style={{ animationDelay: "10s" }}></div>
-        <div className="absolute bottom-1/4 left-1/3 w-72 h-72 psychedelic-gradient-1 oil-blob" style={{ animationDelay: "15s" }}></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
 
-      <div className="max-w-2xl mx-auto relative z-10">
-        {/* Network Warning - Oil Slick Style */}
-        {isWrongNetwork && (
-          <div className="mb-6 p-4 psychedelic-gradient-2 oil-blob-2 border border-white/20">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-5xl font-bold text-white mb-4">
+            🐻 Genesis Bears
+          </h1>
+          <p className="text-2xl text-purple-200">
+            By Pixelw00k | {MAX_SUPPLY} Unique NFTs
+          </p>
+          <p className="text-4xl font-bold text-yellow-300 mt-4">
+            ${finalPrice} {quantity > 1 && `(${quantity} Bears)`}
+          </p>
+        </div>
+
+        {/* Supply Counter */}
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8 border border-white/20">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-white text-lg font-semibold">Minted</span>
+            <span className="text-white text-3xl font-bold">{minted}/{MAX_SUPPLY}</span>
+          </div>
+          <div className="w-full bg-white/20 rounded-full h-4 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-500"
+              style={{ width: `${(minted / MAX_SUPPLY) * 100}%` }}
+            />
+          </div>
+          {boxesRemaining > 0 && (
+            <p className="text-yellow-300 font-bold text-center mt-4 text-lg animate-pulse">
+              🎁 Only {boxesRemaining} gift boxes remaining!
+            </p>
+          )}
+        </div>
+
+        {/* Wrong Network Warning */}
+        {address && isWrongNetwork && (
+          <div className="bg-red-500/20 backdrop-blur-lg rounded-2xl p-6 mb-8 border border-red-500/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white font-semibold liquid-chrome">⚠️ Wrong Network</p>
-                <p className="text-white/80 text-sm">Please switch to Berachain testnet to mint Genesis Bears</p>
+                <p className="text-white font-bold text-lg">⚠️ Wrong Network</p>
+                <p className="text-white/80">Please switch to Berachain Bepolia testnet</p>
               </div>
               <button
-                onClick={() => switchChainAsync({ chainId: BERACHAIN_TESTNET_ID }).catch(console.error)}
-                className="bg-white text-red-600 px-4 py-2 rounded-lg font-semibold hover:bg-red-50 transition-colors syrupy-button"
+                onClick={() => switchChain(80069)}
+                className="bg-white text-red-600 px-6 py-3 rounded-xl font-bold hover:bg-red-50 transition-all"
               >
                 Switch Network
               </button>
@@ -141,114 +173,237 @@ export default function MintGenesisPage() {
           </div>
         )}
 
-        {/* Main Mint Card - Lava Lamp Style */}
-        <div className="oil-glassmorphic oil-blob-2 shadow-lg p-8 relative overflow-hidden">
-          {/* Kaleidoscope Background */}
-          <div className="absolute inset-0 kaleidoscope opacity-10"></div>
-          
-          <h1 className="text-3xl font-bold text-white mb-6 psychedelic-text relative z-10">🐻 Genesis Bears Mint</h1>
-          
-          <div className="space-y-6 relative z-10">
-            {/* Wallet Address - Oil Blob Style */}
-            <div>
-              <label className="block text-sm font-medium text-white/90 mb-2 liquid-chrome">
-                Wallet Address
-              </label>
-              <div className="psychedelic-gradient-1 oil-blob-3 p-3">
-                <p className="font-mono text-sm text-white">
-                  {address || 'Not connected'}
-                </p>
-              </div>
+        {/* Main Mint Card */}
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 mb-8">
+
+          {/* Discount Code Section */}
+          <div className="mb-8">
+            <label className="block text-white font-semibold mb-3 text-lg">
+              Have a discount code?
+            </label>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={discountCode}
+                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                placeholder="ENTER CODE"
+                className="flex-1 px-4 py-3 bg-white/20 text-white placeholder-white/50 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+              <button
+                onClick={checkDiscountCode}
+                disabled={isCheckingCode || !address}
+                className="px-8 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isCheckingCode ? 'Checking...' : 'Apply'}
+              </button>
+            </div>
+            {appliedDiscount > 0 && (
+              <p className="text-green-400 font-semibold mt-3 text-lg">
+                ✓ {appliedDiscount}% discount applied!
+                {appliedDiscount === 25 && ' 🌟 OG Bear!'}
+                {appliedDiscount === 20 && ' 💎 Early Supporter!'}
+                {appliedDiscount === 15 && ' 🍯 Honey Jar Partner!'}
+                {appliedDiscount === 10 && ' 🎪 Pilot Event Attendee!'}
+              </p>
+            )}
+          </div>
+
+          {/* Quantity Selector */}
+          <div className="mb-8">
+            <label className="block text-white font-semibold mb-3 text-lg">
+              Quantity (max 3 per transaction)
+            </label>
+            <div className="flex gap-3">
+              {[1, 2, 3].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => setQuantity(num)}
+                  className={`flex-1 py-4 rounded-xl font-bold text-xl transition-all ${
+                    quantity === num
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white/20 text-white hover:bg-white/30'
+                  }`}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Purchase Options */}
+          <div className="space-y-4">
+
+            {/* Option 1: Buy with Card */}
+            <div className="bg-white/5 rounded-xl p-6 border border-white/20">
+              <h3 className="text-white font-bold text-xl mb-4">💳 Buy with Credit/Debit Card</h3>
+              <Web3Button
+                contractAddress={CONTRACT_ADDRESS}
+                action={(contract) =>
+                  contract.call("claim", [
+                    address,
+                    quantity,
+                    discountCode.toUpperCase() || ""
+                  ], {
+                    value: ethers.utils.parseEther((parseFloat(finalPrice) / quantity).toString())
+                  })
+                }
+                onSuccess={handleMintSuccess}
+                onError={(error) => {
+                  console.error(error)
+                  alert('Mint failed: ' + error.message)
+                }}
+                className="!w-full !bg-gradient-to-r !from-purple-600 !to-pink-600 !text-white !font-bold !py-4 !rounded-xl hover:!from-purple-700 hover:!to-pink-700 !transition-all"
+                contractAbi={[
+                  {
+                    "inputs": [
+                      {"internalType": "address", "name": "_receiver", "type": "address"},
+                      {"internalType": "uint256", "name": "_quantity", "type": "uint256"},
+                      {"internalType": "string", "name": "_discountCode", "type": "string"}
+                    ],
+                    "name": "claim",
+                    "outputs": [],
+                    "stateMutability": "payable",
+                    "type": "function"
+                  }
+                ]}
+              >
+                Buy for ${finalPrice}
+              </Web3Button>
+              <p className="text-white/60 text-sm mt-3 text-center">
+                No wallet needed - we'll create one for you
+              </p>
             </div>
 
-            {/* Contract Address - Oil Blob Style */}
-            <div>
-              <label className="block text-sm font-medium text-white/90 mb-2 liquid-chrome">
-                Genesis Bears Contract (Berachain Testnet)
-              </label>
-              <div className="psychedelic-gradient-2 oil-blob p-3">
-                <p className="font-mono text-sm text-white">
-                  {GENESIS_BEARS_ADDRESS || 'Not configured'}
-                </p>
-              </div>
-            </div>
-
-            {/* Quantity Selector - Melting Style */}
-            <div>
-              <label className="block text-sm font-medium text-white/90 mb-2 liquid-chrome">
-                Quantity (max 3 per transaction, 5 per wallet)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="1"
-                  max="3"
-                  value={quantity}
-                  onChange={(e) => setQuantity(Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-white/90 text-gray-900 placeholder-gray-500 border border-white/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white syrupy-button"
+            {/* Option 2: Buy with Crypto Wallet */}
+            <div className="bg-white/5 rounded-xl p-6 border border-white/20">
+              <h3 className="text-white font-bold text-xl mb-4">🦊 Buy with Crypto Wallet</h3>
+              {!address ? (
+                <ConnectWallet
+                  className="!w-full !bg-blue-600 !text-white !font-bold !py-4 !rounded-xl"
                 />
-                {/* Floating Oil Droplets around input */}
-                <div className="absolute -top-2 -right-2 w-3 h-3 psychedelic-gradient-3 oil-blob-2 opacity-60"></div>
-                <div className="absolute -bottom-2 -left-2 w-2 h-2 psychedelic-gradient-1 oil-blob-3 opacity-50"></div>
-              </div>
+              ) : (
+                <Web3Button
+                  contractAddress={CONTRACT_ADDRESS}
+                  action={(contract) =>
+                    contract.call("claim", [
+                      address,
+                      quantity,
+                      discountCode.toUpperCase() || ""
+                    ], {
+                      value: ethers.utils.parseEther((parseFloat(finalPrice) / quantity).toString())
+                    })
+                  }
+                  onSuccess={handleMintSuccess}
+                  onError={(error) => {
+                    console.error(error)
+                    alert('Mint failed: ' + error.message)
+                  }}
+                  className="!w-full !bg-gradient-to-r !from-blue-600 !to-indigo-600 !text-white !font-bold !py-4 !rounded-xl hover:!from-blue-700 hover:!to-indigo-700 !transition-all"
+                  contractAbi={[
+                    {
+                      "inputs": [
+                        {"internalType": "address", "name": "_receiver", "type": "address"},
+                        {"internalType": "uint256", "name": "_quantity", "type": "uint256"},
+                        {"internalType": "string", "name": "_discountCode", "type": "string"}
+                      ],
+                      "name": "claim",
+                      "outputs": [],
+                      "stateMutability": "payable",
+                      "type": "function"
+                    }
+                  ]}
+                >
+                  Mint {quantity} Genesis Bear{quantity > 1 ? 's' : ''}
+                </Web3Button>
+              )}
+              <p className="text-white/60 text-sm mt-3 text-center">
+                MetaMask, Coinbase Wallet, WalletConnect supported
+              </p>
             </div>
 
-            {/* Mint Button - Psychedelic Style */}
-            <button
-              onClick={mintGenesisBears}
-              disabled={isMintingLocal || isPending || isConfirming || !address || isWrongNetwork}
-              className="w-full psychedelic-gradient-1 oil-blob text-white font-bold py-3 px-6 syrupy-button disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
-            >
-              {isMintingLocal || isPending || isConfirming ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  <span className="liquid-chrome">
-                    {isMintingLocal ? 'Preparing mint...' : isPending ? 'Confirming...' : 'Waiting for confirmation...'}
-                  </span>
-                </div>
-              ) : (
-                <span className="liquid-chrome">
-                  `Mint ${quantity} Genesis Bear${quantity !== 1 ? 's' : ''} (FREE on Testnet)`
-                </span>
-              )}
-            </button>
-
-            {/* Error State - Trippy Morphing Style */}
-            {error && (
-              <div className="p-4 psychedelic-gradient-2 oil-blob-2 border border-white/20">
-                <p className="text-white font-semibold liquid-chrome">Transaction Failed</p>
-                <p className="text-white/80 text-sm">{error.message}</p>
-              </div>
-            )}
-
-            {/* Success State - Psychedelic Style */}
-            {hash && (
-              <div className="p-4 psychedelic-gradient-1 oil-blob-3 border border-white/20">
-                <p className="text-white font-semibold liquid-chrome">Transaction Submitted!</p>
-                <p className="text-white/80 text-sm">
-                  Hash: <span className="font-mono break-all">{hash}</span>
-                </p>
-                <p className="text-white/80 text-sm mt-2">
-                  Check <a href={`https://bepolia.beratrail.io/tx/${hash}`} target="_blank" rel="noopener noreferrer" className="underline hover:text-white liquid-chrome">Berachain Explorer</a>
-                </p>
-              </div>
-            )}
+            {/* Option 3: Cross-Chain Purchase */}
+            <div className="bg-white/5 rounded-xl p-6 border border-white/20">
+              <h3 className="text-white font-bold text-xl mb-4">🌉 Buy from ETH/Base/Polygon</h3>
+              <Web3Button
+                contractAddress={CONTRACT_ADDRESS}
+                action={(contract) =>
+                  contract.call("claim", [
+                    address,
+                    quantity,
+                    discountCode.toUpperCase() || ""
+                  ], {
+                    value: ethers.utils.parseEther((parseFloat(finalPrice) / quantity).toString())
+                  })
+                }
+                onSuccess={handleMintSuccess}
+                onError={(error) => {
+                  console.error(error)
+                  alert('Mint failed: ' + error.message)
+                }}
+                className="!w-full !bg-gradient-to-r !from-green-600 !to-teal-600 !text-white !font-bold !py-4 !rounded-xl hover:!from-green-700 hover:!to-teal-700 !transition-all"
+                contractAbi={[
+                  {
+                    "inputs": [
+                      {"internalType": "address", "name": "_receiver", "type": "address"},
+                      {"internalType": "uint256", "name": "_quantity", "type": "uint256"},
+                      {"internalType": "string", "name": "_discountCode", "type": "string"}
+                    ],
+                    "name": "claim",
+                    "outputs": [],
+                    "stateMutability": "payable",
+                    "type": "function"
+                  }
+                ]}
+              >
+                Buy from Other Chain
+              </Web3Button>
+              <p className="text-white/60 text-sm mt-3 text-center">
+                Automatically bridges from Ethereum, Base, Polygon, etc.
+              </p>
+            </div>
           </div>
+        </div>
 
-          {/* Instructions - Oil Slick Style */}
-          <div className="mt-8 p-4 psychedelic-gradient-3 oil-blob border border-white/20 relative z-10">
-            <h3 className="font-semibold text-white mb-2 liquid-chrome">📋 Instructions:</h3>
-            <ol className="text-white/80 text-sm space-y-1 list-decimal list-inside">
-              <li>Connect your wallet</li>
-              <li>Switch to Berachain testnet (will auto-prompt)</li>
-              <li>Get testnet BERA from <a href="https://bepolia.faucet.berachain.com/" target="_blank" rel="noopener noreferrer" className="text-white underline hover:text-white/80 liquid-chrome">Bepolia Faucet</a></li>
-              <li>Choose quantity (1-3 bears per transaction)</li>
-              <li>Click "Mint Genesis Bears" and approve transaction</li>
-              <li>Wait for confirmation - you'll become a Genesis holder!</li>
-            </ol>
+        {/* Gift Box Details */}
+        {boxesRemaining > 0 && (
+          <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-lg rounded-2xl p-8 border-2 border-yellow-400/50 mb-8">
+            <h3 className="text-white font-bold text-2xl mb-4 text-center">
+              🎁 First 100 Buyers Get Gift Box:
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 text-white">
+                <span className="text-3xl">📿</span>
+                <span className="text-lg">Sterling Silver NFA Bears Pendant</span>
+              </div>
+              <div className="flex items-center gap-3 text-white">
+                <span className="text-3xl">👕</span>
+                <span className="text-lg">Hand-Dyed Premium T-Shirt</span>
+              </div>
+              <div className="flex items-center gap-3 text-white">
+                <span className="text-3xl">🎨</span>
+                <span className="text-lg">Exclusive Sticker Pack</span>
+              </div>
+              <div className="flex items-center gap-3 text-white">
+                <span className="text-3xl">📜</span>
+                <span className="text-lg">Numbered Certificate (1-100)</span>
+              </div>
+            </div>
           </div>
+        )}
+
+        {/* Instructions */}
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+          <h3 className="text-white font-bold text-xl mb-4">📋 How It Works:</h3>
+          <ol className="text-white/90 space-y-3 text-lg list-decimal list-inside">
+            <li>Enter your discount code (if you have one)</li>
+            <li>Choose quantity (1-3 bears)</li>
+            <li>Select payment method (card, crypto wallet, or cross-chain)</li>
+            <li>Complete purchase</li>
+            <li>If you're in the first 100, you'll be redirected to enter shipping info</li>
+            <li>Welcome to the Genesis Bears family! 🐻</li>
+          </ol>
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -7,16 +7,6 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
 
-  // Turbopack configuration (Next.js 15.5+)
-  turbopack: {
-    rules: {
-      "*.svg": {
-        loaders: ["@svgr/webpack"],
-        as: "*.js",
-      },
-    },
-  },
-
   // Aggressive bundle optimization for fast compilation
   experimental: {
     // Optimize server actions
