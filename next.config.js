@@ -89,6 +89,14 @@ const nextConfig = {
       net: false,
       tls: false,
       crypto: false,
+      '@react-native-async-storage/async-storage': false,
+    }
+
+    // Ignore React Native modules in browser builds
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@react-native-async-storage/async-storage': false,
+      'react-native': false,
     }
 
     // Add caching for faster rebuilds

@@ -1,0 +1,43 @@
+
+> my-v0-project@0.1.0 build
+> next build
+
+   ▲ Next.js 15.2.4
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ⚠ Compiled with warnings
+
+./app/mint-genesis/page.tsx
+Attempted import error: 'Berachain' is not exported from '@thirdweb-dev/chains' (imported as 'Berachain').
+
+Import trace for requested module:
+./app/mint-genesis/page.tsx
+
+./app/mint-genesis/page.tsx
+Attempted import error: 'Berachain' is not exported from '@thirdweb-dev/chains' (imported as 'Berachain').
+
+Import trace for requested module:
+./app/mint-genesis/page.tsx
+
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+   Generating static pages (0/23) ...
+   Generating static pages (5/23) 
+   Generating static pages (11/23) 
+   Generating static pages (17/23) 
+Error occurred prerendering page "/mint-genesis". Read more: https://nextjs.org/docs/messages/prerender-error
+TypeError: p.defaultQueryOptions is not a function
+    at C:\Users\natha\nfa-bears-mvp\nfa-bears-mvp\.next\server\chunks\web3.js:25:43390
+    at T (C:\Users\natha\nfa-bears-mvp\nfa-bears-mvp\.next\server\chunks\web3.js:25:44412)
+    at eO (C:\Users\natha\nfa-bears-mvp\nfa-bears-mvp\.next\server\app\mint-genesis\page.js:340:6172)
+    at eY (C:\Users\natha\nfa-bears-mvp\nfa-bears-mvp\.next\server\app\mint-genesis\page.js:340:6662)
+    at U (C:\Users\natha\nfa-bears-mvp\nfa-bears-mvp\.next\server\app\mint-genesis\page.js:101:493)
+    at nL (C:\Users\natha\nfa-bears-mvp\nfa-bears-mvp\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:76:46773)
+    at nF (C:\Users\natha\nfa-bears-mvp\nfa-bears-mvp\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:76:48548)
+    at nq (C:\Users\natha\nfa-bears-mvp\nfa-bears-mvp\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:76:67434)
+    at nH (C:\Users\natha\nfa-bears-mvp\nfa-bears-mvp\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:76:65009)
+    at nV (C:\Users\natha\nfa-bears-mvp\nfa-bears-mvp\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:76:70865)
+Export encountered an error on /mint-genesis/page: /mint-genesis, exiting the build.
+ ⨯ Next.js build worker exited with code: 1 and signal: null
