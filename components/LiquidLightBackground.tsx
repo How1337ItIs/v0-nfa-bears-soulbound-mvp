@@ -1,1 +1,289 @@
-'use client';\n\nimport { useEffect, useRef, useState, useCallback } from 'react';\nimport { AUTHENTIC_CONFIGS, DeviceCapabilities, detectDeviceCapabilities } from '@/lib/fluid/config';\nimport { setupThermalCurrents, setupGlobalMotion } from '@/lib/fluid/thermal';\nimport { useAudioReactive } from '@/lib/audio/useAudioReactive';\n\n// SINGLE ENGINE OF RECORD - webgl-fluid-enhanced only\n// Eliminates parallel CSS/WebGL systems per unified recommendation\n\ninterface PerformanceMetrics {\n  fps: number;\n  frameCount: number;\n  lastFpsCheck: number;\n  tier: 'high' | 'medium' | 'low';\n}\n\nexport default function LiquidLightBackground() {\n  const canvasRef = useRef<HTMLCanvasElement>(null);\n  const fluidRef = useRef<any>(null);\n  const performanceRef = useRef<PerformanceMetrics>({\n    fps: 60,\n    frameCount: 0,\n    lastFpsCheck: Date.now(),\n    tier: 'high'\n  });\n  \n  const [capabilities, setCapabilities] = useState<DeviceCapabilities | null>(null);\n  const [currentTier, setCurrentTier] = useState<'high' | 'medium' | 'low'>('high');\n  const [isLoaded, setIsLoaded] = useState(false);\n  const [hasError, setHasError] = useState(false);\n  \n  // Centralized audio reactivity (single analyzer)\n  const { audioData, physicsParams } = useAudioReactive();\n\n  // Device capability detection on mount\n  useEffect(() => {\n    const caps = detectDeviceCapabilities();\n    setCapabilities(caps);\n    setCurrentTier(caps.tier);\n  }, []);\n\n  // Auto-quality adjustment based on FPS monitoring\n  const monitorPerformance = useCallback(() => {\n    if (!capabilities) return;\n    \n    const now = Date.now();\n    performanceRef.current.frameCount++;\n    \n    // Check FPS every 60 frames (~1 second at 60fps)\n    if (performanceRef.current.frameCount % 60 === 0) {\n      const elapsed = now - performanceRef.current.lastFpsCheck;\n      const currentFps = Math.round(60000 / elapsed);\n      performanceRef.current.fps = currentFps;\n      \n      // Auto-quality step-down logic\n      if (currentFps < 25 && currentTier !== 'low') {\n        const newTier = currentTier === 'high' ? 'medium' : 'low';\n        console.warn(`Performance degradation: ${currentFps}fps, stepping down to ${newTier}`);\n        setCurrentTier(newTier);\n      } else if (currentFps > 50 && currentTier !== capabilities.tier) {\n        const newTier = currentTier === 'low' ? 'medium' : capabilities.tier;\n        console.log(`Performance improved: ${currentFps}fps, stepping up to ${newTier}`);\n        setCurrentTier(newTier);\n      }\n      \n      performanceRef.current.lastFpsCheck = now;\n    }\n  }, [capabilities, currentTier]);\n\n  // Main fluid engine initialization\n  useEffect(() => {\n    const canvas = canvasRef.current;\n    if (!canvas || !capabilities?.webgl || hasError) return;\n\n    let cleanupFunctions: (() => void)[] = [];\n    \n    const initFluid = async () => {\n      try {\n        // Dynamic import to avoid SSR issues\n        const { default: webGLFluidEnhanced } = await import('webgl-fluid-enhanced');\n        \n        // Get authentic config for current tier\n        const config = AUTHENTIC_CONFIGS[currentTier];\n        \n        // Initialize fluid with authentic 60s parameters\n        const fluidInstance = webGLFluidEnhanced.simulation(canvas, {\n          ...config,\n          // Ensure proper canvas setup\n          TRANSPARENT: true,\n          INITIAL: true,\n          HOVER: true\n        });\n        \n        fluidRef.current = fluidInstance;\n        setIsLoaded(true);\n        \n        // Setup thermal convection (authentic physics)\n        const thermalCleanup = setupThermalCurrents(fluidInstance, canvas, physicsParams);\n        cleanupFunctions.push(thermalCleanup);\n        \n        // Setup subtle global motion to avoid digital stillness\n        const motionCleanup = setupGlobalMotion(fluidInstance, canvas);\n        cleanupFunctions.push(motionCleanup);\n        \n        // Start performance monitoring\n        let animationId: number;\n        const performanceLoop = () => {\n          monitorPerformance();\n          animationId = requestAnimationFrame(performanceLoop);\n        };\n        performanceLoop();\n        \n        cleanupFunctions.push(() => cancelAnimationFrame(animationId));\n        \n        console.log(`Liquid light initialized: tier ${currentTier}, config:`, config);\n        \n      } catch (error) {\n        console.error('Fluid initialization failed:', error);\n        setHasError(true);\n      }\n    };\n    \n    initFluid();\n    \n    // Cleanup function\n    return () => {\n      cleanupFunctions.forEach(cleanup => cleanup());\n      if (fluidRef.current?.dispose) {\n        fluidRef.current.dispose();\n      }\n    };\n  }, [capabilities, currentTier, hasError, monitorPerformance, physicsParams]);\n\n  // Canvas resize handling\n  useEffect(() => {\n    const canvas = canvasRef.current;\n    if (!canvas) return;\n\n    const resizeCanvas = () => {\n      canvas.width = window.innerWidth;\n      canvas.height = window.innerHeight;\n    };\n    \n    resizeCanvas();\n    window.addEventListener('resize', resizeCanvas);\n    return () => window.removeEventListener('resize', resizeCanvas);\n  }, []);\n\n  // Handle WebGL context lost\n  useEffect(() => {\n    const canvas = canvasRef.current;\n    if (!canvas) return;\n\n    const handleContextLost = (event: Event) => {\n      event.preventDefault();\n      console.warn('WebGL context lost, falling back to CSS');\n      setHasError(true);\n    };\n\n    canvas.addEventListener('webglcontextlost', handleContextLost);\n    return () => canvas.removeEventListener('webglcontextlost', handleContextLost);\n  }, []);\n\n  // Audio reactivity integration\n  useEffect(() => {\n    if (!fluidRef.current || !audioData || !isLoaded) return;\n    \n    // Apply audio-reactive physics parameters\n    const { splatForce, thermalRate } = physicsParams;\n    \n    // Beat-triggered splats\n    if (audioData.beatDetected && fluidRef.current.splat) {\n      const canvas = canvasRef.current;\n      if (canvas) {\n        const x = Math.random() * canvas.width;\n        const y = Math.random() * canvas.height;\n        const vx = (Math.random() - 0.5) * splatForce;\n        const vy = (Math.random() - 0.5) * splatForce;\n        const color = [1, 0.8, 0.2]; // Beat color\n        \n        fluidRef.current.splat(x, y, vx, vy, color);\n      }\n    }\n  }, [audioData, physicsParams, isLoaded]);\n\n  // Strict fallback chain: WebGL → CSS fallback only\n  if (!capabilities?.webgl || hasError) {\n    return (\n      <div className=\"fixed inset-0 -z-10 w-full h-full pointer-events-none\">\n        <div className=\"w-full h-full bg-gradient-to-br from-purple-900/20 via-pink-900/20 to-blue-900/20 animate-pulse\" \n             style={{ animationDuration: '4s' }} />\n      </div>\n    );\n  }\n\n  return (\n    <>\n      {/* Development HUD */}\n      {process.env.NODE_ENV === 'development' && (\n        <div className=\"fixed top-4 right-4 z-50 text-white text-xs bg-black/70 p-3 rounded backdrop-blur\">\n          <div>FPS: {performanceRef.current.fps}</div>\n          <div>Tier: {currentTier} (max: {capabilities.tier})</div>\n          <div>Audio: Bass {audioData?.bass.toFixed(2)} | Mids {audioData?.mids.toFixed(2)} | Treble {audioData?.treble.toFixed(2)}</div>\n          <div>WebGL: {capabilities.webgl2 ? 'v2' : 'v1'} | Max Texture: {capabilities.maxTextureSize}</div>\n          <div>Memory: {capabilities.deviceMemory}GB | Mobile: {capabilities.mobile ? 'Yes' : 'No'}</div>\n        </div>\n      )}\n      \n      {/* Single full-viewport canvas - engine of record */}\n      <canvas\n        ref={canvasRef}\n        className=\"fixed inset-0 -z-10 w-full h-full pointer-events-none\"\n        style={{\n          mixBlendMode: 'screen',\n          opacity: 0.8,\n          background: 'transparent'\n        }}\n        role=\"img\"\n        aria-label=\"Authentic 1960s liquid light show background\"\n      />\n    </>\n  );\n}\n"
+'use client';
+
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { AUTHENTIC_CONFIGS, DeviceCapabilities, detectDeviceCapabilities } from '@/lib/fluid/config';
+import { setupThermalCurrents, setupGlobalMotion } from '@/lib/fluid/thermal';
+import { useAudioReactive } from '@/lib/audio/useAudioReactive';
+import { calculatePhysicsParams } from '@/lib/audio';
+import { PaletteDirector } from '@/lib/palette';
+import { CSSFallback, LiquidLightControls } from '@/components/liquid-light';
+
+// SINGLE ENGINE OF RECORD - webgl-fluid-enhanced only
+// Eliminates parallel CSS/WebGL systems per unified recommendation
+
+interface PerformanceMetrics {
+  fps: number;
+  frameCount: number;
+  lastFpsCheck: number;
+  tier: 'high' | 'medium' | 'low';
+}
+
+export default function LiquidLightBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fluidRef = useRef<any>(null);
+  const performanceRef = useRef<PerformanceMetrics>({
+    fps: 60,
+    frameCount: 0,
+    lastFpsCheck: Date.now(),
+    tier: 'high'
+  });
+  
+  const [capabilities, setCapabilities] = useState<DeviceCapabilities | null>(null);
+  const [currentTier, setCurrentTier] = useState<'high' | 'medium' | 'low'>('high');
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [intensity, setIntensity] = useState(1.0);
+  const [motionEnabled, setMotionEnabled] = useState(true);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [currentPalette, setCurrentPalette] = useState('psychedelic');
+  const [currentMode, setCurrentMode] = useState('ambient');
+  
+  // Centralized audio reactivity (single analyzer)
+  const { audioData } = useAudioReactive();
+  
+  // Calculate physics parameters using centralized mapping
+  const physicsParams = calculatePhysicsParams(audioData);
+
+  // Device capability detection on mount
+  useEffect(() => {
+    const caps = detectDeviceCapabilities();
+    setCapabilities(caps);
+    setCurrentTier(caps.tier);
+    
+    // Check for prefers-reduced-motion
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    // Listen for changes to prefers-reduced-motion
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+      if (e.matches) {
+        setMotionEnabled(false); // Auto-disable motion when user prefers reduced motion
+      }
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  // Auto-quality adjustment based on FPS monitoring
+  const monitorPerformance = useCallback(() => {
+    if (!capabilities) return;
+    
+    const now = Date.now();
+    performanceRef.current.frameCount++;
+    
+    // Check FPS every 60 frames (~1 second at 60fps)
+    if (performanceRef.current.frameCount % 60 === 0) {
+      const elapsed = now - performanceRef.current.lastFpsCheck;
+      const currentFps = Math.round(60000 / elapsed);
+      performanceRef.current.fps = currentFps;
+      
+      // Auto-quality step-down logic
+      if (currentFps < 25 && currentTier !== 'low') {
+        const newTier = currentTier === 'high' ? 'medium' : 'low';
+        console.warn(`Performance degradation: ${currentFps}fps, stepping down to ${newTier}`);
+        setCurrentTier(newTier);
+      } else if (currentFps > 50 && currentTier !== capabilities.tier) {
+        const newTier = currentTier === 'low' ? 'medium' : capabilities.tier;
+        console.log(`Performance improved: ${currentFps}fps, stepping up to ${newTier}`);
+        setCurrentTier(newTier);
+      }
+      
+      performanceRef.current.lastFpsCheck = now;
+    }
+  }, [capabilities, currentTier]);
+
+  // Main fluid engine initialization
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !capabilities?.webgl || hasError) return;
+
+    let cleanupFunctions: (() => void)[] = [];
+    
+    const initFluid = async () => {
+      try {
+        // Dynamic import to avoid SSR issues
+        const { default: webGLFluidEnhanced } = await import('webgl-fluid-enhanced');
+        
+        // Get authentic config for current tier
+        const config = AUTHENTIC_CONFIGS[currentTier];
+        
+        // Get current palette colors for fluid config
+        const currentPalette = PaletteDirector.getCurrentPalette();
+        const paletteColors = currentPalette.colors;
+        
+        // Initialize fluid with authentic 60s parameters and current palette
+        const fluidInstance = webGLFluidEnhanced.simulation(canvas, {
+          ...config,
+          // Override palette with current selection
+          COLOR_PALETTE: paletteColors,
+          // Apply intensity scaling to visual parameters
+          SPLAT_RADIUS: config.SPLAT_RADIUS * intensity,
+          DENSITY_DISSIPATION: config.DENSITY_DISSIPATION * intensity,
+          VELOCITY_DISSIPATION: config.VELOCITY_DISSIPATION * intensity,
+          // Ensure proper canvas setup
+          TRANSPARENT: true,
+          INITIAL: true,
+          HOVER: true
+        });
+        
+        fluidRef.current = fluidInstance;
+        setIsLoaded(true);
+        
+        // Setup thermal convection (authentic physics)
+        const thermalCleanup = setupThermalCurrents(fluidInstance, canvas, physicsParams);
+        cleanupFunctions.push(thermalCleanup);
+        
+        // Setup subtle global motion to avoid digital stillness
+        const motionCleanup = setupGlobalMotion(fluidInstance, canvas);
+        cleanupFunctions.push(motionCleanup);
+        
+        // Start performance monitoring
+        let animationId: number;
+        const performanceLoop = () => {
+          monitorPerformance();
+          animationId = requestAnimationFrame(performanceLoop);
+        };
+        performanceLoop();
+        
+        cleanupFunctions.push(() => cancelAnimationFrame(animationId));
+        
+        console.log(`Liquid light initialized: tier ${currentTier}, config:`, config);
+        
+      } catch (error) {
+        console.error('Fluid initialization failed:', error);
+        setHasError(true);
+      }
+    };
+    
+    initFluid();
+    
+    // Cleanup function
+    return () => {
+      cleanupFunctions.forEach(cleanup => cleanup());
+      if (fluidRef.current?.dispose) {
+        fluidRef.current.dispose();
+      }
+    };
+  }, [capabilities, currentTier, hasError, monitorPerformance, physicsParams]);
+
+  // Canvas resize handling
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    return () => window.removeEventListener('resize', resizeCanvas);
+  }, []);
+
+  // Handle WebGL context lost
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      console.warn('WebGL context lost, falling back to CSS');
+      setHasError(true);
+    };
+
+    canvas.addEventListener('webglcontextlost', handleContextLost);
+    return () => canvas.removeEventListener('webglcontextlost', handleContextLost);
+  }, []);
+
+  // Audio reactivity integration with intensity scaling
+  useEffect(() => {
+    if (!fluidRef.current || !audioData || !isLoaded) return;
+    
+    // Apply audio-reactive physics parameters with intensity scaling
+    const { splatForce, thermalRate, colorPhase, globalIntensity, curlStrength, viscosity } = physicsParams;
+    
+    // Apply physics parameters to fluid with intensity scaling (only if motion enabled and not reduced motion)
+    if (fluidRef.current.config && motionEnabled && !prefersReducedMotion) {
+      fluidRef.current.config.SPLAT_RADIUS = splatForce * intensity;
+      fluidRef.current.config.DENSITY_DISSIPATION = thermalRate * intensity;
+      fluidRef.current.config.VELOCITY_DISSIPATION = viscosity * intensity;
+      fluidRef.current.config.CURL = curlStrength * intensity;
+    } else if (fluidRef.current.config && (!motionEnabled || prefersReducedMotion)) {
+      // Disable motion when toggle is off
+      fluidRef.current.config.SPLAT_RADIUS = 0;
+      fluidRef.current.config.DENSITY_DISSIPATION = 0.98; // Static
+      fluidRef.current.config.VELOCITY_DISSIPATION = 0.98; // Static
+      fluidRef.current.config.CURL = 0;
+    }
+    
+    // Beat-triggered splats (intensity-scaled, only if motion enabled and not reduced motion)
+    if (audioData.beatDetected && fluidRef.current.splat && motionEnabled && !prefersReducedMotion) {
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const vx = (Math.random() - 0.5) * splatForce * intensity;
+        const vy = (Math.random() - 0.5) * splatForce * intensity;
+        // Use current palette for beat color instead of hardcoded
+        const beatColorIndex = Math.floor(Math.random() * currentPalette.colors.length);
+        const beatColor = PaletteDirector.getColorRGB(beatColorIndex);
+        
+        fluidRef.current.splat(x, y, vx, vy, beatColor);
+      }
+    }
+  }, [audioData, physicsParams, isLoaded, intensity, motionEnabled, prefersReducedMotion]);
+
+  // Strict fallback chain: WebGL → CSS fallback only
+  if (!capabilities?.webgl || hasError) {
+    return (
+      <CSSFallback 
+        intensity={intensity}
+        motionEnabled={motionEnabled && !prefersReducedMotion}
+        className="fixed inset-0 -z-10 w-full h-full pointer-events-none"
+      />
+    );
+  }
+
+  return (
+    <>
+      {/* Development HUD */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed top-4 right-4 z-50 text-white text-xs bg-black/70 p-3 rounded backdrop-blur">
+          <div>FPS: {performanceRef.current.fps}</div>
+          <div>Tier: {currentTier} (max: {capabilities.tier})</div>
+          <div>Audio: Bass {audioData?.bass.toFixed(2)} | Mids {audioData?.mids.toFixed(2)} | Treble {audioData?.treble.toFixed(2)}</div>
+          <div>WebGL: {capabilities.webgl2 ? 'v2' : 'v1'} | Max Texture: {capabilities.maxTextureSize}</div>
+          <div>Memory: {capabilities.deviceMemory}GB | Mobile: {capabilities.mobile ? 'Yes' : 'No'}</div>
+        </div>
+      )}
+      
+      {/* User Controls */}
+      <LiquidLightControls
+        onIntensityChange={setIntensity}
+        onPaletteChange={setCurrentPalette}
+        onModeChange={setCurrentMode}
+        onMotionToggle={setMotionEnabled}
+        intensity={intensity}
+        motionEnabled={motionEnabled}
+        prefersReducedMotion={prefersReducedMotion}
+        className="fixed top-4 left-4 z-50"
+      />
+      
+      {/* Single full-viewport canvas - engine of record */}
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 -z-10 w-full h-full pointer-events-none"
+        style={{
+          mixBlendMode: 'screen',
+          opacity: 0.8,
+          background: 'transparent'
+        }}
+        role="img"
+        aria-label="Authentic 1960s liquid light show background"
+      />
+    </>
+  );
+}

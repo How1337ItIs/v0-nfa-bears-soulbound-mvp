@@ -93,7 +93,8 @@ export function DesktopAppShell({ children }: DesktopAppShellProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#000011] relative overflow-hidden">
+    <>
+      <div className="min-h-screen bg-[#000011] relative overflow-hidden">
       {/* AUTHENTIC LIQUID LIGHT ENGINE - React Three Fiber with Real Physics */}
       <AuthenticLiquidLightEngine
         audioData={audioData}
@@ -571,6 +572,7 @@ export function DesktopAppShell({ children }: DesktopAppShellProps) {
 
       {/* Floating Music Player */}
       <FloatingMusicPlayer onAudioDataChange={setAudioData} />
-    </div>
+      </div>
+    </>
   )
 }

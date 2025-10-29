@@ -1,1 +1,281 @@
-'use client';\n\nimport { useEffect, useRef, useState, useCallback } from 'react';\n\n// PRODUCTION ENGINE OF RECORD - webgl-fluid-enhanced only\n// Eliminates parallel CSS/WebGL systems per ChatGPT-5 analysis\n\ninterface DeviceCapabilities {\n  webgl: boolean;\n  webgl2: boolean;\n  maxTextureSize: number;\n  deviceMemory: number;\n  mobile: boolean;\n  tier: 'high' | 'medium' | 'low';\n}\n\ninterface AuthenticConfig {\n  SIM_RESOLUTION: number;\n  DYE_RESOLUTION: number;\n  VELOCITY_DISSIPATION: number;\n  DENSITY_DISSIPATION: number;\n  CURL: number;\n  PRESSURE_ITERATIONS: number;\n  COLOR_PALETTE: string[];\n  TRANSPARENT: boolean;\n  INITIAL: boolean;\n  HOVER: boolean;\n}\n\n// Authentic 60s physics parameters (from all research synthesis)\nconst AUTHENTIC_CONFIGS: Record<string, AuthenticConfig> = {\n  high: {\n    SIM_RESOLUTION: 256,\n    DYE_RESOLUTION: 512,\n    VELOCITY_DISSIPATION: 0.4,   // Lava lamp viscosity\n    DENSITY_DISSIPATION: 0.92,   // Color persistence\n    CURL: 20,                    // Organic movement\n    PRESSURE_ITERATIONS: 25,     // Smooth boundaries\n    COLOR_PALETTE: [\n      '#ff0066', // Electric magenta - 650nm\n      '#00ffcc', // Cyan-turquoise - 485nm  \n      '#ffff33', // Electric yellow - 580nm\n      '#ff6600'  // Orange-red - 620nm\n    ],\n    TRANSPARENT: true,\n    INITIAL: true,\n    HOVER: true\n  },\n  medium: {\n    SIM_RESOLUTION: 192,\n    DYE_RESOLUTION: 384,\n    VELOCITY_DISSIPATION: 0.4,\n    DENSITY_DISSIPATION: 0.92,\n    CURL: 20,\n    PRESSURE_ITERATIONS: 20,\n    COLOR_PALETTE: ['#ff0066', '#00ffcc', '#ffff33', '#ff6600'],\n    TRANSPARENT: true,\n    INITIAL: true,\n    HOVER: true\n  },\n  low: {\n    SIM_RESOLUTION: 128,\n    DYE_RESOLUTION: 256,\n    VELOCITY_DISSIPATION: 0.5,\n    DENSITY_DISSIPATION: 0.9,\n    CURL: 15,\n    PRESSURE_ITERATIONS: 15,\n    COLOR_PALETTE: ['#ff0066', '#00ffcc', '#ffff33', '#ff6600'],\n    TRANSPARENT: true,\n    INITIAL: true,\n    HOVER: true\n  }\n};\n\nfunction detectDeviceCapabilities(): DeviceCapabilities {\n  const canvas = document.createElement('canvas');\n  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');\n  const gl2 = canvas.getContext('webgl2');\n  \n  if (!gl) {\n    return {\n      webgl: false,\n      webgl2: false,\n      maxTextureSize: 0,\n      deviceMemory: 2,\n      mobile: true,\n      tier: 'low'\n    };\n  }\n\n  const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);\n  const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);\n  const deviceMemory = (navigator as any).deviceMemory || (isMobile ? 3 : 8);\n  \n  // Performance tier determination (ChatGPT-5 recommendation)\n  let tier: 'high' | 'medium' | 'low' = 'low';\n  if (!isMobile && maxTextureSize >= 4096 && deviceMemory >= 8) {\n    tier = 'high';\n  } else if (maxTextureSize >= 2048 && deviceMemory >= 4) {\n    tier = 'medium';\n  }\n\n  return {\n    webgl: true,\n    webgl2: !!gl2,\n    maxTextureSize,\n    deviceMemory,\n    mobile: isMobile,\n    tier\n  };\n}\n\nexport default function ProductionLiquidEngine() {\n  const canvasRef = useRef<HTMLCanvasElement>(null);\n  const fluidRef = useRef<any>(null);\n  const performanceRef = useRef({ frameCount: 0, lastFpsCheck: Date.now() });\n  \n  const [capabilities, setCapabilities] = useState<DeviceCapabilities | null>(null);\n  const [currentTier, setCurrentTier] = useState<'high' | 'medium' | 'low'>('high');\n  const [fps, setFps] = useState(60);\n\n  // Device capability detection\n  useEffect(() => {\n    setCapabilities(detectDeviceCapabilities());\n  }, []);\n\n  // Thermal current simulation (authentic 60s physics)\n  const addThermalCurrents = useCallback(() => {\n    if (!fluidRef.current || !canvasRef.current) return;\n    \n    const canvas = canvasRef.current;\n    const x = Math.random() * canvas.width;\n    const y = canvas.height * (0.8 + Math.random() * 0.2); // Near bottom\n    \n    // Heat rises with authentic physics parameters\n    const force = 15 + Math.random() * 10;\n    const color = [1, 0.8, 0.2]; // Warm thermal color\n    \n    if (fluidRef.current.splat) {\n      fluidRef.current.splat(x, y, 0, -force, color);\n    }\n  }, []);\n\n  // Performance monitoring and auto-quality adjustment\n  useEffect(() => {\n    if (!capabilities) return;\n\n    let animationId: number;\n    \n    const monitorPerformance = () => {\n      const now = Date.now();\n      performanceRef.current.frameCount++;\n      \n      // Check FPS every 60 frames\n      if (performanceRef.current.frameCount % 60 === 0) {\n        const elapsed = now - performanceRef.current.lastFpsCheck;\n        const currentFps = Math.round(60000 / elapsed);\n        setFps(currentFps);\n        \n        // Auto-quality adjustment (ChatGPT-5 specification)\n        if (currentFps < 25 && currentTier !== 'low') {\n          const newTier = currentTier === 'high' ? 'medium' : 'low';\n          console.warn(`Performance degradation: ${currentFps}fps, reducing to ${newTier}`);\n          setCurrentTier(newTier);\n        } else if (currentFps > 50 && currentTier !== capabilities.tier) {\n          const newTier = currentTier === 'low' ? 'medium' : capabilities.tier;\n          setCurrentTier(newTier);\n        }\n        \n        performanceRef.current.lastFpsCheck = now;\n      }\n      \n      animationId = requestAnimationFrame(monitorPerformance);\n    };\n    \n    monitorPerformance();\n    return () => cancelAnimationFrame(animationId);\n  }, [capabilities, currentTier]);\n\n  // Fluid engine initialization\n  useEffect(() => {\n    const canvas = canvasRef.current;\n    if (!canvas || !capabilities?.webgl) return;\n\n    // Dynamic import to avoid SSR issues\n    import('webgl-fluid-enhanced').then(({ default: webGLFluidEnhanced }) => {\n      try {\n        const config = AUTHENTIC_CONFIGS[currentTier];\n        \n        // Initialize with authentic 60s parameters\n        const fluidInstance = webGLFluidEnhanced.simulation(canvas, config);\n        fluidRef.current = fluidInstance;\n\n        // Setup thermal convection (3-5 second intervals with randomness)\n        const thermalInterval = setInterval(addThermalCurrents, 3000 + Math.random() * 2000);\n        \n        // Slow global rotation for organic feel\n        let rotationPhase = 0;\n        const addGlobalMotion = () => {\n          if (fluidRef.current && canvas) {\n            rotationPhase += 0.01;\n            const centerX = canvas.width / 2;\n            const centerY = canvas.height / 2;\n            const radius = Math.min(canvas.width, canvas.height) * 0.3;\n            \n            const x = centerX + Math.cos(rotationPhase) * radius;\n            const y = centerY + Math.sin(rotationPhase) * radius;\n            const vx = -Math.sin(rotationPhase) * 2;\n            const vy = Math.cos(rotationPhase) * 2;\n            \n            if (fluidRef.current.splat) {\n              fluidRef.current.splat(x, y, vx, vy, [0.5, 0.5, 0.5]);\n            }\n          }\n          \n          setTimeout(addGlobalMotion, 1000);\n        };\n        addGlobalMotion();\n\n        // Cleanup function\n        return () => {\n          clearInterval(thermalInterval);\n          if (fluidInstance?.dispose) {\n            fluidInstance.dispose();\n          }\n        };\n      } catch (error) {\n        console.error('WebGL fluid initialization failed:', error);\n        setCapabilities(prev => prev ? { ...prev, webgl: false } : null);\n      }\n    }).catch(() => {\n      console.error('Failed to load webgl-fluid-enhanced');\n      setCapabilities(prev => prev ? { ...prev, webgl: false } : null);\n    });\n  }, [capabilities, currentTier, addThermalCurrents]);\n\n  // Canvas resize handler\n  useEffect(() => {\n    const canvas = canvasRef.current;\n    if (!canvas) return;\n\n    const resizeCanvas = () => {\n      canvas.width = window.innerWidth;\n      canvas.height = window.innerHeight;\n    };\n    \n    resizeCanvas();\n    window.addEventListener('resize', resizeCanvas);\n    return () => window.removeEventListener('resize', resizeCanvas);\n  }, []);\n\n  // CSS fallback for non-WebGL browsers (single fallback system)\n  if (!capabilities?.webgl) {\n    return (\n      <div className=\"fixed inset-0 -z-10 w-full h-full pointer-events-none\">\n        <div className=\"w-full h-full bg-gradient-to-br from-purple-900/20 via-pink-900/20 to-blue-900/20 animate-pulse\" />\n      </div>\n    );\n  }\n\n  return (\n    <>\n      {/* Performance monitoring display (dev mode) */}\n      {process.env.NODE_ENV === 'development' && (\n        <div className=\"fixed top-4 right-4 z-50 text-white text-xs bg-black/50 p-2 rounded\">\n          FPS: {fps} | Tier: {currentTier} | Device: {capabilities.tier}\n        </div>\n      )}\n      \n      {/* Single engine of record */}\n      <canvas\n        ref={canvasRef}\n        className=\"fixed inset-0 -z-10 w-full h-full pointer-events-none\"\n        style={{\n          mixBlendMode: 'screen',\n          opacity: 0.8\n        }}\n      />\n    </>\n  );\n}\n"
+'use client';
+
+import { useEffect, useRef, useState, useCallback } from 'react';
+
+// PRODUCTION ENGINE OF RECORD - webgl-fluid-enhanced only
+// Eliminates parallel CSS/WebGL systems per ChatGPT-5 analysis
+
+interface DeviceCapabilities {
+  webgl: boolean;
+  webgl2: boolean;
+  maxTextureSize: number;
+  deviceMemory: number;
+  mobile: boolean;
+  tier: 'high' | 'medium' | 'low';
+}
+
+interface AuthenticConfig {
+  SIM_RESOLUTION: number;
+  DYE_RESOLUTION: number;
+  VELOCITY_DISSIPATION: number;
+  DENSITY_DISSIPATION: number;
+  CURL: number;
+  PRESSURE_ITERATIONS: number;
+  COLOR_PALETTE: string[];
+  TRANSPARENT: boolean;
+  INITIAL: boolean;
+  HOVER: boolean;
+}
+
+// Authentic 60s physics parameters (from all research synthesis)
+const AUTHENTIC_CONFIGS: Record<string, AuthenticConfig> = {
+  high: {
+    SIM_RESOLUTION: 256,
+    DYE_RESOLUTION: 512,
+    VELOCITY_DISSIPATION: 0.4,   // Lava lamp viscosity
+    DENSITY_DISSIPATION: 0.92,   // Color persistence
+    CURL: 20,                    // Organic movement
+    PRESSURE_ITERATIONS: 25,     // Smooth boundaries
+    COLOR_PALETTE: [
+      '#ff0066', // Electric magenta - 650nm
+      '#00ffcc', // Cyan-turquoise - 485nm  
+      '#ffff33', // Electric yellow - 580nm
+      '#ff6600'  // Orange-red - 620nm
+    ],
+    TRANSPARENT: true,
+    INITIAL: true,
+    HOVER: true
+  },
+  medium: {
+    SIM_RESOLUTION: 192,
+    DYE_RESOLUTION: 384,
+    VELOCITY_DISSIPATION: 0.4,
+    DENSITY_DISSIPATION: 0.92,
+    CURL: 20,
+    PRESSURE_ITERATIONS: 20,
+    COLOR_PALETTE: ['#ff0066', '#00ffcc', '#ffff33', '#ff6600'],
+    TRANSPARENT: true,
+    INITIAL: true,
+    HOVER: true
+  },
+  low: {
+    SIM_RESOLUTION: 128,
+    DYE_RESOLUTION: 256,
+    VELOCITY_DISSIPATION: 0.5,
+    DENSITY_DISSIPATION: 0.9,
+    CURL: 15,
+    PRESSURE_ITERATIONS: 15,
+    COLOR_PALETTE: ['#ff0066', '#00ffcc', '#ffff33', '#ff6600'],
+    TRANSPARENT: true,
+    INITIAL: true,
+    HOVER: true
+  }
+};
+
+function detectDeviceCapabilities(): DeviceCapabilities {
+  const canvas = document.createElement('canvas');
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  const gl2 = canvas.getContext('webgl2');
+  
+  if (!gl) {
+    return {
+      webgl: false,
+      webgl2: false,
+      maxTextureSize: 0,
+      deviceMemory: 2,
+      mobile: true,
+      tier: 'low'
+    };
+  }
+
+  const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+  const deviceMemory = (navigator as any).deviceMemory || (isMobile ? 3 : 8);
+  
+  // Performance tier determination (ChatGPT-5 recommendation)
+  let tier: 'high' | 'medium' | 'low' = 'low';
+  if (!isMobile && maxTextureSize >= 4096 && deviceMemory >= 8) {
+    tier = 'high';
+  } else if (maxTextureSize >= 2048 && deviceMemory >= 4) {
+    tier = 'medium';
+  }
+
+  return {
+    webgl: true,
+    webgl2: !!gl2,
+    maxTextureSize,
+    deviceMemory,
+    mobile: isMobile,
+    tier
+  };
+}
+
+export default function ProductionLiquidEngine() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fluidRef = useRef<any>(null);
+  const performanceRef = useRef({ frameCount: 0, lastFpsCheck: Date.now() });
+  
+  const [capabilities, setCapabilities] = useState<DeviceCapabilities | null>(null);
+  const [currentTier, setCurrentTier] = useState<'high' | 'medium' | 'low'>('high');
+  const [fps, setFps] = useState(60);
+
+  // Device capability detection
+  useEffect(() => {
+    setCapabilities(detectDeviceCapabilities());
+  }, []);
+
+  // Thermal current simulation (authentic 60s physics)
+  const addThermalCurrents = useCallback(() => {
+    if (!fluidRef.current || !canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const x = Math.random() * canvas.width;
+    const y = canvas.height * (0.8 + Math.random() * 0.2); // Near bottom
+    
+    // Heat rises with authentic physics parameters
+    const force = 15 + Math.random() * 10;
+    const color = [1, 0.8, 0.2]; // Warm thermal color
+    
+    if (fluidRef.current.splat) {
+      fluidRef.current.splat(x, y, 0, -force, color);
+    }
+  }, []);
+
+  // Performance monitoring and auto-quality adjustment
+  useEffect(() => {
+    if (!capabilities) return;
+
+    let animationId: number;
+    
+    const monitorPerformance = () => {
+      const now = Date.now();
+      performanceRef.current.frameCount++;
+      
+      // Check FPS every 60 frames
+      if (performanceRef.current.frameCount % 60 === 0) {
+        const elapsed = now - performanceRef.current.lastFpsCheck;
+        const currentFps = Math.round(60000 / elapsed);
+        setFps(currentFps);
+        
+        // Auto-quality adjustment (ChatGPT-5 specification)
+        if (currentFps < 25 && currentTier !== 'low') {
+          const newTier = currentTier === 'high' ? 'medium' : 'low';
+          console.warn(`Performance degradation: ${currentFps}fps, reducing to ${newTier}`);
+          setCurrentTier(newTier);
+        } else if (currentFps > 50 && currentTier !== capabilities.tier) {
+          const newTier = currentTier === 'low' ? 'medium' : capabilities.tier;
+          setCurrentTier(newTier);
+        }
+        
+        performanceRef.current.lastFpsCheck = now;
+      }
+      
+      animationId = requestAnimationFrame(monitorPerformance);
+    };
+    
+    monitorPerformance();
+    return () => cancelAnimationFrame(animationId);
+  }, [capabilities, currentTier]);
+
+  // Fluid engine initialization
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !capabilities?.webgl) return;
+
+    // Dynamic import to avoid SSR issues
+    import('webgl-fluid-enhanced').then(({ default: webGLFluidEnhanced }) => {
+      try {
+        const config = AUTHENTIC_CONFIGS[currentTier];
+        
+        // Initialize with authentic 60s parameters
+        const fluidInstance = webGLFluidEnhanced.simulation(canvas, config);
+        fluidRef.current = fluidInstance;
+
+        // Setup thermal convection (3-5 second intervals with randomness)
+        const thermalInterval = setInterval(addThermalCurrents, 3000 + Math.random() * 2000);
+        
+        // Slow global rotation for organic feel
+        let rotationPhase = 0;
+        const addGlobalMotion = () => {
+          if (fluidRef.current && canvas) {
+            rotationPhase += 0.01;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(canvas.width, canvas.height) * 0.3;
+            
+            const x = centerX + Math.cos(rotationPhase) * radius;
+            const y = centerY + Math.sin(rotationPhase) * radius;
+            const vx = -Math.sin(rotationPhase) * 2;
+            const vy = Math.cos(rotationPhase) * 2;
+            
+            if (fluidRef.current.splat) {
+              fluidRef.current.splat(x, y, vx, vy, [0.5, 0.5, 0.5]);
+            }
+          }
+          
+          setTimeout(addGlobalMotion, 1000);
+        };
+        addGlobalMotion();
+
+        // Cleanup function
+        return () => {
+          clearInterval(thermalInterval);
+          if (fluidInstance?.dispose) {
+            fluidInstance.dispose();
+          }
+        };
+      } catch (error) {
+        console.error('WebGL fluid initialization failed:', error);
+        setCapabilities(prev => prev ? { ...prev, webgl: false } : null);
+      }
+    }).catch(() => {
+      console.error('Failed to load webgl-fluid-enhanced');
+      setCapabilities(prev => prev ? { ...prev, webgl: false } : null);
+    });
+  }, [capabilities, currentTier, addThermalCurrents]);
+
+  // Canvas resize handler
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    return () => window.removeEventListener('resize', resizeCanvas);
+  }, []);
+
+  // CSS fallback for non-WebGL browsers (single fallback system)
+  if (!capabilities?.webgl) {
+    return (
+      <div className="fixed inset-0 -z-10 w-full h-full pointer-events-none">
+        <div className="w-full h-full bg-gradient-to-br from-purple-900/20 via-pink-900/20 to-blue-900/20 animate-pulse" />
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Performance monitoring display (dev mode) */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed top-4 right-4 z-50 text-white text-xs bg-black/50 p-2 rounded">
+          FPS: {fps} | Tier: {currentTier} | Device: {capabilities.tier}
+        </div>
+      )}
+      
+      {/* Single engine of record */}
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 -z-10 w-full h-full pointer-events-none"
+        style={{
+          mixBlendMode: 'screen',
+          opacity: 0.8
+        }}
+      />
+    </>
+  );
+}

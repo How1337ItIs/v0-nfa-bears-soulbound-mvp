@@ -1,1 +1,287 @@
-'use client';\n\nimport React, { useMemo, useRef } from 'react';\nimport { extend, useFrame, useThree } from '@react-three/fiber';\nimport { EffectComposer, Effect } from '@react-three/postprocessing';\nimport { BlendFunction } from 'postprocessing';\nimport * as THREE from 'three';\nimport type { AudioReactiveParams } from '@/lib/audio/useAudioReactive';\n\n// AUTHENTIC THIN-FILM INTERFERENCE POST-PROCESSING\n// Recreates oil-on-water iridescence using real physics calculations\n\nclass ThinFilmInterferenceEffect extends Effect {\n  constructor() {\n    super('ThinFilmInterferenceEffect', fragmentShader, {\n      blendFunction: BlendFunction.SCREEN,\n      uniforms: new Map([\n        ['uTime', new THREE.Uniform(0)],\n        ['uColorPhase', new THREE.Uniform(0)],\n        ['uIntensity', new THREE.Uniform(0.6)],\n        ['uFilmThickness', new THREE.Uniform(200.0)],\n        ['uViewingAngle', new THREE.Uniform(0.5)],\n        ['uInterferenceStrength', new THREE.Uniform(0.8)]\n      ])\n    });\n  }\n}\n\n// AUTHENTIC THIN-FILM INTERFERENCE SHADER\n// Based on real physics: optical path difference and wavelength-to-RGB conversion\nconst fragmentShader = `\n  uniform float uTime;\n  uniform float uColorPhase;\n  uniform float uIntensity;\n  uniform float uFilmThickness;\n  uniform float uViewingAngle;\n  uniform float uInterferenceStrength;\n  \n  // Authentic wavelength to RGB conversion (380-750nm spectrum)\n  vec3 wavelengthToRGB(float wavelength) {\n    vec3 color = vec3(0.0);\n    \n    if (wavelength >= 380.0 && wavelength < 440.0) {\n      // Violet to Blue\n      color.r = -(wavelength - 440.0) / (440.0 - 380.0);\n      color.b = 1.0;\n    } else if (wavelength >= 440.0 && wavelength < 490.0) {\n      // Blue to Cyan\n      color.g = (wavelength - 440.0) / (490.0 - 440.0);\n      color.b = 1.0;\n    } else if (wavelength >= 490.0 && wavelength < 510.0) {\n      // Cyan to Green\n      color.g = 1.0;\n      color.b = -(wavelength - 510.0) / (510.0 - 490.0);\n    } else if (wavelength >= 510.0 && wavelength < 580.0) {\n      // Green to Yellow\n      color.r = (wavelength - 510.0) / (580.0 - 510.0);\n      color.g = 1.0;\n    } else if (wavelength >= 580.0 && wavelength < 645.0) {\n      // Yellow to Red\n      color.r = 1.0;\n      color.g = -(wavelength - 645.0) / (645.0 - 580.0);\n    } else if (wavelength >= 645.0 && wavelength <= 750.0) {\n      // Red\n      color.r = 1.0;\n    }\n    \n    // Intensity falloff at spectrum edges (authentic physics)\n    float intensity = 1.0;\n    if (wavelength >= 380.0 && wavelength < 420.0) {\n      intensity = 0.3 + 0.7 * (wavelength - 380.0) / (420.0 - 380.0);\n    } else if (wavelength >= 700.0 && wavelength <= 750.0) {\n      intensity = 0.3 + 0.7 * (750.0 - wavelength) / (750.0 - 700.0);\n    }\n    \n    return color * intensity;\n  }\n  \n  // Thin-film interference calculation (authentic physics)\n  vec3 calculateInterference(float thickness, float angle, vec2 uv, float time) {\n    // Refractive indices for oil-on-water system\n    float n_oil = 1.5;    // Mineral oil\n    float n_water = 1.33; // Water\n    float n_air = 1.0;    // Air\n    \n    // Optical path difference calculation\n    float opticalPath = 2.0 * n_oil * thickness * cos(angle);\n    \n    // Dynamic thickness variation (simulates oil flow)\n    float thicknessVariation = thickness + \n      50.0 * sin(uv.x * 8.0 + time * 0.3) * cos(uv.y * 6.0 + time * 0.2) +\n      25.0 * sin(uv.x * 16.0 + time * 0.5) * cos(uv.y * 12.0 + time * 0.4);\n    \n    vec3 interferenceColor = vec3(0.0);\n    \n    // Calculate constructive interference for visible spectrum\n    // Multiple orders of interference (m = 1, 2, 3)\n    for (int m = 1; m <= 3; m++) {\n      float wavelength = (2.0 * opticalPath) / float(m);\n      \n      // Only include visible wavelengths\n      if (wavelength >= 380.0 && wavelength <= 750.0) {\n        vec3 spectralColor = wavelengthToRGB(wavelength);\n        float orderIntensity = 1.0 / float(m); // Higher orders are dimmer\n        interferenceColor += spectralColor * orderIntensity;\n      }\n    }\n    \n    // Normalize and apply color phase shift (audio reactivity)\n    interferenceColor = normalize(interferenceColor + 0.1); // Prevent pure black\n    \n    // Apply color phase rotation for audio reactivity\n    float cosPhase = cos(uColorPhase);\n    float sinPhase = sin(uColorPhase);\n    \n    vec3 phasedColor;\n    phasedColor.r = interferenceColor.r * cosPhase - interferenceColor.g * sinPhase;\n    phasedColor.g = interferenceColor.r * sinPhase + interferenceColor.g * cosPhase;\n    phasedColor.b = interferenceColor.b; // Blue less affected by phase\n    \n    return phasedColor;\n  }\n  \n  void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {\n    // Sample the original fluid simulation\n    vec4 originalColor = inputColor;\n    \n    // Calculate dynamic film thickness based on original color intensity\n    float colorIntensity = dot(originalColor.rgb, vec3(0.299, 0.587, 0.114));\n    float dynamicThickness = uFilmThickness + colorIntensity * 100.0;\n    \n    // Viewing angle varies across the screen\n    float angle = uViewingAngle + (uv.x - 0.5) * 0.2 + (uv.y - 0.5) * 0.1;\n    \n    // Calculate thin-film interference\n    vec3 interferenceColor = calculateInterference(dynamicThickness, angle, uv, uTime);\n    \n    // Blend interference with original fluid colors\n    vec3 finalColor = mix(\n      originalColor.rgb, \n      interferenceColor, \n      uInterferenceStrength * uIntensity\n    );\n    \n    // Apply overall intensity (audio reactive)\n    finalColor *= (0.5 + uIntensity * 0.5);\n    \n    // Preserve original alpha\n    outputColor = vec4(finalColor, originalColor.a);\n  }\n`;\n\n// Register the custom effect\nextend({ ThinFilmInterferenceEffect });\n\n// THIN FILM POST-PROCESSING COMPONENT\ninterface ThinFilmPassProps {\n  audioParams: AudioReactiveParams;\n  intensity?: number;\n  enabled?: boolean;\n}\n\nfunction ThinFilmPass({ audioParams, intensity = 0.6, enabled = true }: ThinFilmPassProps) {\n  const effectRef = useRef<ThinFilmInterferenceEffect>();\n  \n  // Create effect instance\n  const effect = useMemo(() => {\n    const thinFilmEffect = new ThinFilmInterferenceEffect();\n    effectRef.current = thinFilmEffect;\n    return thinFilmEffect;\n  }, []);\n\n  // Update uniforms with audio reactivity\n  useFrame((state) => {\n    if (!effectRef.current) return;\n    \n    const uniforms = effectRef.current.uniforms;\n    \n    // Time progression\n    uniforms.get('uTime')!.value = state.clock.elapsedTime * 0.1;\n    \n    // Audio-reactive parameters\n    uniforms.get('uColorPhase')!.value = audioParams.colorPhase;\n    uniforms.get('uIntensity')!.value = intensity * audioParams.globalIntensity;\n    \n    // Dynamic film thickness (bass-reactive)\n    const baseThickness = 200;\n    const thicknessVariation = (audioParams.splatForce - 8) / 15 * 100; // 0-100 range\n    uniforms.get('uFilmThickness')!.value = baseThickness + thicknessVariation;\n    \n    // Viewing angle (mids-reactive)\n    const baseAngle = 0.5;\n    const angleVariation = (audioParams.thermalRate - 2) / 6 * 0.3; // 0-0.3 range\n    uniforms.get('uViewingAngle')!.value = baseAngle + angleVariation;\n    \n    // Interference strength remains constant for authenticity\n    uniforms.get('uInterferenceStrength')!.value = 0.6;\n  });\n\n  return enabled ? <primitive object={effect} /> : null;\n}\n\n// COMPLETE POST-PROCESSING COMPOSER\ninterface LiquidLightPostProcessorProps {\n  audioParams: AudioReactiveParams;\n  deviceTier: 'high' | 'medium' | 'low';\n  children?: React.ReactNode;\n}\n\nexport default function LiquidLightPostProcessor({ \n  audioParams, \n  deviceTier, \n  children \n}: LiquidLightPostProcessorProps) {\n  const { size } = useThree();\n  \n  // Enable thin-film effect only on high and medium tiers\n  const enableThinFilm = deviceTier === 'high' || deviceTier === 'medium';\n  \n  // Adjust intensity based on device tier\n  const intensity = {\n    high: 0.8,\n    medium: 0.6,\n    low: 0.0\n  }[deviceTier];\n\n  return (\n    <EffectComposer\n      multisampling={deviceTier === 'high' ? 4 : 0}\n      stencilBuffer={false}\n      depthBuffer={false}\n    >\n      {/* Thin-film interference pass */}\n      <ThinFilmPass \n        audioParams={audioParams} \n        intensity={intensity}\n        enabled={enableThinFilm}\n      />\n      \n      {/* Additional passes can be added here */}\n      {children}\n    </EffectComposer>\n  );\n}\n\n// USAGE COMPONENT FOR INTEGRATION\ninterface AuthenticThinFilmEffectProps {\n  audioParams: AudioReactiveParams;\n  deviceTier: 'high' | 'medium' | 'low';\n}\n\nexport function AuthenticThinFilmEffect({ \n  audioParams, \n  deviceTier \n}: AuthenticThinFilmEffectProps) {\n  // Only render on high performance devices to maintain 60fps\n  if (deviceTier === 'low') {\n    return null;\n  }\n\n  return (\n    <div className=\"fixed inset-0 -z-5 w-full h-full pointer-events-none\">\n      <Canvas\n        style={{ background: 'transparent' }}\n        dpr={deviceTier === 'high' ? [1, 2] : [1, 1]}\n        gl={{ \n          alpha: true, \n          antialias: deviceTier === 'high',\n          powerPreference: 'high-performance'\n        }}\n      >\n        {/* Full-screen plane for post-processing */}\n        <mesh>\n          <planeGeometry args={[2, 2]} />\n          <meshBasicMaterial transparent opacity={0} />\n        </mesh>\n        \n        <LiquidLightPostProcessor \n          audioParams={audioParams} \n          deviceTier={deviceTier}\n        />\n      </Canvas>\n    </div>\n  );\n}\n\nexport { ThinFilmPass, LiquidLightPostProcessor };\n"
+'use client';
+
+import React, { useMemo, useRef } from 'react';
+import { extend, useFrame, useThree, Canvas } from '@react-three/fiber';
+import { EffectComposer, Effect } from '@react-three/postprocessing';
+import { BlendFunction } from 'postprocessing';
+import * as THREE from 'three';
+import type { AudioReactiveParams } from '@/lib/audio/useAudioReactive';
+
+// AUTHENTIC THIN-FILM INTERFERENCE POST-PROCESSING
+// Recreates oil-on-water iridescence using real physics calculations
+
+class ThinFilmInterferenceEffect extends Effect {
+  constructor() {
+    super('ThinFilmInterferenceEffect', fragmentShader, {
+      blendFunction: BlendFunction.SCREEN,
+      uniforms: new Map([
+        ['uTime', new THREE.Uniform(0)],
+        ['uColorPhase', new THREE.Uniform(0)],
+        ['uIntensity', new THREE.Uniform(0.6)],
+        ['uFilmThickness', new THREE.Uniform(200.0)],
+        ['uViewingAngle', new THREE.Uniform(0.5)],
+        ['uInterferenceStrength', new THREE.Uniform(0.8)]
+      ])
+    });
+  }
+}
+
+// AUTHENTIC THIN-FILM INTERFERENCE SHADER
+// Based on real physics: optical path difference and wavelength-to-RGB conversion
+const fragmentShader = `
+  uniform float uTime;
+  uniform float uColorPhase;
+  uniform float uIntensity;
+  uniform float uFilmThickness;
+  uniform float uViewingAngle;
+  uniform float uInterferenceStrength;
+  
+  // Authentic wavelength to RGB conversion (380-750nm spectrum)
+  vec3 wavelengthToRGB(float wavelength) {
+    vec3 color = vec3(0.0);
+    
+    if (wavelength >= 380.0 && wavelength < 440.0) {
+      // Violet to Blue
+      color.r = -(wavelength - 440.0) / (440.0 - 380.0);
+      color.b = 1.0;
+    } else if (wavelength >= 440.0 && wavelength < 490.0) {
+      // Blue to Cyan
+      color.g = (wavelength - 440.0) / (490.0 - 440.0);
+      color.b = 1.0;
+    } else if (wavelength >= 490.0 && wavelength < 510.0) {
+      // Cyan to Green
+      color.g = 1.0;
+      color.b = -(wavelength - 510.0) / (510.0 - 490.0);
+    } else if (wavelength >= 510.0 && wavelength < 580.0) {
+      // Green to Yellow
+      color.r = (wavelength - 510.0) / (580.0 - 510.0);
+      color.g = 1.0;
+    } else if (wavelength >= 580.0 && wavelength < 645.0) {
+      // Yellow to Red
+      color.r = 1.0;
+      color.g = -(wavelength - 645.0) / (645.0 - 580.0);
+    } else if (wavelength >= 645.0 && wavelength <= 750.0) {
+      // Red
+      color.r = 1.0;
+    }
+    
+    // Intensity falloff at spectrum edges (authentic physics)
+    float intensity = 1.0;
+    if (wavelength >= 380.0 && wavelength < 420.0) {
+      intensity = 0.3 + 0.7 * (wavelength - 380.0) / (420.0 - 380.0);
+    } else if (wavelength >= 700.0 && wavelength <= 750.0) {
+      intensity = 0.3 + 0.7 * (750.0 - wavelength) / (750.0 - 700.0);
+    }
+    
+    return color * intensity;
+  }
+  
+  // Thin-film interference calculation (authentic physics)
+  vec3 calculateInterference(float thickness, float angle, vec2 uv, float time) {
+    // Refractive indices for oil-on-water system
+    float n_oil = 1.5;    // Mineral oil
+    float n_water = 1.33; // Water
+    float n_air = 1.0;    // Air
+    
+    // Optical path difference calculation
+    float opticalPath = 2.0 * n_oil * thickness * cos(angle);
+    
+    // Dynamic thickness variation (simulates oil flow)
+    float thicknessVariation = thickness + 
+      50.0 * sin(uv.x * 8.0 + time * 0.3) * cos(uv.y * 6.0 + time * 0.2) +
+      25.0 * sin(uv.x * 16.0 + time * 0.5) * cos(uv.y * 12.0 + time * 0.4);
+    
+    vec3 interferenceColor = vec3(0.0);
+    
+    // Calculate constructive interference for visible spectrum
+    // Multiple orders of interference (m = 1, 2, 3)
+    for (int m = 1; m <= 3; m++) {
+      float wavelength = (2.0 * opticalPath) / float(m);
+      
+      // Only include visible wavelengths
+      if (wavelength >= 380.0 && wavelength <= 750.0) {
+        vec3 spectralColor = wavelengthToRGB(wavelength);
+        float orderIntensity = 1.0 / float(m); // Higher orders are dimmer
+        interferenceColor += spectralColor * orderIntensity;
+      }
+    }
+    
+    // Normalize and apply color phase shift (audio reactivity)
+    interferenceColor = normalize(interferenceColor + 0.1); // Prevent pure black
+    
+    // Apply color phase rotation for audio reactivity
+    float cosPhase = cos(uColorPhase);
+    float sinPhase = sin(uColorPhase);
+    
+    vec3 phasedColor;
+    phasedColor.r = interferenceColor.r * cosPhase - interferenceColor.g * sinPhase;
+    phasedColor.g = interferenceColor.r * sinPhase + interferenceColor.g * cosPhase;
+    phasedColor.b = interferenceColor.b; // Blue less affected by phase
+    
+    return phasedColor;
+  }
+  
+  void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
+    // Sample the original fluid simulation
+    vec4 originalColor = inputColor;
+    
+    // Calculate dynamic film thickness based on original color intensity
+    float colorIntensity = dot(originalColor.rgb, vec3(0.299, 0.587, 0.114));
+    float dynamicThickness = uFilmThickness + colorIntensity * 100.0;
+    
+    // Viewing angle varies across the screen
+    float angle = uViewingAngle + (uv.x - 0.5) * 0.2 + (uv.y - 0.5) * 0.1;
+    
+    // Calculate thin-film interference
+    vec3 interferenceColor = calculateInterference(dynamicThickness, angle, uv, uTime);
+    
+    // Blend interference with original fluid colors
+    vec3 finalColor = mix(
+      originalColor.rgb, 
+      interferenceColor, 
+      uInterferenceStrength * uIntensity
+    );
+    
+    // Apply overall intensity (audio reactive)
+    finalColor *= (0.5 + uIntensity * 0.5);
+    
+    // Preserve original alpha
+    outputColor = vec4(finalColor, originalColor.a);
+  }
+`;
+
+// Register the custom effect
+extend({ ThinFilmInterferenceEffect });
+
+// THIN FILM POST-PROCESSING COMPONENT
+interface ThinFilmPassProps {
+  audioParams: AudioReactiveParams;
+  intensity?: number;
+  enabled?: boolean;
+}
+
+function ThinFilmPass({ audioParams, intensity = 0.6, enabled = true }: ThinFilmPassProps) {
+  const effectRef = useRef<ThinFilmInterferenceEffect>();
+  
+  // Create effect instance
+  const effect = useMemo(() => {
+    const thinFilmEffect = new ThinFilmInterferenceEffect();
+    effectRef.current = thinFilmEffect;
+    return thinFilmEffect;
+  }, []);
+
+  // Update uniforms with audio reactivity
+  useFrame((state) => {
+    if (!effectRef.current) return;
+    
+    const uniforms = effectRef.current.uniforms;
+    
+    // Time progression
+    uniforms.get('uTime')!.value = state.clock.elapsedTime * 0.1;
+    
+    // Audio-reactive parameters
+    uniforms.get('uColorPhase')!.value = audioParams.colorPhase;
+    uniforms.get('uIntensity')!.value = intensity * audioParams.globalIntensity;
+    
+    // Dynamic film thickness (bass-reactive)
+    const baseThickness = 200;
+    const thicknessVariation = (audioParams.splatForce - 8) / 15 * 100; // 0-100 range
+    uniforms.get('uFilmThickness')!.value = baseThickness + thicknessVariation;
+    
+    // Viewing angle (mids-reactive)
+    const baseAngle = 0.5;
+    const angleVariation = (audioParams.thermalRate - 2) / 6 * 0.3; // 0-0.3 range
+    uniforms.get('uViewingAngle')!.value = baseAngle + angleVariation;
+    
+    // Interference strength remains constant for authenticity
+    uniforms.get('uInterferenceStrength')!.value = 0.6;
+  });
+
+  return enabled ? <primitive object={effect} /> : null;
+}
+
+// COMPLETE POST-PROCESSING COMPOSER
+interface LiquidLightPostProcessorProps {
+  audioParams: AudioReactiveParams;
+  deviceTier: 'high' | 'medium' | 'low';
+  children?: React.ReactNode;
+}
+
+export default function LiquidLightPostProcessor({ 
+  audioParams, 
+  deviceTier, 
+  children 
+}: LiquidLightPostProcessorProps) {
+  const { size } = useThree();
+  
+  // Enable thin-film effect only on high and medium tiers
+  const enableThinFilm = deviceTier === 'high' || deviceTier === 'medium';
+  
+  // Adjust intensity based on device tier
+  const intensity = {
+    high: 0.8,
+    medium: 0.6,
+    low: 0.0
+  }[deviceTier];
+
+  return (
+    <EffectComposer
+      multisampling={deviceTier === 'high' ? 4 : 0}
+      stencilBuffer={false}
+      depthBuffer={false}
+    >
+      {/* Thin-film interference pass */}
+      <ThinFilmPass 
+        audioParams={audioParams} 
+        intensity={intensity}
+        enabled={enableThinFilm}
+      />
+      
+      {/* Additional passes can be added here */}
+      {children}
+    </EffectComposer>
+  );
+}
+
+// USAGE COMPONENT FOR INTEGRATION
+interface AuthenticThinFilmEffectProps {
+  audioParams: AudioReactiveParams;
+  deviceTier: 'high' | 'medium' | 'low';
+}
+
+export function AuthenticThinFilmEffect({ 
+  audioParams, 
+  deviceTier 
+}: AuthenticThinFilmEffectProps) {
+  // Only render on high performance devices to maintain 60fps
+  if (deviceTier === 'low') {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 -z-5 w-full h-full pointer-events-none">
+      <Canvas
+        style={{ background: 'transparent' }}
+        dpr={deviceTier === 'high' ? [1, 2] : [1, 1]}
+        gl={{ 
+          alpha: true, 
+          antialias: deviceTier === 'high',
+          powerPreference: 'high-performance'
+        }}
+      >
+        {/* Full-screen plane for post-processing */}
+        <mesh>
+          <planeGeometry args={[2, 2]} />
+          <meshBasicMaterial transparent opacity={0} />
+        </mesh>
+        
+        <LiquidLightPostProcessor 
+          audioParams={audioParams} 
+          deviceTier={deviceTier}
+        />
+      </Canvas>
+    </div>
+  );
+}
+
+export { ThinFilmPass, LiquidLightPostProcessor };
