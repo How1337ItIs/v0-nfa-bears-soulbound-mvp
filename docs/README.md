@@ -24,10 +24,22 @@ This is the organized documentation hub. Runtime code and assets remain in place
   - [Codex CLI cross-AI synthesis (timestamped)](../docs/reports/codex-cli-cross-ai-liquid-light-synthesis-2025-10-29T20-20-44Z.md)
   - If missing: Three AI Synthesis — Cursor was previously titled `THREE_AI_SYNTHESIS_REPORT_CURSOR_2025-10-29-2000.md`
 
+  - [Cursor Observe My Codebase](../docs/reports/cursor_observe_my_codebase.md)
+  - [CLAUDE.md](../docs/reports/CLAUDE.md)
+  - [Cultural Enhancements](../docs/reports/CULTURAL_ENHANCEMENTS.md)
+  - [Cultural Language Guide](../docs/reports/CULTURAL_LANGUAGE_GUIDE.md)
+  - [Claude MD Redesign Process](../docs/reports/claude-md-redesign-process.md)
+  - [Web3 Design Methodology](../docs/reports/web3-design-methodology.md)
+  - [Web3 Dev Best Practices](../docs/reports/web3-dev-best-practices.md)
+  - [Master Liquid Light Integration Plan](../docs/reports/MASTER-LIQUID-LIGHT-INTEGRATION-PLAN.md)
+
 Full index: see [TOC.md](../docs/TOC.md)
 
 Regenerate TOC (manual):
 - From repo root, list docs and update `docs/TOC.md` accordingly. No code paths are affected by TOC updates.
+
+Automated TOC generation:
+- Run: `node nfa-bears-mvp/scripts/generate_docs_toc.js`
 
 - Guides
   - [Start Here](../docs/guides/START_HERE.md)
@@ -37,6 +49,9 @@ Regenerate TOC (manual):
   - [Redis Setup Guide](../docs/guides/REDIS_SETUP_GUIDE.md)
   - [Pilot Event Checklist](../docs/guides/PILOT_EVENT_CHECKLIST.md)
   - [Mint Page Setup](../docs/guides/MINT_PAGE_SETUP.md)
+
+  - [Pilot Event Simulation](../docs/guides/PILOT_EVENT_SIMULATION.md)
+  - [Ambassador Training](../docs/guides/AMBASSADOR_TRAINING.md)
 
 - Architecture
   - [Dual Path Architecture Plan](../docs/architecture/DUAL_PATH_ARCHITECTURE_PLAN.md)
@@ -52,6 +67,14 @@ Regenerate TOC (manual):
   - [Security Audit](../docs/ops/SECURITY_AUDIT.md)
   - [Security Fixes Completed](../docs/ops/SECURITY_FIXES_COMPLETED.md)
   - [Security Fixes Applied](../docs/ops/SECURITY-FIXES-APPLIED.md)
+
+  - [Autonomous Session Complete](../docs/ops/AUTONOMOUS_SESSION_COMPLETE.md)
+  - [Coordination Setup Log](../docs/ops/COORDINATION_SETUP_LOG.md)
+  - [Codex Colab MCP Diagnostic Prompt](../docs/ops/CODEX_COLAB_MCP_DIAGNOSTIC_PROMPT.md)
+  - [Feature Audit](../docs/ops/FEATURE_AUDIT.md)
+  - [Fix Summary](../docs/ops/FIX_SUMMARY.md)
+  - [Audit Findings](../docs/ops/AUDIT-FINDINGS.md)
+  - [Session Summary](../docs/ops/SESSION_SUMMARY.txt)
 
 Notes
 - Links target the reorganized docs only; runtime code/assets were not moved.
