@@ -10,7 +10,7 @@
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { VisualPolicy, useVisualPolicy } from './VisualPolicy';
+import { VisualPolicy, useVisualPolicy, createVisualPolicyManager } from './VisualPolicy';
 import { DeviceCapabilities } from './types';
 import { PaletteDirector } from '@/lib/palette';
 import { useAudioReactive } from '@/lib/audio/useAudioReactive';
@@ -63,6 +63,9 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
   onError,
   onWarning,
 }) => {
+  // Ensure policy manager exists
+  createVisualPolicyManager();
+
   const {
     policy,
     shouldRenderWebGL,
@@ -303,6 +306,9 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
           if (process.env.NODE_ENV === 'development') {
             console.warn(`[VisualOrchestrator] Battery saver enforced: ${decision.forcedTier} (${decision.reason})`);
           }
+          if (debugEnabled) {
+            setDebugToast(`Battery saver enforced: ${decision.forcedTier}`);
+          }
         }
 
         // Attach listeners if Battery API available
@@ -318,6 +324,9 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
               }));
               if (process.env.NODE_ENV === 'development') {
                 console.warn(`[VisualOrchestrator] Battery saver updated: ${d.forcedTier} (${d.reason})`);
+              }
+              if (debugEnabled) {
+                setDebugToast(`Battery saver updated: ${d.forcedTier}`);
               }
             }
           };

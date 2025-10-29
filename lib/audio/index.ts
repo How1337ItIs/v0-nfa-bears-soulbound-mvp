@@ -3,6 +3,8 @@
  */
 
 export { useAudioReactive } from './useAudioReactive';
+
+// Basic mapping
 export {
   AUDIO_PHYSICS_MAPPING,
   mapAudioToPhysics,
@@ -10,6 +12,23 @@ export {
   MODE_PRESETS,
 } from './mapping';
 export type { AudioData, PhysicsParams, ModeType } from './mapping';
+
+// Advanced curves and smoothing
+export {
+  softKnee,
+  powerCurve,
+  sCurve,
+  EMASmootherBank,
+  BeatGate,
+  createEnhancedAudioProcessor,
+  calculateEnhancedPhysicsParams,
+} from './mapping';
+export type {
+  BeatGateConfig,
+  EnhancedAudioProcessor,
+} from './mapping';
+
+// Beat detection
 export {
   BeatDetector,
   createBeatDetector,
