@@ -60,6 +60,186 @@ npm run mint:demo          # Test minting workflow
 - Private key usage in minting relayer (`app/api/mint/route.ts`)
 - Rate limiting configuration (`@upstash/ratelimit` instances)
 
+## Agent Coordination (Colab MCP)
+
+**Colab MCP** enables seamless coordination between Claude Code, Cursor, and Codex CLI with shared session context.
+
+### How to Communicate Between Agents
+
+**From Claude Code → Cursor:**
+```
+[CURSOR_REQUEST] action:browser_test priority:high id:test-001
+Please test localhost:3000 homepage:
+- Navigate and screenshot
+- Verify wallet button visible
+- Check console for errors
+```
+
+**From Cursor → Claude Code:**
+```
+[CLAUDE_REQUEST] action:code_review priority:medium id:review-001
+Please review the new GPS verification logic in lib/gps-utils.ts
+Focus on: security, performance, edge cases
+```
+
+**From Claude Code/Cursor → Codex:**
+```
+[CODEX_REQUEST] action:terminal_command priority:high id:cmd-001
+Please run the following terminal commands:
+- npm run build
+- npm run lint
+Report any errors or warnings
+```
+
+**From Codex → Claude Code/Cursor:**
+```
+[RESPONSE] id:cmd-001 status:completed
+Build completed successfully
+Lint found 2 warnings (see details)
+```
+
+### Search for Requests
+
+**In Cursor:**
+```javascript
+// Find Claude Code's requests
+search_logs("[CURSOR_REQUEST]")
+// Find Codex's responses
+search_logs("[RESPONSE]")
+```
+
+**In Claude Code:**
+```javascript
+// Find Cursor's requests
+search_logs("[CLAUDE_REQUEST]")
+// Find Codex's responses
+search_logs("[RESPONSE]")
+```
+
+**In Codex:**
+```javascript
+// Find requests from any agent
+search_logs("[CODEX_REQUEST]")
+// Find all pending requests
+search_logs("priority:high")
+```
+
+### Best Practices
+
+- **Use clear prefixes**: `[CURSOR_REQUEST]`, `[CLAUDE_REQUEST]`, `[CODEX_REQUEST]`, `[RESPONSE]`
+- **Include IDs**: For tracking request/response pairs
+- **Set priority**: high/medium/low for task urgency
+- **Be specific**: Clear action items, not vague descriptions
+- **Don't use custom log files**: Write directly in session - Colab MCP auto-tracks
+- **Check Codex status**: Use `codex_status` tool to see if Codex CLI is active
+
+### Available Colab MCP Tools
+
+- `list_sessions` - See all coding sessions
+- `fetch_transcript` - Get full conversation history
+- `summarize_session` - Quick session overview
+- `search_logs(query)` - Find specific discussions/commands
+- `codex_status` - Check Codex CLI activity (if using Codex)
+
+### Configuration (Windows Paths)
+
+**CRITICAL**: Colab MCP requires correct log paths in both `~/.cursor/mcp.json` and `~/.claude/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "colab-mcp": {
+      "command": "python",
+      "args": ["-m", "colab_mcp.main"],
+      "env": {
+        "CLAUDE_HOME": "C:\\Users\\natha\\.claude",
+        "CURSOR_LOGS": "C:\\Users\\natha\\AppData\\Roaming\\Cursor\\logs",
+        "TMPDIR": "C:\\Users\\natha\\AppData\\Local\\Temp"
+      }
+    }
+  }
+}
+```
+
+**Note**: The correct Cursor logs path is `AppData\Roaming\Cursor\logs`, NOT `.cursor-server\data\logs`
+
+### Installation
+
+- Ensure Python 3.10+ (`python --version`)
+- Install: `pip install colab-mcp`
+- Run installer: `colab-mcp-install` (use elevated shell on Windows)
+- Restart both tools: fully quit and relaunch Cursor and Claude Code
+
+### Troubleshooting
+
+- Verify `CURSOR_LOGS` path: `C:\\Users\\natha\\AppData\\Roaming\\Cursor\\logs`
+- Confirm install: `pip show colab-mcp`; fallback command: `python -m colab_mcp.main`
+- Validate JSON in `~/.cursor/mcp.json` and `~/.claude/mcp.json`
+- Restart tools after any config change
+- Use `search_logs("[CURSOR_REQUEST]")` to confirm indexing
+
+### See Also
+
+- `AGENTS.md` → Colab MCP Setup and Usage (Expanded) for step-by-step guidance
+
+### Common Coordination Patterns
+
+**Browser Testing Request:**
+```
+[CURSOR_REQUEST] id:homepage-test priority:high
+@Browser test localhost:3000
+- Screenshot on load
+- Click "Connect Wallet"
+- Verify Privy modal appears
+- Check console for Web3 errors
+```
+
+**Code Review Request:**
+```
+[CLAUDE_REQUEST] id:security-review priority:high
+Review /api/mint/route.ts for:
+- Private key exposure risks
+- Rate limiting bypasses
+- HMAC signature validation
+- Input sanitization gaps
+```
+
+**Design Feedback Request:**
+```
+[CURSOR_REQUEST] id:ui-feedback priority:medium
+@Browser compare localhost:3000/dashboard with Figma design
+Focus on: spacing, colors, responsive breakpoints
+Provide screenshot with annotations
+```
+
+**Three-Agent Workflow (Claude + Cursor + Codex):**
+```
+# Claude Code identifies work needed
+[CODEX_REQUEST] id:build-check priority:high
+Run full build and test suite:
+- npm run build
+- npm run typecheck
+- npm run lint
+Report all errors/warnings
+
+# Codex executes and reports
+[RESPONSE] id:build-check status:completed
+Build: ✓ Success
+Typecheck: ✗ 3 errors in components/Dashboard.tsx
+Lint: ⚠️ 2 warnings
+
+# Claude Code requests code review
+[CURSOR_REQUEST] id:typecheck-fix priority:high
+@Browser open components/Dashboard.tsx
+Review the 3 type errors Codex found
+Suggest fixes considering the design mockups
+
+# Cursor provides visual context
+[RESPONSE] id:typecheck-fix status:completed
+[Browser screenshot + type error annotations]
+Recommended fixes: [details]
+```
+
 # ⚡ DAILY DEVELOPMENT
 
 ## Tech Stack & Architecture
@@ -186,7 +366,7 @@ if (distance > venue.radius) throw new Error('Outside venue radius');
 
 ## Cultural Foundation
 
-**Mission**: Preserve Deadhead parking lot culture using Web3 tools for authentic IRL connections. Based on "Pill Triad" philosophy: Clear (transparency), Rave (joy), Light (insight). Community-driven, anti-speculation.
+**Mission**: Preserve Deadhead parking lot culture using Web3 tools for authentic IRL connections. Based on core cultural values: transparency, community joy, and cultural education. Community-driven, anti-speculation.
 
 ## Current Issues & TODOs
 

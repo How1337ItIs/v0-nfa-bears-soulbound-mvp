@@ -4,9 +4,13 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "predev": "node scripts/mcp_preflight.js || exit 0",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "prestart": "node scripts/mcp_preflight.js || exit 0",
+    "start": "next start",
+    "mcp:verify": "node scripts/verify_mcp_config.js",
+    "mcp:fix": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/fix_mcp_config.ps1"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

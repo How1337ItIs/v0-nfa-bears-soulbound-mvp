@@ -92,7 +92,7 @@
 - Vendor discount info
 - Discord community link
 - POAT collection explanation
-- Pill Triad philosophy
+- Cultural philosophy
 - Growth path for members
 
 ---

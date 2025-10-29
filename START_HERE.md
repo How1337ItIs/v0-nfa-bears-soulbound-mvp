@@ -191,14 +191,14 @@ git push                       # Push to remote
 ## 🎓 Cultural Context
 
 This isn't a typical Web3 project. Read the philosophy in:
-- `nfa-bears-master-doc.md` - Full vision, Pill Triad, Barlow's influence
+- `nfa-bears-master-doc.md` - Full vision, cultural values, Barlow's influence
 - `PILOT_EVENT_CHECKLIST.md` - Practical event requirements
 - `AMBASSADOR_TRAINING.md` - How to embody the culture
 
 **Key Principles**:
-- **Clear** (transparency) - Open source, open books
-- **Rave** (joy) - Collective euphoria, celebration
-- **Light** (insight) - Ego-melting transformation
+- **Transparency** - Open source, open books
+- **Community Joy** - Collective euphoria, celebration
+- **Cultural Education** - Learning and transformation
 
 **Not Fade Away** - Keeping the parking lot spirit alive 🚌
 

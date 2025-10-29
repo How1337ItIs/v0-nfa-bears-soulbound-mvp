@@ -29,15 +29,9 @@ NFA Bears draws from multiple streams of counterculture and crypto culture. We'r
 
 The number 710 holds special meaning: it's an homage to 710 Ashbury Street in San Francisco, the famed communal house where the Grateful Dead lived in the 1960s. It's also "OIL" upside-down, a little Easter egg for those who know. This attention to lore and detail runs through everything we do.
 
-### Core Values and the Pill Triad
+### Core Values and Cultural Foundation
 
-Our philosophy is guided by what we call the Pill Triad — three complementary states of consciousness that inform our work:
-
-**Clear** (inspired by Milady): Radical transparency in all we do. Our books are open, our governance is public, our code is open-source. This is our governing ethos.
-
-**Rave** (from Mibera): Collective euphoria and shared joy. This shapes our visual and sonic palette — the tie-dyes, the dancing bears, the jam sessions that go until dawn.
-
-**Light** (NFA's contribution): Ego-melting insight and transformation. This is our core sigil and storyline, the idea that in the right moment, with the right people, everything becomes clear.
+Our philosophy is rooted in the authentic values of Deadhead culture — generosity, authenticity, community autonomy, and cultural preservation. We believe in the power of real human connections over speculation, and we use blockchain technology as a tool to preserve and transmit these values.
 
 We believe in Kaironic Time — that lore resurfaces non-linearly in a perpetual remix. Stories and art evolve, get retold, branch into new directions. No single voice owns our narrative. Like a Dead jam, many voices come together to create something greater than any single person could.
 

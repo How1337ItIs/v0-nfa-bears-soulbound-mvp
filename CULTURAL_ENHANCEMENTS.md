@@ -129,7 +129,7 @@ But culture requires:
 - View active/passed proposals (mock data for MVP)
 - Genesis holders can vote (1 NFT = 1 vote)
 - SBT members can discuss and propose
-- Pill Triad philosophy embedded
+- Cultural philosophy embedded
 - Quorum tracking (71 votes = 10% of 710)
 
 **Cultural Impact**:
@@ -178,21 +178,21 @@ But culture requires:
 
 ## 🎨 Design Philosophy Applied
 
-### The Pill Triad in Practice
+### Cultural Values in Practice
 
-**Clear (Transparency)**:
+**Transparency**:
 - Governance votes visible
 - Ambassador identities tracked
 - Stories public (when implemented)
 - Open source everything
 
-**Rave (Collective Joy)**:
+**Community Joy**:
 - Celebratory success page
 - Playful emojis (⚡🐻💀🌹)
 - Colorful gradients
 - Joyful micro-copy
 
-**Light (Insight)**:
+**Cultural Education**:
 - Philosophy embedded in UI
 - Cultural education throughout
 - Reflective questions (your story, your journey)

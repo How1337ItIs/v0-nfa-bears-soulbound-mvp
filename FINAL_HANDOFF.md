@@ -294,10 +294,10 @@ The 60-Second Miracle flow is functional:
    - Soulbound tokens (anti-speculation)
    - Parking lot culture preservation
 
-6. **Pill Triad** (Clear, Rave, Light) maps to:
-   - Clear: Open source, transparent
-   - Rave: Joyful UX, dancing bear
-   - Light: Transformative onboarding experience
+6. **Cultural Values** map to:
+   - Transparency: Open source, transparent operations
+   - Community Joy: Joyful UX, dancing bear
+   - Cultural Education: Transformative onboarding experience
 
 ---
 

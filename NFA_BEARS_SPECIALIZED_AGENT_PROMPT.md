@@ -140,7 +140,7 @@ const generateInviteCode = (venueId: string) => {
 ### Cultural Foundation
 **Mantra**: "Fuck crypto, real family shit" - Prioritizing human connection over speculation
 **Triple Entendre**: Non-Fungible Acid Bears | Not Fade Away | Not Financial Advice
-**Pill Triad**: Clear (transparency), Rave (collective joy), Light (transformative insight)
+**Cultural Values**: Transparency, community joy, cultural education
 
 ### Membership System (Dual-Token Architecture)
 

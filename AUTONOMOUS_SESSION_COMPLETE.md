@@ -23,10 +23,10 @@ Tasked to "systematically observe and test everything, build towards goals from 
 
 ## 📚 What I Discovered (Deep Document Analysis)
 
-### The Philosophy (Pill Triad)
-- **Clear**: Radical transparency, open source, open books
-- **Rave**: Collective euphoria, shared joy, celebration
-- **Light**: Ego-melting insight, transformation
+### The Cultural Values
+- **Transparency**: Radical transparency, open source, open books
+- **Community Joy**: Collective euphoria, shared joy, celebration
+- **Cultural Education**: Learning, insight, transformation
 
 ### The Cultural Foundation
 - John Perry Barlow's cyber-libertarian vision
@@ -133,7 +133,7 @@ GPS-verified onboarding at live events:
    - Community decision-making UI
    - Genesis voting (1 NFT = 1 vote)
    - SBT discussion rights
-   - Pill Triad philosophy embedded
+   - Cultural philosophy embedded
    - "Nobody should have that" made actionable
    - Mock data for MVP (future: on-chain)
 
@@ -152,19 +152,19 @@ GPS-verified onboarding at live events:
 
 ### Design Philosophy Applied
 
-**Clear** (Transparency):
+**Transparency**:
 - All proposals visible
 - Ambassador identities tracked
 - Open source code
 - Public documentation
 
-**Rave** (Joy):
+**Community Joy**:
 - Celebratory success page
 - Playful emojis (⚡🐻💀🌹)
 - Joyful micro-copy
 - Colorful gradients
 
-**Light** (Insight):
+**Cultural Education**:
 - Philosophy quotes embedded
 - Reflective questions (your story)
 - Cultural education throughout
