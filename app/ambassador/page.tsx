@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
+import { useAccount } from 'wagmi';
 import { BigQRCode } from '@/components/BigQRCode';
 import { CountdownCircle } from '@/components/CountdownCircle';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -22,6 +24,8 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
 }
 
 function AmbassadorContent() {
+  const { user } = usePrivy();
+  const { address } = useAccount();
   const [selectedVenue, setSelectedVenue] = useState('');
   const [url, setUrl] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
@@ -29,6 +33,13 @@ function AmbassadorContent() {
   const [error, setError] = useState<string | null>(null);
 
   const venues = allVenues();
+
+  // Get ambassador name from Privy user or wallet
+  const ambassadorName = user?.email?.address?.split('@')[0] ||
+                         user?.twitter?.username ||
+                         user?.google?.name ||
+                         address ? `${address.slice(0, 6)}...${address.slice(-4)}` :
+                         'Anonymous';
 
   const generateInvite = async () => {
     setIsLoading(true);
@@ -39,7 +50,11 @@ function AmbassadorContent() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ venueId: selectedVenue }),
+        body: JSON.stringify({
+          venueId: selectedVenue,
+          ambassadorAddress: address,
+          ambassadorName: ambassadorName
+        }),
       });
       
       if (!response.ok) {
@@ -70,9 +85,13 @@ function AmbassadorContent() {
   };
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-8 bg-gradient-to-br from-gray-900 via-purple-900 to-indigo-900">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Ambassador Portal</h1>
+        <div className="text-center mb-8">
+          <div className="text-6xl mb-4">🐻</div>
+          <h1 className="text-3xl font-bold text-white mb-2">Ambassador Portal</h1>
+          <p className="text-purple-200">Welcome family members to the bus</p>
+        </div>
         
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="mb-4">
@@ -98,9 +117,9 @@ function AmbassadorContent() {
           <button
             onClick={generateInvite}
             disabled={isLoading || !selectedVenue}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+            className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 transition-all"
           >
-            {isLoading ? 'Generating...' : 'Generate New Invite'}
+            {isLoading ? 'Generating your miracle...' : '⚡ Miracle Someone In'}
           </button>
 
           {error && (

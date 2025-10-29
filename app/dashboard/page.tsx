@@ -96,6 +96,37 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Community Features */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* My Story */}
+            <button
+              onClick={() => router.push("/my-story")}
+              className="bg-gradient-to-r from-yellow-600/20 to-orange-600/20 backdrop-blur-lg rounded-xl p-6 border border-yellow-400/30 hover:border-yellow-400/50 transition-all text-left"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-3xl">📖</span>
+                <h3 className="text-white font-bold text-lg">Share Your Story</h3>
+              </div>
+              <p className="text-white/80 text-sm">
+                Tell the family about your Dead journey and connection to the scene
+              </p>
+            </button>
+
+            {/* Proposals */}
+            <button
+              onClick={() => router.push("/proposals")}
+              className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-lg rounded-xl p-6 border border-blue-400/30 hover:border-blue-400/50 transition-all text-left"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-3xl">🗳️</span>
+                <h3 className="text-white font-bold text-lg">Community Proposals</h3>
+              </div>
+              <p className="text-white/80 text-sm">
+                Vote on shows, events, and collective decisions
+              </p>
+            </button>
+          </div>
+
           {/* Recent Activity */}
           <div className="mt-8 bg-white/5 rounded-lg p-6 border border-white/10">
             <h3 className="text-white font-semibold mb-4 flex items-center">

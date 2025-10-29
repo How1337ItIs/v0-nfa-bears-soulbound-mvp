@@ -132,8 +132,8 @@ const mintHandler = async (request: NextRequest) => {
     Logger.error('Failed to parse invite data from Redis', parseError instanceof Error ? parseError : new Error(String(parseError)), context);
     throw createInternalError('Corrupt invite data', context);
   }
-  
-  const { timestamp, venueId } = parsedInviteData;
+
+  const { timestamp, venueId, ambassadorAddress, ambassadorName } = parsedInviteData;
   
   // Check if invite is still recent (within 5 minutes of generation)
   const now = Math.floor(Date.now() / 1000);
@@ -215,10 +215,13 @@ const mintHandler = async (request: NextRequest) => {
       venueId
     }, context);
     
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       hash,
-      message: 'Miracle SBT minted successfully!'
+      message: 'Miracle SBT minted successfully!',
+      ambassadorAddress,
+      ambassadorName,
+      venueId
     }, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate',

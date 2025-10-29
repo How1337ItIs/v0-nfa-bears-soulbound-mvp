@@ -102,9 +102,9 @@ const postHandler = async (request: NextRequest) => {
   
   // Parse request body
   const body = await request.json();
-  const { venueId, baseUrl } = body;
-  
-  Logger.info('Processing venue invite generation', { venueId }, context);
+  const { venueId, baseUrl, ambassadorAddress, ambassadorName } = body;
+
+  Logger.info('Processing venue invite generation', { venueId, ambassador: ambassadorAddress }, context);
 
   // Validate input
   if (!venueId || typeof venueId !== 'string') {
@@ -129,7 +129,9 @@ const postHandler = async (request: NextRequest) => {
   const inviteData = {
     timestamp: Math.floor(Date.now() / 1000),
     venueId: venueId,
-    expiresAt: expiresAt
+    expiresAt: expiresAt,
+    ambassadorAddress: ambassadorAddress || null,
+    ambassadorName: ambassadorName || 'Anonymous Ambassador'
   };
   
   const redisKey = `invite:${code}`;
