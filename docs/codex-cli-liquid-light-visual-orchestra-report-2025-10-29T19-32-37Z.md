@@ -166,7 +166,7 @@ Phase 4 — Art Direction and Presets
 ---
 
 ## Internal Inventory (for reference)
-- Docs and analyses: `docs/liquid-light-show-report.md`, `docs/liquid-light-show-analysis-cursor.md`, `nfa-bears-mvp/LIQUID_LIGHT_RESEARCH_REPORT.md`, `nfa-bears-mvp/LIQUID_LIGHT_ACTION_PLAN.md`.
+- Docs and analyses: `./reports/liquid-light-show-report.md`, `./reports/liquid-light-show-analysis-cursor.md`, `./reports/LIQUID_LIGHT_RESEARCH_REPORT.md`, `./reports/LIQUID_LIGHT_ACTION_PLAN.md`.
 - Starters/engines: `nfa-bears-mvp/liquid-light-starter/*`, `nfa-bears-mvp/liquid-light-engine.zip`.
 - Assets: `nfa-bears-mvp/public/psychedelic-assets/*`.
 - App comps (subset): thin‑film and fluid variants, CSS fractal/psychedelic backgrounds, and layout shells.
