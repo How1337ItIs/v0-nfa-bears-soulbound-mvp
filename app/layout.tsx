@@ -5,6 +5,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { PrivySetup } from './providers/PrivySetup'
 import { Toaster } from 'react-hot-toast'
 import './globals.css'
+import { VisualOrchestrator } from '@/lib/visual'
 
 export const metadata: Metadata = {
   title: 'NFA Bears - Not Fade Away',
@@ -20,10 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <PrivySetup>
-          {children}
-          <Toaster position="top-center" />
-        </PrivySetup>
+        <VisualOrchestrator>
+          <PrivySetup>
+            {children}
+            <Toaster position="top-center" />
+          </PrivySetup>
+        </VisualOrchestrator>
         <Analytics />
       </body>
     </html>

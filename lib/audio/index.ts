@@ -10,3 +10,10 @@ export {
   MODE_PRESETS,
 } from './mapping';
 export type { AudioData, PhysicsParams, ModeType } from './mapping';
+export {
+  BeatDetector,
+  createBeatDetector,
+  createDanceFloorDetector,
+  createAmbientDetector,
+} from './beatDetector';
+export type { BeatDetectionResult, BeatDetectorConfig } from './beatDetector';

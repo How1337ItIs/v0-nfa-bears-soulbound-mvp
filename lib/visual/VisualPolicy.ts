@@ -82,6 +82,14 @@ class VisualPolicyManager {
     const capabilities = config.forceCapabilities 
       ? { ...detectDeviceCapabilities(), ...config.forceCapabilities }
       : detectDeviceCapabilities();
+    // Load saved preferences if available
+    let saved: Partial<VisualPolicy> | null = null;
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('nfa-liquid-light-policy-prefs');
+        if (raw) saved = JSON.parse(raw);
+      } catch {}
+    }
 
     return {
       // Device capabilities
@@ -93,13 +101,13 @@ class VisualPolicyManager {
       maxTextureSize: capabilities.maxTextureSize,
       
       // User preferences
-      motionEnabled: config.forceMotionEnabled ?? true,
-      intensity: config.forceIntensity ?? 1.0,
+      motionEnabled: config.forceMotionEnabled ?? saved?.motionEnabled ?? true,
+      intensity: config.forceIntensity ?? saved?.intensity ?? 1.0,
       prefersReducedMotion: false,
       
       // Visual settings
-      paletteId: config.forcePalette ?? 'psychedelic',
-      mode: config.forceMode ?? 'reactive',
+      paletteId: config.forcePalette ?? saved?.paletteId ?? 'psychedelic',
+      mode: config.forceMode ?? saved?.mode ?? 'reactive',
       
       // Global flags
       webglEnabled: config.forceWebglEnabled ?? capabilities.webgl,
@@ -108,9 +116,9 @@ class VisualPolicyManager {
       thinFilmEnabled: config.forceThinFilmEnabled ?? (capabilities.tier !== 'low'),
       
       // Quality settings
-      fluidQuality: config.forceFluidQuality ?? this.getQualityForTier(capabilities.tier),
-      particleCount: config.forceParticleCount ?? this.getParticleCountForTier(capabilities.tier),
-      resolution: config.forceResolution ?? this.getResolutionForTier(capabilities.tier),
+      fluidQuality: config.forceFluidQuality ?? saved?.fluidQuality ?? this.getQualityForTier(capabilities.tier),
+      particleCount: config.forceParticleCount ?? saved?.particleCount ?? this.getParticleCountForTier(capabilities.tier),
+      resolution: config.forceResolution ?? saved?.resolution ?? this.getResolutionForTier(capabilities.tier),
       
       // Accessibility
       highContrast: false,
@@ -178,6 +186,7 @@ class VisualPolicyManager {
 
   updatePolicy(updates: Partial<VisualPolicy>): void {
     this.policy = { ...this.policy, ...updates };
+    this.persistPrefs();
     this.notifyListeners();
   }
 
@@ -200,22 +209,26 @@ class VisualPolicyManager {
   setMotionEnabled(enabled: boolean): void {
     if (!this.policy.prefersReducedMotion) {
       this.policy.motionEnabled = enabled;
+      this.persistPrefs();
       this.notifyListeners();
     }
   }
 
   setIntensity(intensity: number): void {
     this.policy.intensity = Math.max(0, Math.min(1, intensity));
+    this.persistPrefs();
     this.notifyListeners();
   }
 
   setPalette(paletteId: string): void {
     this.policy.paletteId = paletteId;
+    this.persistPrefs();
     this.notifyListeners();
   }
 
   setMode(mode: VisualPolicy['mode']): void {
     this.policy.mode = mode;
+    this.persistPrefs();
     this.notifyListeners();
   }
 
@@ -236,7 +249,19 @@ class VisualPolicyManager {
         this.policy.motionEnabled = false;
       }
     }
+    this.persistPrefs();
     this.notifyListeners();
+  }
+
+  private persistPrefs(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      const { motionEnabled, intensity, paletteId, mode, fluidQuality, particleCount, resolution } = this.policy;
+      localStorage.setItem(
+        'nfa-liquid-light-policy-prefs',
+        JSON.stringify({ motionEnabled, intensity, paletteId, mode, fluidQuality, particleCount, resolution })
+      );
+    } catch {}
   }
 
   // Event system

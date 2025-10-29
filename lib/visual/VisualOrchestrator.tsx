@@ -17,6 +17,8 @@ import { useAudioReactive } from '@/lib/audio/useAudioReactive';
 import { calculatePhysicsParams } from '@/lib/audio';
 import { CSSFallback } from '@/components/liquid-light';
 import LiquidLightBackground from '@/components/LiquidLightBackground';
+import { TierTransitionManager } from './performance/tierTransitionManager';
+import { getBatterySaverPolicy } from './capability/batterySaverPolicy';
 
 export interface VisualLayer {
   id: string;
@@ -74,6 +76,15 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
 
   const { audioData } = useAudioReactive();
   const physicsParams = calculatePhysicsParams(audioData);
+
+  // Tier transition manager (hysteresis)
+  const transitionManager = useRef(new TierTransitionManager());
+  const [tabHidden, setTabHidden] = useState(false);
+  const pureMode = (() => {
+    if (typeof window === 'undefined') return false;
+    const params = new URLSearchParams(window.location.search);
+    return params.get('pureMode') === 'true';
+  })();
 
   // State management
   const [state, setState] = useState<VisualOrchestratorState>({
@@ -133,7 +144,7 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
     {
       id: 'thin-film',
       type: 'thin-film',
-      enabled: shouldEnableThinFilm(),
+      enabled: pureMode ? false : shouldEnableThinFilm(),
       priority: 4,
       zIndex: 2,
       opacity: 0.6,
@@ -175,11 +186,20 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
       if (state.quality.adaptive) {
         let newQuality = state.quality.current;
         
-        if (currentFps < 25 && state.quality.current !== 'low') {
-          newQuality = state.quality.current === 'high' ? 'medium' : 'low';
-        } else if (currentFps > 50 && state.quality.current !== 'ultra') {
-          newQuality = state.quality.current === 'low' ? 'medium' : 
-                      state.quality.current === 'medium' ? 'high' : 'ultra';
+        // Hysteresis-based tier transitions
+        const currentTier = state.quality.current as 'low' | 'medium' | 'high' | 'ultra';
+        const maxTier = (policy.capabilities?.tier || 'high') as 'low' | 'medium' | 'high' | 'ultra';
+        const suggestedTier = transitionManager.current.checkAndTransition(
+          currentFps,
+          currentTier,
+          maxTier
+        );
+
+        if (suggestedTier) {
+          // Clamp to medium in Pure Mode
+          newQuality = (pureMode && (suggestedTier === 'high' || suggestedTier === 'ultra'))
+            ? 'medium'
+            : (suggestedTier as typeof newQuality);
         }
 
         if (newQuality !== state.quality.current) {
@@ -190,6 +210,11 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
               target: newQuality,
             },
           }));
+          // Debug notification for tier change
+          if (debugEnabled) {
+            const msg = `Quality adjusted for performance: ${state.quality.current} → ${newQuality} (FPS ${currentFps})`;
+            setDebugToast(msg);
+          }
         }
       }
 
@@ -261,6 +286,78 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
     onStateChange?.(state);
   }, [state, onStateChange]);
 
+  // Battery Saver auto-detection + listeners
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const decision = await getBatterySaverPolicy();
+        if (!cancelled && decision.enabled && decision.forcedTier) {
+          setState(prev => ({
+            ...prev,
+            quality: {
+              ...prev.quality,
+              target: decision.forcedTier,
+            },
+          }));
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`[VisualOrchestrator] Battery saver enforced: ${decision.forcedTier} (${decision.reason})`);
+          }
+        }
+
+        // Attach listeners if Battery API available
+        const nav: any = navigator as any;
+        if (nav && 'getBattery' in nav) {
+          const battery = await nav.getBattery();
+          const handler = async () => {
+            const d = await getBatterySaverPolicy();
+            if (!cancelled && d.enabled && d.forcedTier) {
+              setState(prev => ({
+                ...prev,
+                quality: { ...prev.quality, target: d.forcedTier },
+              }));
+              if (process.env.NODE_ENV === 'development') {
+                console.warn(`[VisualOrchestrator] Battery saver updated: ${d.forcedTier} (${d.reason})`);
+              }
+            }
+          };
+          battery.addEventListener('levelchange', handler);
+          battery.addEventListener('chargingchange', handler);
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Visibility optimization: pause when tab hidden
+  useEffect(() => {
+    const onVis = () => setTabHidden(document.hidden);
+    document.addEventListener('visibilitychange', onVis);
+    onVis();
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, []);
+
+  // Debug HUD URL toggle (in addition to development mode)
+  const debugEnabled = (() => {
+    if (typeof window === 'undefined') return process.env.NODE_ENV === 'development';
+    const params = new URLSearchParams(window.location.search);
+    const debugParam = params.get('debug');
+    return process.env.NODE_ENV === 'development' || debugParam === 'true';
+  })();
+
+  // Debug toast state
+  const [debugToast, setDebugToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (debugToast) {
+      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = window.setTimeout(() => setDebugToast(null), 2000);
+    }
+    return () => {
+      if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
+    };
+  }, [debugToast]);
+
   // Render layers
   const renderLayer = (layer: VisualLayer) => {
     const style: React.CSSProperties = {
@@ -280,6 +377,8 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
         return (
           <LiquidLightBackground
             key={layer.id}
+            intensity={getEffectiveIntensity()}
+            motionEnabled={policy.motionEnabled && !tabHidden}
             className="visual-layer"
             style={style}
           />
@@ -290,7 +389,7 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
           <CSSFallback
             key={layer.id}
             intensity={getEffectiveIntensity()}
-            motionEnabled={policy.motionEnabled}
+            motionEnabled={policy.motionEnabled && !tabHidden}
             className="visual-layer"
             style={style}
           />
@@ -340,8 +439,8 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
     <div className={`visual-orchestrator ${className}`}>
       {activeLayers.map(renderLayer)}
       
-      {/* Performance HUD (development only) */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* Performance HUD (development or ?debug=true) */}
+      {debugEnabled && (
         <div className="fixed top-4 right-4 z-50 text-white text-xs bg-black/70 p-3 rounded backdrop-blur">
           <div>FPS: {state.performance.fps}</div>
           <div>Quality: {state.quality.current} → {state.quality.target}</div>
@@ -350,6 +449,12 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
           <div>Intensity: {Math.round(getEffectiveIntensity() * 100)}%</div>
           <div>Particles: {getEffectiveParticleCount()}</div>
           <div>Resolution: {Math.round(getEffectiveResolution() * 100)}%</div>
+        </div>
+      )}
+
+      {debugEnabled && debugToast && (
+        <div className="fixed top-20 right-4 z-50 text-white text-xs bg-emerald-700/80 p-2 rounded shadow">
+          {debugToast}
         </div>
       )}
     </div>

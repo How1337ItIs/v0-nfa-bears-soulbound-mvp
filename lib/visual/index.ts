@@ -14,6 +14,10 @@ export { VisualPolicy, createVisualPolicyManager, getVisualPolicyManager, destro
 export { default as VisualOrchestrator } from './VisualOrchestrator';
 export { LayerCoordinator, getLayerCoordinator, createLayerCoordinator, destroyLayerCoordinator } from './LayerCoordinator';
 export { PerformanceMonitor, getPerformanceMonitor, createPerformanceMonitor, destroyPerformanceMonitor, usePerformanceMonitor } from './PerformanceMonitor';
+// Utilities
+export { getClampedDPR, applyDPRToCanvas } from './utils/dprClamp';
+export { TierTransitionManager } from './performance/tierTransitionManager';
+export { getBatterySaverPolicy } from './capability/batterySaverPolicy';
 
 // Type exports
 export type {
