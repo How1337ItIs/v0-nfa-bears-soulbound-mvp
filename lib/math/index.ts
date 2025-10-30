@@ -19,3 +19,13 @@ export {
   cellularNoise,
   createSeededNoise2D,
 } from './noise';
+
+// Spline interpolation
+export {
+  createCatmullRomSpline,
+  createLinearSpline,
+  createHermiteSpline,
+  sampleSpline,
+  catmullRomPath2D,
+} from './splines';
+export type { Point2D, Point3D } from './splines';

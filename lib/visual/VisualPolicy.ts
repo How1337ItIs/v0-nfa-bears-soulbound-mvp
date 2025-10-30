@@ -39,6 +39,8 @@ export interface VisualPolicy {
   audioSmoothingAlpha?: number; // 0.1-0.9 smoothing factor
   beatBurstMultiplier?: number; // 1.0-2.5 beat burst strength
   thinFilmQuality?: 'low' | 'medium' | 'high';
+  thinFilmBlendMode?: 'screen' | 'overlay' | 'normal';
+  audioFrozen?: boolean;
   
   // Quality settings
   fluidQuality: 'low' | 'medium' | 'high';
@@ -128,6 +130,8 @@ class VisualPolicyManager {
           default: return 'low';
         }
       })(),
+      thinFilmBlendMode: saved?.thinFilmBlendMode ?? 'screen',
+      audioFrozen: false,
       
       // Quality settings
       fluidQuality: config.forceFluidQuality ?? saved?.fluidQuality ?? this.getQualityForTier(capabilities.tier),
@@ -270,10 +274,10 @@ class VisualPolicyManager {
   private persistPrefs(): void {
     if (typeof window === 'undefined') return;
     try {
-      const { motionEnabled, intensity, paletteId, mode, fluidQuality, particleCount, resolution, thinFilmIntensity, audioSmoothingAlpha, beatBurstMultiplier, thinFilmQuality } = this.policy;
+      const { motionEnabled, intensity, paletteId, mode, fluidQuality, particleCount, resolution, thinFilmIntensity, audioSmoothingAlpha, beatBurstMultiplier, thinFilmQuality, thinFilmBlendMode } = this.policy;
       localStorage.setItem(
         'nfa-liquid-light-policy-prefs',
-        JSON.stringify({ motionEnabled, intensity, paletteId, mode, fluidQuality, particleCount, resolution, thinFilmIntensity, audioSmoothingAlpha, beatBurstMultiplier, thinFilmQuality })
+        JSON.stringify({ motionEnabled, intensity, paletteId, mode, fluidQuality, particleCount, resolution, thinFilmIntensity, audioSmoothingAlpha, beatBurstMultiplier, thinFilmQuality, thinFilmBlendMode })
       );
     } catch {}
   }

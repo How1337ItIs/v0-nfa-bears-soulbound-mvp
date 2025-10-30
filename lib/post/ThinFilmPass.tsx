@@ -200,6 +200,7 @@ interface ThinFilmPassProps {
   enabled?: boolean;
   paletteId?: string;
   quality?: ThinFilmQuality;
+  blendMode?: 'screen' | 'overlay' | 'normal';
 }
 
 function ThinFilmPass({
@@ -207,7 +208,8 @@ function ThinFilmPass({
   intensity = 0.6,
   enabled = true,
   paletteId = 'classic-60s',
-  quality = 'mobile'
+  quality = 'mobile',
+  blendMode = 'screen'
 }: ThinFilmPassProps) {
   const effectRef = useRef<ThinFilmInterferenceEffect>();
   const paletteArrayRef = useRef<Float32Array>(new Float32Array(12));
@@ -268,6 +270,18 @@ function ThinFilmPass({
     const v = lightVecRef.current;
     v.set(Math.cos(lightRotation) * 0.5, 0.8, Math.sin(lightRotation) * 0.3);
     uniforms.get('uLightDir')!.value = v;
+
+    // Blend mode mapping
+    const bm = {
+      screen: BlendFunction.SCREEN,
+      overlay: BlendFunction.OVERLAY,
+      normal: BlendFunction.NORMAL,
+    }[blendMode] ?? BlendFunction.SCREEN;
+    // @ts-ignore postprocessing Effect has blendMode property
+    if (effectRef.current.blendMode && effectRef.current.blendMode.blendFunction !== bm) {
+      // @ts-ignore
+      effectRef.current.blendMode.blendFunction = bm;
+    }
   });
 
   return enabled ? <primitive object={effect} /> : null;
@@ -279,6 +293,7 @@ interface LiquidLightPostProcessorProps {
   deviceTier: 'high' | 'medium' | 'low' | 'ultra';
   paletteId?: string;
   quality?: ThinFilmQuality;
+  blendMode?: 'screen' | 'overlay' | 'normal';
   children?: React.ReactNode;
 }
 
@@ -287,6 +302,7 @@ export default function LiquidLightPostProcessor({
   deviceTier,
   paletteId = 'classic-60s',
   quality,
+  blendMode,
   children
 }: LiquidLightPostProcessorProps) {
   const { size } = useThree();
@@ -324,6 +340,7 @@ export default function LiquidLightPostProcessor({
         enabled={enableThinFilm}
         paletteId={paletteId}
         quality={effectiveQuality}
+        blendMode={blendMode}
       />
 
       {/* Additional passes can be added here */}
@@ -343,6 +360,7 @@ interface AuthenticThinFilmEffectProps {
   quality?: ThinFilmQuality;
   currentFPS?: number; // For adaptive quality
   batteryLevel?: number | null; // For performance scaling
+  blendMode?: 'screen' | 'overlay' | 'normal';
 }
 
 export function AuthenticThinFilmEffect({
@@ -353,7 +371,8 @@ export function AuthenticThinFilmEffect({
   intensity,
   quality,
   currentFPS = 60,
-  batteryLevel = null
+  batteryLevel = null,
+  blendMode
 }: AuthenticThinFilmEffectProps) {
   // SAFETY: Auto-pause when tab is hidden (visibility API)
   const [isVisible, setIsVisible] = useState(true);
@@ -406,6 +425,7 @@ export function AuthenticThinFilmEffect({
           deviceTier={deviceTier}
           paletteId={paletteId}
           quality={effectiveQuality}
+          blendMode={blendMode}
         />
       </Canvas>
     </div>

@@ -46,6 +46,8 @@ export default function LiquidLightControls({
   const [thinFilmEnabled, setThinFilmEnabled] = useState(initialPolicy?.thinFilmEnabled ?? true);
   const [thinFilmIntensity, setThinFilmIntensity] = useState(Math.round(((initialPolicy?.thinFilmIntensity ?? 0.6) * 100)));
   const [thinFilmQuality, setThinFilmQuality] = useState(initialPolicy?.thinFilmQuality ?? 'medium');
+  const [thinFilmBlendMode, setThinFilmBlendMode] = useState(initialPolicy?.thinFilmBlendMode ?? 'screen');
+  const [audioFrozen, setAudioFrozen] = useState(initialPolicy?.audioFrozen ?? false);
 
   const handleIntensityChange = (value: number) => {
     setIntensity(value);
@@ -110,6 +112,17 @@ export default function LiquidLightControls({
   const handleThinFilmQuality = (quality: 'low' | 'medium' | 'high') => {
     setThinFilmQuality(quality);
     policyManager?.updatePolicy({ thinFilmQuality: quality });
+  };
+
+  const handleThinFilmBlendMode = (mode: 'screen' | 'overlay' | 'normal') => {
+    setThinFilmBlendMode(mode);
+    policyManager?.updatePolicy({ thinFilmBlendMode: mode });
+  };
+
+  const handleAudioFrozen = () => {
+    const next = !audioFrozen;
+    setAudioFrozen(next);
+    policyManager?.updatePolicy({ audioFrozen: next });
   };
 
   const randomizePalette = () => {
@@ -278,6 +291,20 @@ export default function LiquidLightControls({
             </select>
           </div>
 
+          {/* Thin-Film Blend Mode */}
+          <div className="mb-4">
+            <label className="text-xs font-medium mb-2 block">Thin-Film Blend Mode</label>
+            <select
+              value={thinFilmBlendMode}
+              onChange={(e) => handleThinFilmBlendMode(e.target.value as any)}
+              className="w-full bg-white/10 text-white px-2 py-1.5 rounded text-xs border border-white/20"
+            >
+              <option value="screen" className="bg-black">Screen</option>
+              <option value="overlay" className="bg-black">Overlay</option>
+              <option value="normal" className="bg-black">Normal</option>
+            </select>
+          </div>
+
           {/* Randomize Palette */}
           <div className="mb-2">
             <button
@@ -286,6 +313,19 @@ export default function LiquidLightControls({
             >
               🔀 Randomize Palette
             </button>
+          </div>
+
+          {/* Audio Freeze (debug) */}
+          <div className="mb-2">
+            <label className="flex items-center gap-2 text-xs cursor-pointer">
+              <input
+                type="checkbox"
+                checked={audioFrozen}
+                onChange={handleAudioFrozen}
+                className="w-4 h-4"
+              />
+              <span>Freeze Audio (debug)</span>
+            </label>
           </div>
 
           {/* Color preview */}
