@@ -5,7 +5,7 @@
 The Palette System provides **centralized color management** for the Liquid Light visual system. It manages authentic 1960s-era color palettes inspired by the Joshua Light Show, Grateful Dead concerts, and oil-on-water interference patterns.
 
 **Key Features:**
-- 8 authentic palettes (Classic 60s, Grateful Dead songs, etc.)
+- 11 authentic palettes (Classic 60s + 7 Dead songs + 3 new)
 - Wavelength-based color specification (380-750nm)
 - sRGB ↔ Linear RGB conversion
 - Singleton pattern for global access
@@ -17,7 +17,7 @@ The Palette System provides **centralized color management** for the Liquid Ligh
 
 ```
 PaletteDirector (Singleton)
-├── AUTHENTIC_PALETTES (8 palettes)
+├── AUTHENTIC_PALETTES (11 palettes)
 │   ├── Classic 60s
 │   ├── Grateful Dead
 │   ├── Joshua Light Show
@@ -27,6 +27,12 @@ PaletteDirector (Singleton)
 │   ├── Terrapin Station
 │   └── Scarlet Begonias
 ├── getCurrentColorsRGB() → [[r,g,b], ...]
+├── getPaletteUniformRGB4() → Float32Array(12)
+├── getCSSGradientStops() → string (linear-gradient)
+├── blendPalettes(id1, id2, t)
+├── getRandomPalette(exclude?)
+├── getPalettesByEnergy(level)
+├── exportPaletteAsJSON(id)
 ├── getPalette(id) → Palette
 ├── wavelengthToRGB(nm) → [r,g,b]
 ├── sRGBToLinear(val) → linear
@@ -278,6 +284,28 @@ interface Palette {
 ---
 
 ## Color Science
+
+### Additional Palettes
+
+### 9. **St. Stephen** (`st-stephen`)
+- Deep purple, magenta, sky blue, gold — high energy, mystical.
+
+### 10. **Help on the Way** (`help-on-the-way`)
+- Spring green, aqua, cream, lavender — medium energy, uplifting.
+
+### 11. **Eyes of the World** (`eyes-of-the-world`)
+- Ocean blue, sea green, sunlight, twilight purple — medium energy, cosmic flow.
+
+---
+
+## New Utilities
+
+- `getPaletteUniformRGB4(paletteId?)`: Returns flattened Float32Array(12) RGB for shaders.
+- `getCSSGradientStops(paletteId?, angle)`: Returns a CSS linear-gradient string of palette colors.
+- `blendPalettes(id1, id2, t)`: Interpolates two palettes’ colors (0..1).
+- `getRandomPalette(exclude?)`: Picks a random palette, excluding optional IDs.
+- `getPalettesByEnergy(level)`: Filters palettes by energy.
+- `exportPaletteAsJSON(id)`: Exports palette to JSON (for tools).
 
 ### Wavelength Mapping
 

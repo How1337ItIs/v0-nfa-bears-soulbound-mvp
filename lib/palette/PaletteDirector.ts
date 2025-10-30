@@ -335,6 +335,70 @@ class PaletteDirectorClass {
   }
 
   /**
+   * Blend two palettes by t in [0,1]
+   */
+  blendPalettes(paletteId1: string, paletteId2: string, t: number): number[][] {
+    const p1 = this.getPalette(paletteId1);
+    const p2 = this.getPalette(paletteId2);
+    const tClamped = Math.max(0, Math.min(1, t));
+    const c1 = p1.colors.map(hex => [
+      parseInt(hex.substring(1,3), 16) / 255,
+      parseInt(hex.substring(3,5), 16) / 255,
+      parseInt(hex.substring(5,7), 16) / 255,
+    ]);
+    const c2 = p2.colors.map(hex => [
+      parseInt(hex.substring(1,3), 16) / 255,
+      parseInt(hex.substring(3,5), 16) / 255,
+      parseInt(hex.substring(5,7), 16) / 255,
+    ]);
+    const out: number[][] = [];
+    for (let i = 0; i < 4; i++) {
+      const a = c1[i % c1.length] as number[];
+      const b = c2[i % c2.length] as number[];
+      out.push([
+        a[0] * (1 - tClamped) + b[0] * tClamped,
+        a[1] * (1 - tClamped) + b[1] * tClamped,
+        a[2] * (1 - tClamped) + b[2] * tClamped,
+      ]);
+    }
+    return out;
+  }
+
+  /**
+   * Random palette helper
+   */
+  getRandomPalette(exclude?: string[]): Palette {
+    const ids = this.getAllPalettes().map(p => p.id).filter(id => !(exclude || []).includes(id));
+    const id = ids[Math.floor(Math.random() * ids.length)] || this.currentPaletteId;
+    return this.getPalette(id);
+  }
+
+  /**
+   * Filter by energy
+   */
+  getPalettesByEnergy(energy: 'low' | 'medium' | 'high'): Palette[] {
+    return this.getAllPalettes().filter(p => p.energy === energy);
+  }
+
+  /**
+   * Export/import palette JSON
+   */
+  exportPaletteAsJSON(paletteId: string): string {
+    const palette = this.getPalette(paletteId);
+    return JSON.stringify(palette, null, 2);
+  }
+
+  importPaletteFromJSON(json: string): void {
+    try {
+      const palette = JSON.parse(json) as Palette;
+      if (!palette?.id || !palette?.colors || !palette?.wavelengths) throw new Error('Invalid palette');
+      this.customPalettes.set(palette.id, palette);
+    } catch (e) {
+      console.warn('Failed to import palette JSON:', e);
+    }
+  }
+
+  /**
    * Shader-ready flattened RGB array for 4 colors (Float32Array length 12)
    */
   getPaletteUniformRGB4(paletteId?: string): Float32Array {
