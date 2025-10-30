@@ -30,6 +30,7 @@ import { getBatterySaverPolicy } from './capability/batterySaverPolicy';
 import { AuthenticThinFilmEffect } from '@/lib/post/ThinFilmPass';
 import PerformanceHUD from '@/components/liquid-light/dev/PerformanceHUD';
 import { getClampedDPR } from '@/lib/visual';
+import { PaletteAnimator } from '@/lib/palette/PaletteAnimator';
 
 // Minimal error boundary
 class ErrorBoundary extends React.Component<{
@@ -386,10 +387,27 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
   }, [coordinateLayers]);
 
   // Sync PaletteDirector with policy palette
+  const paletteAnimatorRef = useRef(new PaletteAnimator());
+  const rafRef = useRef<number | null>(null);
+
   useEffect(() => {
-    try {
-      PaletteDirector.setCurrentPalette(policy.paletteId);
-    } catch {}
+    // Start palette transition on change
+    const current = PaletteDirector.getCurrentPalette().id;
+    if (current !== policy.paletteId) {
+      paletteAnimatorRef.current.transitionTo(policy.paletteId, 1200);
+      // Drive animation loop
+      const loop = (last: number) => (now: number) => {
+        const dt = now - last;
+        const active = paletteAnimatorRef.current.update(dt);
+        if (active) {
+          rafRef.current = requestAnimationFrame(loop(now));
+        } else {
+          rafRef.current = null;
+        }
+      };
+      if (!rafRef.current) rafRef.current = requestAnimationFrame(loop(performance.now()));
+    }
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [policy.paletteId]);
 
   useEffect(() => {
@@ -561,7 +579,12 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
 
       case 'thin-film': {
         const target = state.quality.target as 'low' | 'medium' | 'high' | 'ultra';
-        const deviceTier = (target === 'ultra' ? 'high' : target) as 'low' | 'medium' | 'high';
+        const baseTier = (target === 'ultra' ? 'high' : target) as 'low' | 'medium' | 'high';
+        // Map thinFilmQuality to effective device tier for the thin-film Canvas
+        const quality = policy.thinFilmQuality || (baseTier === 'high' ? 'high' : 'medium');
+        const deviceTier = quality === 'high' ? 'high' : quality === 'medium' ? 'medium' : 'low';
+        // If thin-film quality is 'low', do not render the layer
+        if (quality === 'low') return null;
         // Map physics to AudioReactiveParams expected by thin-film
         const thinFilmAudioParams = {
           splatForce: physicsParams.splatForce,

@@ -270,7 +270,12 @@ export default function LiquidLightBackground({
       fluidRef.current.config.VELOCITY_DISSIPATION = 0.98; // Static
       fluidRef.current.config.CURL = 0;
     }
-    
+
+    // Idle skip: if nearly silent and motion disabled, avoid extra work
+    if ((enrichedAudio.volume ?? 0) < 0.01 && !effMotion) {
+      return;
+    }
+
     // Beat-triggered splats (intensity-scaled)
     if (enrichedAudio?.beatDetected && fluidRef.current.splat && effMotion) {
       const canvas = canvasRef.current;

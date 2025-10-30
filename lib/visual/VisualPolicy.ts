@@ -38,6 +38,7 @@ export interface VisualPolicy {
   thinFilmIntensity?: number; // 0-1 strength for thin-film blending
   audioSmoothingAlpha?: number; // 0.1-0.9 smoothing factor
   beatBurstMultiplier?: number; // 1.0-2.5 beat burst strength
+  thinFilmQuality?: 'low' | 'medium' | 'high';
   
   // Quality settings
   fluidQuality: 'low' | 'medium' | 'high';
@@ -120,6 +121,13 @@ class VisualPolicyManager {
       thinFilmIntensity: saved?.thinFilmIntensity ?? 0.6,
       audioSmoothingAlpha: saved?.audioSmoothingAlpha ?? 0.3,
       beatBurstMultiplier: saved?.beatBurstMultiplier ?? 1.8,
+      thinFilmQuality: ((): 'low' | 'medium' | 'high' => {
+        switch (capabilities.tier) {
+          case 'high': return 'high';
+          case 'medium': return 'medium';
+          default: return 'low';
+        }
+      })(),
       
       // Quality settings
       fluidQuality: config.forceFluidQuality ?? saved?.fluidQuality ?? this.getQualityForTier(capabilities.tier),
@@ -262,10 +270,10 @@ class VisualPolicyManager {
   private persistPrefs(): void {
     if (typeof window === 'undefined') return;
     try {
-      const { motionEnabled, intensity, paletteId, mode, fluidQuality, particleCount, resolution, thinFilmIntensity, audioSmoothingAlpha, beatBurstMultiplier } = this.policy;
+      const { motionEnabled, intensity, paletteId, mode, fluidQuality, particleCount, resolution, thinFilmIntensity, audioSmoothingAlpha, beatBurstMultiplier, thinFilmQuality } = this.policy;
       localStorage.setItem(
         'nfa-liquid-light-policy-prefs',
-        JSON.stringify({ motionEnabled, intensity, paletteId, mode, fluidQuality, particleCount, resolution, thinFilmIntensity, audioSmoothingAlpha, beatBurstMultiplier })
+        JSON.stringify({ motionEnabled, intensity, paletteId, mode, fluidQuality, particleCount, resolution, thinFilmIntensity, audioSmoothingAlpha, beatBurstMultiplier, thinFilmQuality })
       );
     } catch {}
   }
