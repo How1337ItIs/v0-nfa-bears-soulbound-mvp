@@ -14,6 +14,9 @@ import {
 import { PaletteDirector } from '@/lib/palette';
 import { CSSFallback, LiquidLightControls } from '@/components/liquid-light';
 import { applyDPRToCanvas } from '@/lib/visual';
+import { GPUProfiler, createGPUProfiler } from '@/lib/performance/gpuProfiler';
+import { FrameBudgetAnalyzer, markFrameStart } from '@/lib/performance/frameBudget';
+import { globalMemoryLeakDetector } from '@/lib/performance/memoryLeakDetector';
 import type { AudioData, Palette as PaletteType } from '@/lib/visual/types';
 
 // SINGLE ENGINE OF RECORD - webgl-fluid-enhanced only
@@ -47,6 +50,9 @@ export default function LiquidLightBackground({
 }: LiquidLightBackgroundProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fluidRef = useRef<any>(null);
+  const glRef = useRef<WebGL2RenderingContext | null>(null);
+  const gpuProfilerRef = useRef<GPUProfiler | null>(null);
+  const frameBudgetRef = useRef<FrameBudgetAnalyzer | null>(null);
   const performanceRef = useRef<PerformanceMetrics>({
     fps: 60,
     frameCount: 0,

@@ -152,8 +152,12 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
 
   // Enrich audio with beat detection results
   const beatResultRef = useRef<{ isBeat: boolean; confidence: number; bpm: number } | null>(null);
+  const lastEnrichedRef = useRef<EnhancedAudioData | null>(null);
   const enrichedAudioData = useMemo<EnhancedAudioData | null>(() => {
     if (!audioData) return null;
+    if (policy.audioFrozen) {
+      return lastEnrichedRef.current ?? (audioData as EnhancedAudioData);
+    }
     const energy = Math.max(0, Math.min(100, (audioData.bass || 0) * 100));
     const beatResult = beatDetectorRef.current?.detect(energy);
     if (beatResult) {
@@ -163,12 +167,14 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
         bpm: beatResult.bpmEstimate,
       };
     }
-    return {
+    const result = {
       ...audioData,
       beatDetected: beatResult ? beatResult.isBeat : !!audioData.beatDetected,
       tempo: beatResult?.bpmEstimate ?? audioData.tempo,
     } as EnhancedAudioData;
-  }, [audioData]);
+    lastEnrichedRef.current = result;
+    return result;
+  }, [audioData, policy.audioFrozen]);
 
   // Enhanced physics from enriched audio
   const physicsParams = useMemo(() => {
@@ -631,6 +637,7 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
                 paletteId={policy.paletteId}
                 enabled={!tabHidden}
                 intensity={policy.thinFilmIntensity}
+                blendMode={policy.thinFilmBlendMode}
               />
             </ErrorBoundary>
           </div>
@@ -665,6 +672,8 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
           audioData={enrichedAudioData}
           dpr={getClampedDPR()}
           enabled={true}
+          paletteId={policy.paletteId}
+          thinFilmQuality={policy.thinFilmQuality}
         />
       )}
 

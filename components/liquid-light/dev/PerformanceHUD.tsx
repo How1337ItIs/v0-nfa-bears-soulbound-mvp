@@ -27,6 +27,8 @@ export interface PerformanceHUDProps {
   audioData?: AudioData | null;
   dpr?: number;
   enabled?: boolean; // Override visibility
+  paletteId?: string;
+  thinFilmQuality?: 'low' | 'medium' | 'high';
 }
 
 export default function PerformanceHUD({
@@ -35,6 +37,8 @@ export default function PerformanceHUD({
   audioData = null,
   dpr,
   enabled,
+  paletteId,
+  thinFilmQuality,
 }: PerformanceHUDProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
@@ -184,6 +188,12 @@ export default function PerformanceHUD({
           {tier}
         </span>
       </div>
+      {thinFilmQuality && (
+        <div style={{ marginBottom: '4px' }}>
+          <span style={{ color: '#aaa' }}>Thin-Film:</span>{' '}
+          <span style={{ color: '#fff' }}>{thinFilmQuality}</span>
+        </div>
+      )}
 
       {/* DPR */}
       {dpr !== undefined && (
@@ -211,6 +221,12 @@ export default function PerformanceHUD({
           {typeof bpm === 'number' && bpm > 0 && (
             <div style={{ marginTop: '4px', color: '#fff' }}>BPM: {bpm.toFixed(0)}</div>
           )}
+        </div>
+      )}
+      {paletteId && (
+        <div style={{ marginTop: '4px' }}>
+          <span style={{ color: '#aaa' }}>Palette:</span>{' '}
+          <span style={{ color: '#fff' }}>{paletteId}</span>
         </div>
       )}
 
