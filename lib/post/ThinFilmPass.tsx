@@ -210,6 +210,8 @@ function ThinFilmPass({
   quality = 'mobile'
 }: ThinFilmPassProps) {
   const effectRef = useRef<ThinFilmInterferenceEffect>();
+  const paletteArrayRef = useRef<Float32Array>(new Float32Array(12));
+  const lightVecRef = useRef<THREE.Vector3>(new THREE.Vector3(0.5, 0.8, 0.3));
 
   // Get quality preset
   const qualityPreset = THIN_FILM_QUALITY_PRESETS[quality];
@@ -250,26 +252,22 @@ function ThinFilmPass({
     // QUALITY CONTROL: Set interference orders based on quality preset
     uniforms.get('uInterferenceOrders')!.value = qualityPreset.interferenceOrders;
 
-    // PALETTE INTEGRATION: Get current palette colors
+    // PALETTE INTEGRATION: Get current palette colors (reuse array)
     const paletteColorsRGB = PaletteDirector.getCurrentColorsRGB();
-    const flattenedColors = new Float32Array(12);
-
-    // Flatten 4 colors × 3 channels into array
+    const flat = paletteArrayRef.current;
     for (let i = 0; i < 4 && i < paletteColorsRGB.length; i++) {
-      flattenedColors[i * 3] = paletteColorsRGB[i][0];
-      flattenedColors[i * 3 + 1] = paletteColorsRGB[i][1];
-      flattenedColors[i * 3 + 2] = paletteColorsRGB[i][2];
+      const c = paletteColorsRGB[i];
+      flat[i * 3] = c[0];
+      flat[i * 3 + 1] = c[1];
+      flat[i * 3 + 2] = c[2];
     }
-
-    uniforms.get('uPaletteRGB')!.value = flattenedColors;
+    uniforms.get('uPaletteRGB')!.value = flat;
 
     // Light direction (slowly rotating for dynamic effect)
     const lightRotation = state.clock.elapsedTime * 0.05;
-    uniforms.get('uLightDir')!.value = new THREE.Vector3(
-      Math.cos(lightRotation) * 0.5,
-      0.8,
-      Math.sin(lightRotation) * 0.3
-    );
+    const v = lightVecRef.current;
+    v.set(Math.cos(lightRotation) * 0.5, 0.8, Math.sin(lightRotation) * 0.3);
+    uniforms.get('uLightDir')!.value = v;
   });
 
   return enabled ? <primitive object={effect} /> : null;
@@ -386,7 +384,7 @@ export function AuthenticThinFilmEffect({
   }
 
   return (
-    <div className="fixed inset-0 -z-5 w-full h-full pointer-events-none">
+    <div className="fixed inset-0 -z-5 w-full h-full pointer-events-none" data-testid="thin-film-effect">
       <Canvas
         style={{ background: 'transparent' }}
         dpr={qualityPreset.dpr}

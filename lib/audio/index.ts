@@ -77,3 +77,26 @@ export type {
   SilenceEventData,
   TempoChangeEventData,
 } from './audioEventEmitter';
+
+// Dynamic range compression
+export {
+  DynamicRangeCompressor,
+  createCompressor,
+  createGentleCompressor,
+  createAggressiveCompressor,
+} from './dynamicRangeCompressor';
+export type { DRCConfig } from './dynamicRangeCompressor';
+
+// Silence detection
+export {
+  SilenceDetector,
+  createSilenceDetector,
+} from './silenceDetector';
+export type { SilenceDetectionResult, SilenceDetectorConfig } from './silenceDetector';
+
+// Frequency band tracking
+export {
+  FrequencyBandTracker,
+  createFrequencyBandTracker,
+} from './frequencyBandTracker';
+export type { BandStats, FrequencyBandStats } from './frequencyBandTracker';

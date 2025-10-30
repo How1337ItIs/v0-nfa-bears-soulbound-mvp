@@ -81,7 +81,14 @@ Layers should accept orchestrator-provided props when available, but remain back
 - Mounted via `AuthenticThinFilmEffect` at z-index -30.
 - Enabled on medium/high tiers, auto-disabled under 45 FPS and in Pure Mode.
 - Intensity controlled by `policy.thinFilmIntensity` (0–1).
+- Quality controlled by `policy.thinFilmQuality` (low=off, medium, high).
 
 ### Performance HUD
+
+### Palette Rotation
+- Optional auto-rotate via URL params:
+  - `?autoPalette=true` enables rotation
+  - `&paletteInterval=20` sets rotation interval in seconds (default 20)
+  - Uses `PaletteAnimator` to blend between palettes.
 - `components/liquid-light/dev/PerformanceHUD` renders when `?debug=true` or in development.
 - Shows FPS, tier, DPR, audio levels, and BPM when available.

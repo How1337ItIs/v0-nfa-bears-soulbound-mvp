@@ -286,6 +286,14 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
         updatePolicy({ thinFilmEnabled: false });
       }
 
+      // Thin-film quality auto-tune
+      const canHigh = (policy.capabilities?.tier === 'high');
+      if (currentFps < 50 && (policy.thinFilmQuality === 'high')) {
+        updatePolicy({ thinFilmQuality: 'medium' });
+      } else if (currentFps > 55 && canHigh && (policy.thinFilmQuality !== 'high')) {
+        updatePolicy({ thinFilmQuality: 'high' });
+      }
+
       // Adaptive quality adjustment
       if (state.quality.adaptive) {
         let newQuality = state.quality.current;
@@ -495,6 +503,22 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
     onVis();
     return () => document.removeEventListener('visibilitychange', onVis);
   }, []);
+
+  // Optional auto-rotate palettes via URL params: ?autoPalette=true&paletteInterval=20
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const auto = params.get('autoPalette') === 'true';
+    const seconds = Math.max(5, parseInt(params.get('paletteInterval') || '20', 10));
+    if (!auto) return;
+    const tick = () => {
+      const current = policy.paletteId;
+      const next = PaletteDirector.getRandomPalette([current]).id;
+      updatePolicy({ paletteId: next });
+    };
+    const id = window.setInterval(tick, seconds * 1000);
+    return () => window.clearInterval(id);
+  }, [policy.paletteId, updatePolicy]);
 
   // Debug HUD URL toggle (in addition to development mode)
   const debugEnabled = (() => {

@@ -37,3 +37,19 @@ export {
   createPaletteAnimator,
   Easing,
 } from './paletteInterpolation';
+
+// Palette generation
+export {
+  generateRandomPalette,
+  generateBestRandomPalette,
+  generatePaletteFromSeed,
+} from './paletteRandomizer';
+export type { PaletteConstraints } from './paletteRandomizer';
+
+// Palette mood analysis
+export {
+  analyzePaletteMood,
+  findPalettesByMood,
+  getMoodDescription,
+} from './paletteMoodAnalyzer';
+export type { PaletteMoodAnalysis } from './paletteMoodAnalyzer';

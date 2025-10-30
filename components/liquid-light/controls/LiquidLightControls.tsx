@@ -45,6 +45,7 @@ export default function LiquidLightControls({
   const [burst, setBurst] = useState(Math.round(((initialPolicy?.beatBurstMultiplier ?? 1.8) * 10)) / 10);
   const [thinFilmEnabled, setThinFilmEnabled] = useState(initialPolicy?.thinFilmEnabled ?? true);
   const [thinFilmIntensity, setThinFilmIntensity] = useState(Math.round(((initialPolicy?.thinFilmIntensity ?? 0.6) * 100)));
+  const [thinFilmQuality, setThinFilmQuality] = useState(initialPolicy?.thinFilmQuality ?? 'medium');
 
   const handleIntensityChange = (value: number) => {
     setIntensity(value);
@@ -104,6 +105,17 @@ export default function LiquidLightControls({
     const v01 = Math.max(0, Math.min(1, value / 100));
     setThinFilmIntensity(Math.round(v01 * 100));
     policyManager?.updatePolicy({ thinFilmIntensity: v01 });
+  };
+
+  const handleThinFilmQuality = (quality: 'low' | 'medium' | 'high') => {
+    setThinFilmQuality(quality);
+    policyManager?.updatePolicy({ thinFilmQuality: quality });
+  };
+
+  const randomizePalette = () => {
+    const current = policyManager?.getPolicy().paletteId ?? selectedPalette;
+    const random = PaletteDirector.getRandomPalette([current]).id;
+    handlePaletteChange(random);
   };
 
   // Get all palettes
@@ -250,6 +262,30 @@ export default function LiquidLightControls({
               onChange={(e) => handleThinFilmIntensity(Number(e.target.value))}
               className="w-full"
             />
+          </div>
+
+          {/* Thin-Film Quality */}
+          <div className="mb-4">
+            <label className="text-xs font-medium mb-2 block">Thin-Film Quality</label>
+            <select
+              value={thinFilmQuality}
+              onChange={(e) => handleThinFilmQuality(e.target.value as any)}
+              className="w-full bg-white/10 text-white px-2 py-1.5 rounded text-xs border border-white/20"
+            >
+              <option value="low" className="bg-black">Low (off)</option>
+              <option value="medium" className="bg-black">Medium</option>
+              <option value="high" className="bg-black">High</option>
+            </select>
+          </div>
+
+          {/* Randomize Palette */}
+          <div className="mb-2">
+            <button
+              onClick={randomizePalette}
+              className="w-full bg-white/10 hover:bg-white/20 transition-colors text-xs px-3 py-2 rounded"
+            >
+              🔀 Randomize Palette
+            </button>
           </div>
 
           {/* Color preview */}
