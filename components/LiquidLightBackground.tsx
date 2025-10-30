@@ -21,6 +21,7 @@ import { globalMemoryLeakDetector } from '@/lib/performance/memoryLeakDetector';
 import { AdaptiveQuality } from '@/lib/performance/AdaptiveQuality';
 import { ThermalThrottlingDetector, ThermalState } from '@/lib/performance/ThermalThrottlingDetector';
 import type { AudioData, Palette as PaletteType } from '@/lib/visual/types';
+import { getEffectPolicy } from '@/lib/visual/EffectPolicy';
 
 // SINGLE ENGINE OF RECORD - webgl-fluid-enhanced only
 // Eliminates parallel CSS/WebGL systems per unified recommendation
@@ -75,6 +76,7 @@ export default function LiquidLightBackground({
   const [currentPalette, setCurrentPalette] = useState('psychedelic');
   const [currentMode, setCurrentMode] = useState('ambient');
   const [tabHidden, setTabHidden] = useState(false);
+  const [effectPolicy, setEffectPolicy] = useState(() => getEffectPolicy((externalTier ?? 'high') as any, detectMobilePerfHints().saveData));
   const [mobileHints, setMobileHints] = useState(() => detectMobilePerfHints());
   
   // Centralized audio reactivity (single analyzer)
@@ -119,6 +121,15 @@ export default function LiquidLightBackground({
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
+
+  // Update effect policy when tier or save-data changes
+  useEffect(() => {
+    const policy = getEffectPolicy(currentTier as any, mobileHints.saveData);
+    setEffectPolicy(policy);
+    if (typeof window !== 'undefined') {
+      (window as any).__EFFECT_POLICY__ = policy;
+    }
+  }, [currentTier, mobileHints.saveData]);
 
   // Track tab visibility (pause when hidden)
   useEffect(() => {
@@ -249,7 +260,14 @@ export default function LiquidLightBackground({
             adaptiveQualityRef.current?.adjustQuality();
           }
 
-          animationId = requestAnimationFrame(performanceLoop);
+          // Throttle updates on low tier or save-data to reduce workload (approx 30fps)
+          if ((currentTier === 'low' || mobileHints.saveData)) {
+            setTimeout(() => {
+              animationId = requestAnimationFrame(performanceLoop);
+            }, 16);
+          } else {
+            animationId = requestAnimationFrame(performanceLoop);
+          }
         };
         performanceLoop();
         
@@ -304,9 +322,30 @@ export default function LiquidLightBackground({
     };
     
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas, { passive: true } as any);
     return () => window.removeEventListener('resize', resizeCanvas);
   }, []);
+
+  // Memory pressure handling: periodically check heap and step down quality if high
+  useEffect(() => {
+    let timer: any;
+    const checkMemory = () => {
+      try {
+        const anyPerf: any = performance as any;
+        const used = anyPerf?.memory?.usedJSHeapSize as number | undefined;
+        const limit = anyPerf?.memory?.jsHeapSizeLimit as number | undefined;
+        if (used && limit) {
+          const ratio = used / limit; // 0-1
+          if (ratio > 0.75 && currentTier !== 'low' && !externalTier) {
+            setCurrentTier(currentTier === 'high' ? 'medium' : 'low');
+          }
+        }
+      } catch {}
+      timer = setTimeout(checkMemory, 4000);
+    };
+    checkMemory();
+    return () => clearTimeout(timer);
+  }, [currentTier, externalTier]);
 
   // Handle WebGL context lost
   useEffect(() => {

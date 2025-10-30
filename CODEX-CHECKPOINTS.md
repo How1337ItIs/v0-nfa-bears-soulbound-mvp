@@ -17,7 +17,7 @@ Entries
   - Added unit test for enforceThinFilmPerformanceGate()
   - Created CODEX-CONVERSATION-LOG.md for key chat decisions
 - Next:
-  - Optional: run tests locally or in CI
+  - Optional: run tests locally or in CI (note: repo uses Jest; converted one test from Vitest style)
   - Continue with remaining Workstream A items (A14 docs polish) and B tasks as needed
 
 2025-10-30T00:15:00Z

@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest';
 import { createVisualPolicyManager, getVisualPolicyManager, destroyVisualPolicyManager } from '@/lib/visual/VisualPolicy';
 
 describe('VisualPolicy', () => {

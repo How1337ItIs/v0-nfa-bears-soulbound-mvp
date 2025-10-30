@@ -92,19 +92,36 @@ function MyScene() {
 }
 ```
 
-### With Orchestrator
+### Orchestrator Integration
 
-```typescript
-import { VisualOrchestrator } from '@/lib/visual/orchestrator';
+The orchestrator mounts and manages the thin-film overlay automatically when enabled in policy and the device tier permits it.
 
-<VisualOrchestrator
-  deviceTier="high"
-  paletteId="fire-on-the-mountain"
-  audioParams={audioParams}
->
-  {/* Orchestrator handles thin-film mounting */}
-</VisualOrchestrator>
+Key points:
+- Mounted at z-index -30 above the WebGL fluid canvas.
+- Disabled on tier 'low' and when `?pureMode=true`.
+- Auto-disabled when FPS < 45 via a centralized gate.
+- Intensity, quality, and blend mode are controlled via VisualPolicy and UI controls.
+
+Example usage (root layout):
+
+```tsx
+// app/layout.tsx
+import VisualOrchestrator from '@/lib/visual/VisualOrchestrator';
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <VisualOrchestrator>
+          {children}
+        </VisualOrchestrator>
+      </body>
+    </html>
+  );
+}
 ```
+
+Controls are available via the floating panel (`components/liquid-light/controls/LiquidLightControls.tsx`) and debug HUD with `?debug=true`.
 
 ---
 
