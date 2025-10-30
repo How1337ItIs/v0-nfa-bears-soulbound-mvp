@@ -1,0 +1,24 @@
+{
+  "entries": [
+    { "name": "thinfilm:emergency", "hash": "0000000000000000" },
+    { "name": "thinfilm:mobile", "hash": "0000000000000000" },
+    { "name": "thinfilm:desktop", "hash": "0000000000000000" },
+    { "name": "thinfilm:ultra", "hash": "0000000000000000" },
+
+    { "name": "shimmer:default", "hash": "0000000000000000" },
+    { "name": "flow:low", "hash": "0000000000000000" },
+    { "name": "flow:high", "hash": "0000000000000000" },
+
+    { "name": "chromatic:small", "hash": "0000000000000000" },
+    { "name": "chromatic:medium", "hash": "0000000000000000" },
+    { "name": "chromatic:large", "hash": "0000000000000000" },
+
+    { "name": "kaleidoscope:s4", "hash": "0000000000000000" },
+    { "name": "kaleidoscope:s6", "hash": "0000000000000000" },
+    { "name": "kaleidoscope:s8", "hash": "0000000000000000" },
+
+    { "name": "vignette:low", "hash": "0000000000000000" },
+    { "name": "vignette:mid", "hash": "0000000000000000" },
+    { "name": "vignette:high", "hash": "0000000000000000" }
+  ]
+}

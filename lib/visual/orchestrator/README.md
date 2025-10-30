@@ -33,6 +33,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
+## Quick Start
+- Add `VisualOrchestrator` to your root layout as above.
+- Visit any page with `?debug=true` to see the HUD (FPS, tier, DPR, audio).
+- Open the floating controls (bottom-right) to change intensity, palette, mode, audio smoothing/burst, and thin-film options.
+- Use `?pureMode=true` to force baseline visuals (disables thin-film).
+
 ## Dev Toggles
 
 - `?debug=true` — Shows performance HUD and tier-change toasts

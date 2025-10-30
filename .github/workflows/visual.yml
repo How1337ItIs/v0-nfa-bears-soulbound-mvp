@@ -1,0 +1,24 @@
+name: Visual Tests
+
+on: [push, pull_request]
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - name: Run visual tests (high tier)
+        run: |
+          DEVICE_TIER=high npm run test:visual --silent
+      - name: Upload visual report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-report
+          path: |
+            __tests__/visual/visual-report.json
+            __tests__/visual/baselines.json

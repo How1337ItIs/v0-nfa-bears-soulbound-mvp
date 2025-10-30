@@ -14,6 +14,7 @@ import {
 import { PaletteDirector } from '@/lib/palette';
 import { CSSFallback, LiquidLightControls } from '@/components/liquid-light';
 import { applyDPRToCanvas } from '@/lib/visual';
+import { detectMobilePerfHints, getMobileCanvasCap } from '@/lib/performance/MobileOptimization';
 import { GPUProfiler, createGPUProfiler } from '@/lib/performance/gpuProfiler';
 import { FrameBudgetAnalyzer, markFrameStart } from '@/lib/performance/frameBudget';
 import { globalMemoryLeakDetector } from '@/lib/performance/memoryLeakDetector';
@@ -74,6 +75,7 @@ export default function LiquidLightBackground({
   const [currentPalette, setCurrentPalette] = useState('psychedelic');
   const [currentMode, setCurrentMode] = useState('ambient');
   const [tabHidden, setTabHidden] = useState(false);
+  const [mobileHints, setMobileHints] = useState(() => detectMobilePerfHints());
   
   // Centralized audio reactivity (single analyzer)
   // Use shared audio when provided; otherwise, initialize a local analyzer
@@ -284,6 +286,21 @@ export default function LiquidLightBackground({
     const resizeCanvas = () => {
       // Keep CSS size via classes; set backing store size via DPR clamp
       applyDPRToCanvas(canvas);
+      // Mobile cap: tighten DPR for low/medium tiers or save-data
+      try {
+        const rect = canvas.getBoundingClientRect();
+        const baseDpr = Math.min(window.devicePixelRatio || 1, 3);
+        const isLowTier = currentTier === 'low' || currentTier === 'medium';
+        if (isLowTier || mobileHints.saveData) {
+          const cap = getMobileCanvasCap(rect.width, rect.height, baseDpr, currentTier);
+          const targetWidth = Math.floor(rect.width * cap.dpr);
+          const targetHeight = Math.floor(rect.height * cap.dpr);
+          if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+          }
+        }
+      } catch {}
     };
     
     resizeCanvas();

@@ -26,6 +26,7 @@ import {
 import LiquidLightBackground from '@/components/LiquidLightBackground';
 import { AuthenticThinFilmEffect } from '@/lib/post/ThinFilmPass';
 import PerformanceHUD from '@/components/liquid-light/dev/PerformanceHUD';
+import { enforceThinFilmPerformanceGate } from './orchestrator/layerCoordinator';
 
 // Local helpers
 function useQueryFlag(param: string): boolean {
@@ -120,14 +121,9 @@ export default function VisualOrchestrator({ children }: { children?: React.Reac
     if (policy.thinFilmEnabled) updatePolicy({ thinFilmEnabled: false });
   }, [pureMode, policy.thinFilmEnabled, updatePolicy]);
 
-  // Auto-disable thin-film on sustained low FPS
+  // Auto-disable thin-film on sustained low FPS (centralized helper)
   useEffect(() => {
-    if (!policy.thinFilmEnabled) return;
-    if (fps > 0 && fps < 45) {
-      updatePolicy({ thinFilmEnabled: false });
-      // eslint-disable-next-line no-console
-      console.warn('[Orchestrator] Disabling thin-film due to low FPS:', fps);
-    }
+    enforceThinFilmPerformanceGate(fps, { thinFilmEnabled: policy.thinFilmEnabled }, updatePolicy);
   }, [fps, policy.thinFilmEnabled, updatePolicy]);
 
   // Adaptive tiering via hysteresis manager (non-destructive)

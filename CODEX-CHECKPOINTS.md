@@ -11,6 +11,15 @@ Format
 
 Entries
 
+2025-10-30T00:45:00Z
+- Scope: Tests + conversation log
+- Done:
+  - Added unit test for enforceThinFilmPerformanceGate()
+  - Created CODEX-CONVERSATION-LOG.md for key chat decisions
+- Next:
+  - Optional: run tests locally or in CI
+  - Continue with remaining Workstream A items (A14 docs polish) and B tasks as needed
+
 2025-10-30T00:15:00Z
 - Scope: Orchestrator safeguards + docs
 - Done:
@@ -21,6 +30,25 @@ Entries
   - Consider centralizing thin-film FPS gating within layerCoordinator (optional)
   - Add a small unit test for VisualPolicy persistence of new fields
 - Notes: Debug HUD visible with `?debug=true`. Pure Mode respected.
+
+2025-10-30T00:25:00Z
+- Scope: Performance gating + persistence test
+- Done:
+  - Added enforceThinFilmPerformanceGate() in lib/visual/orchestrator/layerCoordinator.ts
+  - Added unit test to ensure VisualPolicy loads saved preferences (audio smoothing, thin-film intensity/quality/blend, beat burst) after re-init
+- Next:
+  - Optionally call enforceThinFilmPerformanceGate() from VisualOrchestrator for a single source of truth
+  - Consider adding quick-start snippet to README showing app-level wrapper
+- Notes: thinFilmEnabled is not persisted by design (device/tier-derived). Other fields persist via localStorage.
+
+2025-10-30T00:35:00Z
+- Scope: Centralize gating + quick start docs
+- Done:
+  - VisualOrchestrator now calls enforceThinFilmPerformanceGate() for thin-film FPS gating
+  - Added Quick Start section to orchestrator README (wrap, debug flags, controls)
+- Next:
+  - Optional: small unit test for the gating helper
+  - Optional: add CODEX-CONVERSATION-LOG.md if we want to paste chat highlights
 
 2025-10-29T00:00:00Z
 - Scope: Sprint setup and handoff

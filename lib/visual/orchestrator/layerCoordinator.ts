@@ -65,3 +65,21 @@ export function getZIndexStack(policy: VisualPolicy): Record<string, number> {
   return stack;
 }
 
+/**
+ * Enforce performance gates that affect layer enablement.
+ * Currently: auto-disable thin-film when FPS drops below 45.
+ *
+ * Use this from the orchestrator render loop or a performance monitor.
+ */
+export function enforceThinFilmPerformanceGate(
+  currentFPS: number,
+  policy: { thinFilmEnabled?: boolean },
+  updatePolicy: (updates: { thinFilmEnabled?: boolean }) => void
+) {
+  if (typeof currentFPS !== 'number' || currentFPS <= 0) return;
+  if (currentFPS < 45 && policy.thinFilmEnabled) {
+    // eslint-disable-next-line no-console
+    console.warn('[LayerCoordinator] Disabling thin-film due to low FPS:', currentFPS);
+    updatePolicy({ thinFilmEnabled: false });
+  }
+}
