@@ -65,3 +65,15 @@ export {
   downloadPalette,
   exportAllFormats,
 } from './paletteExporter';
+
+// Color blindness simulation
+export {
+  simulateProtanopia,
+  simulateDeuteranopia,
+  simulateTritanopia,
+  simulateAchromatopsia,
+  simulateAllColorBlindness,
+  simulatePalette,
+  validatePaletteForColorBlind,
+  getColorBlindRecommendations,
+} from './colorBlindness';

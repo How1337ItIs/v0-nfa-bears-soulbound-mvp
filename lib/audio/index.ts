@@ -100,3 +100,43 @@ export {
   createFrequencyBandTracker,
 } from './frequencyBandTracker';
 export type { BandStats, FrequencyBandStats } from './frequencyBandTracker';
+
+// Audio presets
+export {
+  AUDIO_PRESETS,
+  createAudioProcessorWithPreset,
+  getAvailablePresets,
+  getPreset,
+} from './audioPresets';
+export type { AudioPreset } from './audioPresets';
+
+// Audio latency compensation
+export {
+  AudioLatencyCompensator,
+  LatencyAutoDetector,
+  createSmartLatencyCompensator,
+} from './audioLatencyCompensation';
+export type { LatencyCompensationConfig } from './audioLatencyCompensation';
+
+// Audio ducking
+export {
+  AudioDucker,
+  DuckingManager,
+  globalDuckingManager,
+} from './audioDucking';
+export type { DuckingConfig } from './audioDucking';
+
+// Audio export and recording
+export {
+  AudioRecorder,
+  AudioExporter,
+} from './audioExport';
+export type { AudioExportConfig, RecordingSession } from './audioExport';
+
+// Audio-reactive palette switching
+export {
+  AudioReactivePalette,
+  globalAudioReactivePalette,
+  createAudioReactivePalette,
+} from './audioReactivePalette';
+export type { AudioReactivePaletteConfig } from './audioReactivePalette';

@@ -83,6 +83,18 @@ Layers should accept orchestrator-provided props when available, but remain back
 - Intensity controlled by `policy.thinFilmIntensity` (0–1).
 - Quality controlled by `policy.thinFilmQuality` (low=off, medium, high).
 
+### Controls
+- `components/liquid-light/controls/LiquidLightControls.tsx` exposes:
+  - Intensity, palette, mode, motion toggle
+  - Audio smoothing (`audioSmoothingAlpha`) and beat burst multiplier (`beatBurstMultiplier`)
+  - Thin-film toggle, intensity, quality, and blend mode
+  - Audio freeze (debug)
+
+### Memory Monitoring
+- VisualOrchestrator runs a 10s interval to check `performance.memory.usedJSHeapSize`.
+- If >100MB: disables thin-film first; if already disabled, steps the performance tier down one level.
+- Goal: avoid runaway memory and maintain responsiveness.
+
 ### Performance HUD
 
 ### Palette Rotation

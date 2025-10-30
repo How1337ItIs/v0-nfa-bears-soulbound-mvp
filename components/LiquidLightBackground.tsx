@@ -17,6 +17,8 @@ import { applyDPRToCanvas } from '@/lib/visual';
 import { GPUProfiler, createGPUProfiler } from '@/lib/performance/gpuProfiler';
 import { FrameBudgetAnalyzer, markFrameStart } from '@/lib/performance/frameBudget';
 import { globalMemoryLeakDetector } from '@/lib/performance/memoryLeakDetector';
+import { AdaptiveQuality } from '@/lib/performance/AdaptiveQuality';
+import { ThermalThrottlingDetector, ThermalState } from '@/lib/performance/ThermalThrottlingDetector';
 import type { AudioData, Palette as PaletteType } from '@/lib/visual/types';
 
 // SINGLE ENGINE OF RECORD - webgl-fluid-enhanced only
@@ -53,6 +55,8 @@ export default function LiquidLightBackground({
   const glRef = useRef<WebGL2RenderingContext | null>(null);
   const gpuProfilerRef = useRef<GPUProfiler | null>(null);
   const frameBudgetRef = useRef<FrameBudgetAnalyzer | null>(null);
+  const adaptiveQualityRef = useRef<AdaptiveQuality | null>(null);
+  const thermalDetectorRef = useRef<ThermalThrottlingDetector | null>(null);
   const performanceRef = useRef<PerformanceMetrics>({
     fps: 60,
     frameCount: 0,
@@ -186,6 +190,21 @@ export default function LiquidLightBackground({
         fluidRef.current = fluidInstance;
         setIsLoaded(true);
         
+        // Initialize WebGL2 context and profilers (shared canvas context)
+        const gl = (canvas.getContext('webgl2') || canvas.getContext('experimental-webgl2')) as WebGL2RenderingContext | null;
+        glRef.current = gl;
+        gpuProfilerRef.current = createGPUProfiler(gl);
+        frameBudgetRef.current = new FrameBudgetAnalyzer(60);
+        adaptiveQualityRef.current = new AdaptiveQuality();
+        thermalDetectorRef.current = new ThermalThrottlingDetector();
+        // Respond to thermal state changes by stepping down quality
+        thermalDetectorRef.current.onThermalStateChange((state) => {
+          if (externalTier != null) return; // Don't override explicit tier
+          if (state === ThermalState.SERIOUS || state === ThermalState.CRITICAL) {
+            setCurrentTier((prev) => (prev === 'high' ? 'medium' : 'low'));
+          }
+        });
+        
         // Setup thermal convection (authentic physics)
         const thermalCleanup = setupThermalCurrents(fluidInstance, canvas, physicsParams);
         cleanupFunctions.push(thermalCleanup);
@@ -197,7 +216,37 @@ export default function LiquidLightBackground({
         // Start performance monitoring
         let animationId: number;
         const performanceLoop = () => {
-          monitorPerformance();
+          // Mark frame start
+          markFrameStart();
+
+          // GPU query for the frame
+          try {
+            gpuProfilerRef.current?.startQuery('fluid-frame');
+            glRef.current?.finish?.();
+          } catch {}
+
+          // Frame budget sections
+          frameBudgetRef.current?.resetFrame();
+          frameBudgetRef.current?.measure('monitor-performance', () => {
+            monitorPerformance();
+          });
+
+          // End and collect GPU timing
+          gpuProfilerRef.current?.endQuery();
+          gpuProfilerRef.current?.collectResults();
+
+          // Periodic leak checks in dev
+          if (process.env.NODE_ENV === 'development') {
+            if ((performanceRef.current.frameCount % 300) === 0) {
+              globalMemoryLeakDetector?.checkLeaks();
+            }
+          }
+
+          // Periodic adaptive quality adjustment
+          if ((performanceRef.current.frameCount % 120) === 0) {
+            adaptiveQualityRef.current?.adjustQuality();
+          }
+
           animationId = requestAnimationFrame(performanceLoop);
         };
         performanceLoop();
@@ -220,6 +269,10 @@ export default function LiquidLightBackground({
       if (fluidRef.current?.dispose) {
         fluidRef.current.dispose();
       }
+      gpuProfilerRef.current?.dispose();
+      gpuProfilerRef.current = null;
+      frameBudgetRef.current?.resetAll?.();
+      frameBudgetRef.current = null;
     };
   }, [capabilities, currentTier, hasError, monitorPerformance, physicsParams, externalIntensity, externalPalette]);
 
@@ -322,6 +375,11 @@ export default function LiquidLightBackground({
           <div>Audio: Bass {audioData?.bass.toFixed(2)} | Mids {audioData?.mids.toFixed(2)} | Treble {audioData?.treble.toFixed(2)}</div>
           <div>WebGL: {capabilities.webgl2 ? 'v2' : 'v1'} | Max Texture: {capabilities.maxTextureSize}</div>
           <div>Memory: {capabilities.deviceMemory}GB | Mobile: {capabilities.mobile ? 'Yes' : 'No'}</div>
+          {(() => {
+            const stats = gpuProfilerRef.current?.getStats();
+            const frameStats = stats?.get('fluid-frame');
+            return frameStats ? <div>GPU Frame: {frameStats.avgMs.toFixed(2)}ms avg</div> : null;
+          })()}
         </div>
       )}
       
