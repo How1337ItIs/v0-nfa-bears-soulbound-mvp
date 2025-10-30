@@ -9,16 +9,51 @@
  * Date: 2025-10-29
  */
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { VisualPolicy, useVisualPolicy, createVisualPolicyManager } from './VisualPolicy';
 import { DeviceCapabilities } from './types';
 import { PaletteDirector } from '@/lib/palette';
 import { useAudioReactive } from '@/lib/audio/useAudioReactive';
-import { calculatePhysicsParams } from '@/lib/audio';
+import {
+  createEnhancedAudioProcessor,
+  calculateEnhancedPhysicsParams,
+  BeatDetector,
+  createBeatDetector,
+  createAmbientDetector,
+  createDanceFloorDetector,
+  type AudioData as EnhancedAudioData,
+} from '@/lib/audio';
 import { CSSFallback } from '@/components/liquid-light';
 import LiquidLightBackground from '@/components/LiquidLightBackground';
 import { TierTransitionManager } from './performance/tierTransitionManager';
 import { getBatterySaverPolicy } from './capability/batterySaverPolicy';
+import { AuthenticThinFilmEffect } from '@/lib/post/ThinFilmPass';
+import PerformanceHUD from '@/components/liquid-light/dev/PerformanceHUD';
+import { getClampedDPR } from '@/lib/visual';
+
+// Minimal error boundary
+class ErrorBoundary extends React.Component<{
+  fallback?: React.ReactNode;
+  onError?: (error: any) => void;
+  children: React.ReactNode;
+}, { hasError: boolean }>{
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: any) {
+    this.props.onError?.(error);
+  }
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback ?? null;
+    }
+    return this.props.children;
+  }
+}
 
 export interface VisualLayer {
   id: string;
@@ -68,6 +103,7 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
 
   const {
     policy,
+    updatePolicy,
     shouldRenderWebGL,
     shouldRenderCSSFallback,
     shouldEnableThermal,
@@ -78,7 +114,65 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
   } = useVisualPolicy();
 
   const { audioData } = useAudioReactive();
-  const physicsParams = calculatePhysicsParams(audioData);
+
+  // Enhanced audio processor + beat detection
+  const audioProcessorRef = useRef(
+    createEnhancedAudioProcessor(
+      (typeof policy.audioSmoothingAlpha === 'number' ? policy.audioSmoothingAlpha : 0.3) || 0.3,
+      {
+        burstMultiplier: (typeof policy.beatBurstMultiplier === 'number' ? policy.beatBurstMultiplier : 1.8) || 1.8,
+        decayTime: 200,
+        minInterval: 100,
+      }
+    )
+  );
+
+  // Recreate processor when tuning changes
+  useEffect(() => {
+    audioProcessorRef.current = createEnhancedAudioProcessor(
+      (typeof policy.audioSmoothingAlpha === 'number' ? policy.audioSmoothingAlpha : 0.3) || 0.3,
+      {
+        burstMultiplier: (typeof policy.beatBurstMultiplier === 'number' ? policy.beatBurstMultiplier : 1.8) || 1.8,
+        decayTime: 200,
+        minInterval: 100,
+      }
+    );
+  }, [policy.audioSmoothingAlpha, policy.beatBurstMultiplier]);
+
+  const beatDetectorRef = useRef<BeatDetector | null>(null);
+  useEffect(() => {
+    // Map local modes to detectors
+    let detector: BeatDetector;
+    if (policy.mode === 'ambient') detector = createAmbientDetector();
+    else if (policy.mode === 'reactive') detector = createDanceFloorDetector();
+    else detector = createBeatDetector();
+    beatDetectorRef.current = detector;
+  }, [policy.mode]);
+
+  // Enrich audio with beat detection results
+  const beatResultRef = useRef<{ isBeat: boolean; confidence: number; bpm: number } | null>(null);
+  const enrichedAudioData = useMemo<EnhancedAudioData | null>(() => {
+    if (!audioData) return null;
+    const energy = Math.max(0, Math.min(100, (audioData.bass || 0) * 100));
+    const beatResult = beatDetectorRef.current?.detect(energy);
+    if (beatResult) {
+      beatResultRef.current = {
+        isBeat: beatResult.isBeat,
+        confidence: beatResult.confidence,
+        bpm: beatResult.bpmEstimate,
+      };
+    }
+    return {
+      ...audioData,
+      beatDetected: beatResult ? beatResult.isBeat : !!audioData.beatDetected,
+      tempo: beatResult?.bpmEstimate ?? audioData.tempo,
+    } as EnhancedAudioData;
+  }, [audioData]);
+
+  // Enhanced physics from enriched audio
+  const physicsParams = useMemo(() => {
+    return calculateEnhancedPhysicsParams(enrichedAudioData, audioProcessorRef.current);
+  }, [enrichedAudioData]);
 
   // Tier transition manager (hysteresis)
   const transitionManager = useRef(new TierTransitionManager());
@@ -122,16 +216,16 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
       type: 'webgl',
       enabled: shouldRenderWebGL(),
       priority: 1,
-      zIndex: 0,
+      zIndex: -40,
       opacity: 1.0,
-      blendMode: 'normal',
+      blendMode: 'screen',
     },
     {
       id: 'css-fallback',
       type: 'css',
       enabled: shouldRenderCSSFallback(),
-      priority: 2,
-      zIndex: 0,
+      priority: 0,
+      zIndex: -50,
       opacity: 1.0,
       blendMode: 'normal',
     },
@@ -149,9 +243,9 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
       type: 'thin-film',
       enabled: pureMode ? false : shouldEnableThinFilm(),
       priority: 4,
-      zIndex: 2,
-      opacity: 0.6,
-      blendMode: 'soft-light',
+      zIndex: -30,
+      opacity: policy.thinFilmIntensity ?? 0.6,
+      blendMode: 'screen',
     },
     {
       id: 'ui-overlay',
@@ -185,13 +279,24 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
         },
       }));
 
+      // Thin-film performance gating: disable if FPS too low
+      if (currentFps < 45 && policy.thinFilmEnabled) {
+        console.warn('[LayerCoordinator] Disabling thin-film due to low FPS');
+        updatePolicy({ thinFilmEnabled: false });
+      }
+
       // Adaptive quality adjustment
       if (state.quality.adaptive) {
         let newQuality = state.quality.current;
-        
+
         // Hysteresis-based tier transitions
         const currentTier = state.quality.current as 'low' | 'medium' | 'high' | 'ultra';
         const maxTier = (policy.capabilities?.tier || 'high') as 'low' | 'medium' | 'high' | 'ultra';
+        // Prevent tier transitions during strong beats to avoid visual interruption
+        if (enrichedAudioData?.beatDetected) {
+          performanceRef.current.lastFpsCheck = now;
+          return; // skip this check; try next frame
+        }
         const suggestedTier = transitionManager.current.checkAndTransition(
           currentFps,
           currentTier,
@@ -237,7 +342,7 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
         }));
       }
     }
-  }, [state.quality, state.quality.adaptive]);
+  }, [state.quality, state.quality.adaptive, enrichedAudioData, policy.capabilities?.tier, debugEnabled]);
 
   // Error handling
   const handleError = useCallback((error: string) => {
@@ -280,10 +385,37 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
     coordinateLayers();
   }, [coordinateLayers]);
 
+  // Sync PaletteDirector with policy palette
+  useEffect(() => {
+    try {
+      PaletteDirector.setCurrentPalette(policy.paletteId);
+    } catch {}
+  }, [policy.paletteId]);
+
   useEffect(() => {
     const interval = setInterval(monitorPerformance, 1000 / 60);
     return () => clearInterval(interval);
   }, [monitorPerformance]);
+
+  // Memory guardrail: downshift quality / disable thin-film on high heap usage
+  useEffect(() => {
+    const interval = setInterval(() => {
+      try {
+        if ('memory' in performance) {
+          const mem: any = (performance as any).memory;
+          if (mem && mem.usedJSHeapSize && mem.usedJSHeapSize > 100 * 1024 * 1024) {
+            console.warn('[Orchestrator] High memory detected; applying safeguards');
+            // Reduce resolution and disable thin-film to recover
+            updatePolicy({
+              resolution: Math.max(0.5, (policy.resolution || 1) * 0.8),
+              thinFilmEnabled: false,
+            });
+          }
+        }
+      } catch {}
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [policy.resolution, updatePolicy]);
 
   useEffect(() => {
     onStateChange?.(state);
@@ -383,11 +515,22 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
 
     switch (layer.type) {
       case 'webgl':
+        // Map ultra to high for the fluid tier prop
+        const target = state.quality.target as 'low' | 'medium' | 'high' | 'ultra';
+        const mappedTier = target === 'ultra' ? 'high' : target;
+        // Temporary intensity boost on strong beats
+        let tempoBoost = 1.0;
+        const br = beatResultRef.current;
+        if (br?.isBeat && br.confidence > 0.7) {
+          tempoBoost = 1.2;
+        }
         return (
           <LiquidLightBackground
             key={layer.id}
-            intensity={getEffectiveIntensity()}
+            intensity={getEffectiveIntensity() * tempoBoost}
             motionEnabled={policy.motionEnabled && !tabHidden}
+            tier={mappedTier as 'low' | 'medium' | 'high'}
+            audioData={enrichedAudioData}
             className="visual-layer"
             style={style}
           />
@@ -416,17 +559,36 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
           </div>
         );
 
-      case 'thin-film':
-        // Thin-film interference layer (placeholder)
+      case 'thin-film': {
+        const target = state.quality.target as 'low' | 'medium' | 'high' | 'ultra';
+        const deviceTier = (target === 'ultra' ? 'high' : target) as 'low' | 'medium' | 'high';
+        // Map physics to AudioReactiveParams expected by thin-film
+        const thinFilmAudioParams = {
+          splatForce: physicsParams.splatForce,
+          thermalRate: physicsParams.thermalRate,
+          colorPhase: physicsParams.colorPhase,
+          globalIntensity: physicsParams.intensity,
+        };
         return (
-          <div
-            key={layer.id}
-            className="visual-layer thin-film-layer"
-            style={style}
-          >
-            {/* Thin-film interference implementation */}
+          <div key={layer.id} className="visual-layer thin-film-layer" style={style}>
+            <ErrorBoundary
+              fallback={<div style={{ display: 'none' }} />}
+              onError={(e) => {
+                console.error('[ThinFilm] Error:', e);
+                updatePolicy({ thinFilmEnabled: false });
+              }}
+            >
+              <AuthenticThinFilmEffect
+                audioParams={thinFilmAudioParams as any}
+                deviceTier={deviceTier}
+                paletteId={policy.paletteId}
+                enabled={!tabHidden}
+                intensity={policy.thinFilmIntensity}
+              />
+            </ErrorBoundary>
           </div>
         );
+      }
 
       case 'overlay':
         return (
@@ -447,18 +609,16 @@ const VisualOrchestrator: React.FC<VisualOrchestratorProps> = ({
   return (
     <div className={`visual-orchestrator ${className}`}>
       {activeLayers.map(renderLayer)}
-      
+
       {/* Performance HUD (development or ?debug=true) */}
       {debugEnabled && (
-        <div className="fixed top-4 right-4 z-50 text-white text-xs bg-black/70 p-3 rounded backdrop-blur">
-          <div>FPS: {state.performance.fps}</div>
-          <div>Quality: {state.quality.current} → {state.quality.target}</div>
-          <div>Layers: {activeLayers.length}</div>
-          <div>Memory: {Math.round(state.performance.memoryUsage * 100)}%</div>
-          <div>Intensity: {Math.round(getEffectiveIntensity() * 100)}%</div>
-          <div>Particles: {getEffectiveParticleCount()}</div>
-          <div>Resolution: {Math.round(getEffectiveResolution() * 100)}%</div>
-        </div>
+        <PerformanceHUD
+          fps={state.performance.fps}
+          tier={state.quality.target}
+          audioData={enrichedAudioData}
+          dpr={getClampedDPR()}
+          enabled={true}
+        />
       )}
 
       {debugEnabled && debugToast && (

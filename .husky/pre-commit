@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Pre-commit hook for Liquid Light System
+echo "🎨 Running Liquid Light pre-commit checks..."
+
+# Run liquid light specific quality checks
+npm run quality:liquid-light
+
+# Run general quality checks
+npm run quality:check
+
+echo "✅ Pre-commit checks passed!"

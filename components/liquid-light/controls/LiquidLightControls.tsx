@@ -13,6 +13,7 @@
 import { useState, useEffect } from 'react';
 import { PaletteDirector, AUTHENTIC_PALETTES } from '@/lib/palette';
 import { MODE_PRESETS, type ModeType } from '@/lib/audio/mapping';
+import { createVisualPolicyManager, getVisualPolicyManager } from '@/lib/visual/VisualPolicy';
 
 interface LiquidLightControlsProps {
   onIntensityChange?: (intensity: number) => void;
@@ -27,21 +28,36 @@ export default function LiquidLightControls({
   onModeChange,
   onMotionToggle,
 }: LiquidLightControlsProps) {
-  const [intensity, setIntensity] = useState(60); // 0-100
-  const [selectedPalette, setSelectedPalette] = useState('classic-60s');
+  // Try to attach to VisualPolicy if callbacks not provided
+  let policyManager: ReturnType<typeof getVisualPolicyManager> | null = null;
+  try {
+    createVisualPolicyManager();
+    policyManager = getVisualPolicyManager();
+  } catch {}
+
+  const initialPolicy = policyManager?.getPolicy();
+  const [intensity, setIntensity] = useState(Math.round((initialPolicy?.intensity ?? 0.6) * 100)); // 0-100
+  const [selectedPalette, setSelectedPalette] = useState(initialPolicy?.paletteId ?? 'classic-60s');
   const [selectedMode, setSelectedMode] = useState<ModeType>('ambient');
-  const [motionEnabled, setMotionEnabled] = useState(true);
+  const [motionEnabled, setMotionEnabled] = useState(initialPolicy?.motionEnabled ?? true);
   const [isOpen, setIsOpen] = useState(false);
+  const [smoothing, setSmoothing] = useState(Math.round(((initialPolicy?.audioSmoothingAlpha ?? 0.3) * 100)) / 100);
+  const [burst, setBurst] = useState(Math.round(((initialPolicy?.beatBurstMultiplier ?? 1.8) * 10)) / 10);
+  const [thinFilmEnabled, setThinFilmEnabled] = useState(initialPolicy?.thinFilmEnabled ?? true);
+  const [thinFilmIntensity, setThinFilmIntensity] = useState(Math.round(((initialPolicy?.thinFilmIntensity ?? 0.6) * 100)));
 
   const handleIntensityChange = (value: number) => {
     setIntensity(value);
-    onIntensityChange?.(value / 100); // Convert to 0-1 range
+    const v01 = value / 100;
+    if (onIntensityChange) onIntensityChange(v01);
+    else policyManager?.setIntensity(v01);
   };
 
   const handlePaletteChange = (paletteId: string) => {
     setSelectedPalette(paletteId);
     PaletteDirector.setCurrentPalette(paletteId);
-    onPaletteChange?.(paletteId);
+    if (onPaletteChange) onPaletteChange(paletteId);
+    else policyManager?.setPalette(paletteId);
   };
 
   const handleModeChange = (mode: ModeType) => {
@@ -52,15 +68,42 @@ export default function LiquidLightControls({
     setMotionEnabled(preset.motionEnabled);
     setIntensity(preset.intensity * 100);
 
-    onModeChange?.(mode);
-    onMotionToggle?.(preset.motionEnabled);
-    onIntensityChange?.(preset.intensity);
+    if (onModeChange) onModeChange(mode);
+    if (onMotionToggle) onMotionToggle(preset.motionEnabled);
+    else policyManager?.setMotionEnabled(preset.motionEnabled);
+    if (onIntensityChange) onIntensityChange(preset.intensity);
+    else policyManager?.setIntensity(preset.intensity);
   };
 
   const handleMotionToggle = () => {
     const newValue = !motionEnabled;
     setMotionEnabled(newValue);
-    onMotionToggle?.(newValue);
+    if (onMotionToggle) onMotionToggle(newValue);
+    else policyManager?.setMotionEnabled(newValue);
+  };
+
+  const handleSmoothingChange = (value: number) => {
+    const v = Math.max(0.1, Math.min(0.9, value));
+    setSmoothing(v);
+    policyManager?.updatePolicy({ audioSmoothingAlpha: v });
+  };
+
+  const handleBurstChange = (value: number) => {
+    const v = Math.max(1.0, Math.min(2.5, value));
+    setBurst(v);
+    policyManager?.updatePolicy({ beatBurstMultiplier: v });
+  };
+
+  const handleThinFilmToggle = () => {
+    const next = !thinFilmEnabled;
+    setThinFilmEnabled(next);
+    policyManager?.updatePolicy({ thinFilmEnabled: next });
+  };
+
+  const handleThinFilmIntensity = (value: number) => {
+    const v01 = Math.max(0, Math.min(1, value / 100));
+    setThinFilmIntensity(Math.round(v01 * 100));
+    policyManager?.updatePolicy({ thinFilmIntensity: v01 });
   };
 
   // Get all palettes
@@ -136,6 +179,38 @@ export default function LiquidLightControls({
             </p>
           </div>
 
+          {/* Audio Smoothing */}
+          <div className="mb-4">
+            <label className="text-xs font-medium mb-2 block">
+              Audio Smoothing: {smoothing.toFixed(2)}
+            </label>
+            <input
+              type="range"
+              min="0.1"
+              max="0.9"
+              step="0.05"
+              value={smoothing}
+              onChange={(e) => handleSmoothingChange(parseFloat(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          {/* Beat Burst Multiplier */}
+          <div className="mb-4">
+            <label className="text-xs font-medium mb-2 block">
+              Beat Burst: {burst.toFixed(1)}x
+            </label>
+            <input
+              type="range"
+              min="1.0"
+              max="2.5"
+              step="0.1"
+              value={burst}
+              onChange={(e) => handleBurstChange(parseFloat(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
           {/* Motion Toggle */}
           <div className="mb-2">
             <label className="flex items-center gap-2 text-xs cursor-pointer">
@@ -147,6 +222,34 @@ export default function LiquidLightControls({
               />
               <span>Motion Enabled</span>
             </label>
+          </div>
+
+          {/* Thin-Film Toggle */}
+          <div className="mb-2">
+            <label className="flex items-center gap-2 text-xs cursor-pointer">
+              <input
+                type="checkbox"
+                checked={thinFilmEnabled}
+                onChange={handleThinFilmToggle}
+                className="w-4 h-4"
+              />
+              <span>Thin-Film Overlay</span>
+            </label>
+          </div>
+
+          {/* Thin-Film Intensity */}
+          <div className="mb-4">
+            <label className="text-xs font-medium mb-2 block">
+              Thin-Film Intensity: {thinFilmIntensity}%
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={thinFilmIntensity}
+              onChange={(e) => handleThinFilmIntensity(Number(e.target.value))}
+              className="w-full"
+            />
           </div>
 
           {/* Color preview */}

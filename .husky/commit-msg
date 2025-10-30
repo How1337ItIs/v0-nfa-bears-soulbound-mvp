@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Commit message hook for Liquid Light System
+echo "📝 Validating commit message..."
+
+# Check commit message format
+commit_regex='^(feat|fix|docs|style|refactor|perf|test|chore|liquid-light)(\(.+\))?: .{1,50}'
+
+if ! grep -qE "$commit_regex" "$1"; then
+    echo "❌ Invalid commit message format!"
+    echo "   Format: type(scope): description"
+    echo "   Types: feat, fix, docs, style, refactor, perf, test, chore, liquid-light"
+    echo "   Example: liquid-light: add WebGL2 optimizations"
+    exit 1
+fi
+
+echo "✅ Commit message format is valid!"

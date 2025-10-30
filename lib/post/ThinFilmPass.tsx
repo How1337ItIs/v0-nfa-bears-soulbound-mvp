@@ -7,6 +7,7 @@ import { BlendFunction } from 'postprocessing';
 import * as THREE from 'three';
 import type { AudioReactiveParams } from '@/lib/audio/useAudioReactive';
 import { PaletteDirector } from '@/lib/palette';
+import { THIN_FILM_QUALITY_PRESETS, getRecommendedQuality, type ThinFilmQuality } from './thinFilmQualityPresets';
 
 // AUTHENTIC THIN-FILM INTERFERENCE POST-PROCESSING
 // Recreates oil-on-water iridescence using real physics calculations
@@ -32,7 +33,9 @@ class ThinFilmInterferenceEffect extends Effect {
         // Light direction for physically accurate phase shifts
         ['uLightDir', new THREE.Uniform(new THREE.Vector3(0.5, 0.8, 0.3))],
         // Index of refraction
-        ['uIOR', new THREE.Uniform(1.5)]
+        ['uIOR', new THREE.Uniform(1.5)],
+        // Quality control: interference orders (1-4)
+        ['uInterferenceOrders', new THREE.Uniform(2)]
       ])
     });
   }
@@ -51,6 +54,7 @@ const fragmentShader = `
   uniform float uPaletteRGB[12]; // 4 colors × 3 channels (flattened)
   uniform vec3 uLightDir;
   uniform float uIOR;
+  uniform int uInterferenceOrders; // Quality setting: 1-4 orders
   
   // OPTIMIZED: Branchless wavelength to RGB conversion (380-750nm spectrum)
   // Uses smooth interpolation instead of if-else chains for better mobile performance
@@ -92,16 +96,34 @@ const fragmentShader = `
 
     vec3 interferenceColor = vec3(0.0);
 
-    // OPTIMIZED: Calculate interference for 2 orders only (mobile performance)
-    // Order 1
+    // VARIABLE QUALITY: Calculate interference for 1-4 orders (quality-dependent)
+    // Unrolled loop for compatibility (some GPUs don't support variable loops)
+
+    // Order 1 (always)
     float wavelength1 = (2.0 * opticalPath) / 1.0;
     vec3 spectral1 = wavelengthToRGB(clamp(wavelength1, 380.0, 750.0));
     interferenceColor += spectral1;
 
-    // Order 2 (dimmer)
-    float wavelength2 = (2.0 * opticalPath) / 2.0;
-    vec3 spectral2 = wavelengthToRGB(clamp(wavelength2, 380.0, 750.0));
-    interferenceColor += spectral2 * 0.5;
+    // Order 2 (if quality >= 2)
+    if (uInterferenceOrders >= 2) {
+      float wavelength2 = (2.0 * opticalPath) / 2.0;
+      vec3 spectral2 = wavelengthToRGB(clamp(wavelength2, 380.0, 750.0));
+      interferenceColor += spectral2 * 0.5;
+    }
+
+    // Order 3 (if quality >= 3)
+    if (uInterferenceOrders >= 3) {
+      float wavelength3 = (2.0 * opticalPath) / 3.0;
+      vec3 spectral3 = wavelengthToRGB(clamp(wavelength3, 380.0, 750.0));
+      interferenceColor += spectral3 * 0.33;
+    }
+
+    // Order 4 (if quality == 4)
+    if (uInterferenceOrders >= 4) {
+      float wavelength4 = (2.0 * opticalPath) / 4.0;
+      vec3 spectral4 = wavelengthToRGB(clamp(wavelength4, 380.0, 750.0));
+      interferenceColor += spectral4 * 0.25;
+    }
 
     // Normalize
     interferenceColor = normalize(interferenceColor + 0.1);
@@ -177,15 +199,20 @@ interface ThinFilmPassProps {
   intensity?: number;
   enabled?: boolean;
   paletteId?: string;
+  quality?: ThinFilmQuality;
 }
 
 function ThinFilmPass({
   audioParams,
   intensity = 0.6,
   enabled = true,
-  paletteId = 'classic-60s'
+  paletteId = 'classic-60s',
+  quality = 'mobile'
 }: ThinFilmPassProps) {
   const effectRef = useRef<ThinFilmInterferenceEffect>();
+
+  // Get quality preset
+  const qualityPreset = THIN_FILM_QUALITY_PRESETS[quality];
 
   // Create effect instance
   const effect = useMemo(() => {
@@ -220,6 +247,9 @@ function ThinFilmPass({
     // Interference strength remains constant for authenticity
     uniforms.get('uInterferenceStrength')!.value = 0.6;
 
+    // QUALITY CONTROL: Set interference orders based on quality preset
+    uniforms.get('uInterferenceOrders')!.value = qualityPreset.interferenceOrders;
+
     // PALETTE INTEGRATION: Get current palette colors
     const paletteColorsRGB = PaletteDirector.getCurrentColorsRGB();
     const flattenedColors = new Float32Array(12);
@@ -248,8 +278,9 @@ function ThinFilmPass({
 // COMPLETE POST-PROCESSING COMPOSER
 interface LiquidLightPostProcessorProps {
   audioParams: AudioReactiveParams;
-  deviceTier: 'high' | 'medium' | 'low';
+  deviceTier: 'high' | 'medium' | 'low' | 'ultra';
   paletteId?: string;
+  quality?: ThinFilmQuality;
   children?: React.ReactNode;
 }
 
@@ -257,15 +288,26 @@ export default function LiquidLightPostProcessor({
   audioParams,
   deviceTier,
   paletteId = 'classic-60s',
+  quality,
   children
 }: LiquidLightPostProcessorProps) {
   const { size } = useThree();
 
+  // Auto-determine quality from device tier if not specified
+  const effectiveQuality = quality || (
+    deviceTier === 'ultra' ? 'ultra' :
+    deviceTier === 'high' ? 'desktop' :
+    deviceTier === 'medium' ? 'mobile' : 'emergency'
+  );
+
+  const qualityPreset = THIN_FILM_QUALITY_PRESETS[effectiveQuality];
+
   // Enable thin-film effect only on high and medium tiers
-  const enableThinFilm = deviceTier === 'high' || deviceTier === 'medium';
+  const enableThinFilm = deviceTier !== 'low';
 
   // Adjust intensity based on device tier
   const intensity = {
+    ultra: 0.9,
     high: 0.8,
     medium: 0.6,
     low: 0.0
@@ -273,7 +315,7 @@ export default function LiquidLightPostProcessor({
 
   return (
     <EffectComposer
-      multisampling={deviceTier === 'high' ? 4 : 0}
+      multisampling={qualityPreset.multisampling}
       stencilBuffer={false}
       depthBuffer={false}
     >
@@ -283,6 +325,7 @@ export default function LiquidLightPostProcessor({
         intensity={intensity}
         enabled={enableThinFilm}
         paletteId={paletteId}
+        quality={effectiveQuality}
       />
 
       {/* Additional passes can be added here */}
@@ -295,10 +338,13 @@ export default function LiquidLightPostProcessor({
 // Wrapper component ready for orchestrator mounting
 interface AuthenticThinFilmEffectProps {
   audioParams: AudioReactiveParams;
-  deviceTier: 'high' | 'medium' | 'low';
+  deviceTier: 'high' | 'medium' | 'low' | 'ultra';
   paletteId?: string;
   enabled?: boolean;
   intensity?: number;
+  quality?: ThinFilmQuality;
+  currentFPS?: number; // For adaptive quality
+  batteryLevel?: number | null; // For performance scaling
 }
 
 export function AuthenticThinFilmEffect({
@@ -306,7 +352,10 @@ export function AuthenticThinFilmEffect({
   deviceTier,
   paletteId = 'classic-60s',
   enabled = true,
-  intensity
+  intensity,
+  quality,
+  currentFPS = 60,
+  batteryLevel = null
 }: AuthenticThinFilmEffectProps) {
   // SAFETY: Auto-pause when tab is hidden (visibility API)
   const [isVisible, setIsVisible] = useState(true);
@@ -322,6 +371,15 @@ export function AuthenticThinFilmEffect({
     };
   }, []);
 
+  // ADAPTIVE QUALITY: Determine quality based on performance
+  const effectiveQuality = quality || getRecommendedQuality(
+    deviceTier,
+    currentFPS,
+    batteryLevel
+  );
+
+  const qualityPreset = THIN_FILM_QUALITY_PRESETS[effectiveQuality];
+
   // Only render on high performance devices and when tab is visible
   if (deviceTier === 'low' || !enabled || !isVisible) {
     return null;
@@ -331,12 +389,13 @@ export function AuthenticThinFilmEffect({
     <div className="fixed inset-0 -z-5 w-full h-full pointer-events-none">
       <Canvas
         style={{ background: 'transparent' }}
-        dpr={deviceTier === 'high' ? [1, 2] : [1, 1]}
+        dpr={qualityPreset.dpr}
         gl={{
           alpha: true,
-          antialias: deviceTier === 'high',
+          antialias: qualityPreset.multisampling > 0,
           powerPreference: 'high-performance'
         }}
+        frameloop={qualityPreset.updateRate === 30 ? 'demand' : 'always'}
       >
         {/* Full-screen plane for post-processing */}
         <mesh>
@@ -348,6 +407,7 @@ export function AuthenticThinFilmEffect({
           audioParams={audioParams}
           deviceTier={deviceTier}
           paletteId={paletteId}
+          quality={effectiveQuality}
         />
       </Canvas>
     </div>

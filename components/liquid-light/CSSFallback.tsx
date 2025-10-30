@@ -16,12 +16,14 @@ interface CSSFallbackProps {
   intensity?: number; // 0-1 range
   motionEnabled?: boolean;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export default function CSSFallback({ 
   intensity = 0.6, 
   motionEnabled = true,
-  className = ''
+  className = '',
+  style,
 }: CSSFallbackProps) {
   const currentPalette = PaletteDirector.getCurrentPalette();
   const primaryColor = currentPalette.colors[0];
@@ -37,7 +39,8 @@ export default function CSSFallback({
           ${primaryColor}20 0%, 
           ${secondaryColor}15 25%, 
           ${tertiaryColor}10 50%, 
-          transparent 70%)`
+          transparent 70%)`,
+        ...(style || {}),
       }}
     >
       {/* Animated gradient orbs */}

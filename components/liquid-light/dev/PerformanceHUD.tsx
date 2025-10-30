@@ -115,6 +115,7 @@ export default function PerformanceHUD({
   const bassLevel = audioData?.bass ?? 0;
   const midsLevel = audioData?.mids ?? 0;
   const trebleLevel = audioData?.treble ?? 0;
+  const bpm = audioData?.tempo;
 
   // FPS color coding
   const fpsColor =
@@ -207,6 +208,9 @@ export default function PerformanceHUD({
           <AudioBar label="Bass" level={bassLevel} color="#ff6b6b" />
           <AudioBar label="Mids" level={midsLevel} color="#ffd93d" />
           <AudioBar label="Treb" level={trebleLevel} color="#6bcf7f" />
+          {typeof bpm === 'number' && bpm > 0 && (
+            <div style={{ marginTop: '4px', color: '#fff' }}>BPM: {bpm.toFixed(0)}</div>
+          )}
         </div>
       )}
 

@@ -4,7 +4,13 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { AUTHENTIC_CONFIGS, DeviceCapabilities, detectDeviceCapabilities } from '@/lib/fluid/config';
 import { setupThermalCurrents, setupGlobalMotion } from '@/lib/fluid/thermal';
 import { useAudioReactive } from '@/lib/audio/useAudioReactive';
-import { calculatePhysicsParams } from '@/lib/audio';
+import {
+  createEnhancedAudioProcessor,
+  calculateEnhancedPhysicsParams,
+  BeatDetector,
+  createBeatDetector,
+  type AudioData as EnhancedAudioData,
+} from '@/lib/audio';
 import { PaletteDirector } from '@/lib/palette';
 import { CSSFallback, LiquidLightControls } from '@/components/liquid-light';
 import { applyDPRToCanvas } from '@/lib/visual';
@@ -60,11 +66,25 @@ export default function LiquidLightBackground({
   const [tabHidden, setTabHidden] = useState(false);
   
   // Centralized audio reactivity (single analyzer)
-  const { audioData } = useAudioReactive();
-  const audio = externalAudio ?? audioData;
+  // Use shared audio when provided; otherwise, initialize a local analyzer
+  const useLocalAnalyzer = externalAudio == null;
+  const { audioData } = useLocalAnalyzer ? useAudioReactive() : { audioData: null as any };
+  const audio = (externalAudio ?? audioData) as EnhancedAudioData | null;
   
   // Calculate physics parameters using centralized mapping
-  const physicsParams = calculatePhysicsParams(audio);
+  // Enhanced audio processor + optional local beat detector if using local analyzer
+  const audioProcessorRef = useRef(createEnhancedAudioProcessor(0.3));
+  const beatDetectorRef = useRef<BeatDetector | null>(useLocalAnalyzer ? createBeatDetector() : null);
+
+  const enrichedAudio: EnhancedAudioData | null = (() => {
+    if (!audio) return null;
+    if (!beatDetectorRef.current) return audio;
+    const energy = Math.max(0, Math.min(100, (audio.bass || 0) * 100));
+    const beat = beatDetectorRef.current.detect(energy);
+    return { ...audio, beatDetected: beat.isBeat, tempo: beat.bpmEstimate } as EnhancedAudioData;
+  })();
+
+  const physicsParams = calculateEnhancedPhysicsParams(enrichedAudio, audioProcessorRef.current);
 
   // Device capability detection on mount
   useEffect(() => {
@@ -229,7 +249,7 @@ export default function LiquidLightBackground({
 
   // Audio reactivity integration with intensity scaling
   useEffect(() => {
-    if (!fluidRef.current || !audio || !isLoaded) return;
+    if (!fluidRef.current || !enrichedAudio || !isLoaded) return;
     
     // Apply audio-reactive physics parameters with intensity scaling
     const { splatForce, thermalRate, colorPhase, globalIntensity, curlStrength, viscosity } = physicsParams;
@@ -252,7 +272,7 @@ export default function LiquidLightBackground({
     }
     
     // Beat-triggered splats (intensity-scaled)
-    if (audio?.beatDetected && fluidRef.current.splat && effMotion) {
+    if (enrichedAudio?.beatDetected && fluidRef.current.splat && effMotion) {
       const canvas = canvasRef.current;
       if (canvas) {
         const x = Math.random() * canvas.width;
@@ -267,7 +287,7 @@ export default function LiquidLightBackground({
         fluidRef.current.splat(x, y, vx, vy, beatColor);
       }
     }
-  }, [audio, physicsParams, isLoaded, intensity, externalIntensity, externalMotionEnabled, prefersReducedMotion, tabHidden, externalPalette]);
+  }, [enrichedAudio, physicsParams, isLoaded, intensity, externalIntensity, externalMotionEnabled, prefersReducedMotion, tabHidden, externalPalette]);
 
   // Strict fallback chain: WebGL → CSS fallback only
   if (!capabilities?.webgl || hasError) {

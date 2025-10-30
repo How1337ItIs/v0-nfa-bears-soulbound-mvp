@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Pre-push hook for Liquid Light System
+echo "🚀 Running Liquid Light pre-push checks..."
+
+# Run comprehensive quality checks
+npm run quality:check
+
+# Run test coverage
+npm run test:coverage
+
+# Check for liquid light specific issues
+node scripts/liquid-light-quality.js
+
+echo "✅ Pre-push checks passed!"

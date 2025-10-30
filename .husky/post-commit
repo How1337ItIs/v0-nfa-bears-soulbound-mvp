@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Post-commit hook for Liquid Light System
+echo "🎉 Liquid Light commit completed!"
+
+# Run post-commit tasks
+echo "📊 Updating liquid light metrics..."
+
+# Check if this is a liquid light related commit
+if git log -1 --pretty=%B | grep -q "liquid-light"; then
+    echo "🎨 Liquid Light commit detected!"
+    echo "   Consider running: npm run liquid-light:test"
+fi
+
+echo "✅ Post-commit tasks completed!"

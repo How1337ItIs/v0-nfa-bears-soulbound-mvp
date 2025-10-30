@@ -1,81 +1,168 @@
-# NFA Bears Documentation Index
+# 📚 Documentation Index
 
-This is the organized documentation hub. Runtime code and assets remain in place to avoid breaking any path-specific references.
+Welcome to the NFA Bears MVP documentation! This directory contains comprehensive documentation for the Liquid Light System and related components.
 
-## Folders
+## 🎨 Liquid Light System
 
-- guides/
-  - Deployment, API testing, mobile testing, Redis setup, pilot event, mint page, start here
-- reports/
-  - Liquid light research, cross-AI syntheses, action plans
-- architecture/
-  - Technical documentation, architecture plans
-- ops/
-  - Project status, blockers, handoffs, agents, audits, security
-- research-archive/
-  - All archived research previously under `archived-research/`
+### Core Documentation
+- [Liquid Light System Overview](./liquid-light/LiquidLightSystem.md) - Complete system architecture and features
+- [Performance Optimization Guide](./performance/PerformanceOptimizationGuide.md) - Performance tuning and optimization strategies
+- [Audio Integration Patterns](./audio/AudioIntegrationPatterns.md) - Audio reactivity implementation patterns
 
-## Quick Table of Contents (Top Docs)
+### API Reference
+- [API Reference](./api/APIReference.md) - Complete API documentation for all services and components
 
-- Reports
-  - [Cross-AI Liquid Light Comparison](../docs/reports/CROSS_AI_LIQUID_LIGHT_COMPARISON.md)
-  - [Liquid Light Research Report](../docs/reports/LIQUID_LIGHT_RESEARCH_REPORT.md)
-  - [Claude Code Liquid Light Analysis](../docs/reports/claude-code-liquid-light-analysis.md)
-  - [Codex CLI cross-AI synthesis (timestamped)](../docs/reports/codex-cli-cross-ai-liquid-light-synthesis-2025-10-29T20-20-44Z.md)
-  - If missing: Three AI Synthesis — Cursor was previously titled `THREE_AI_SYNTHESIS_REPORT_CURSOR_2025-10-29-2000.md`
+### Troubleshooting
+- [Troubleshooting Guide](./troubleshooting/TroubleshootingGuide.md) - Common issues and solutions
 
-  - [Cursor Observe My Codebase](../docs/reports/cursor_observe_my_codebase.md)
-  - [CLAUDE.md](../docs/reports/CLAUDE.md)
-  - [Cultural Enhancements](../docs/reports/CULTURAL_ENHANCEMENTS.md)
-  - [Cultural Language Guide](../docs/reports/CULTURAL_LANGUAGE_GUIDE.md)
-  - [Claude MD Redesign Process](../docs/reports/claude-md-redesign-process.md)
-  - [Web3 Design Methodology](../docs/reports/web3-design-methodology.md)
-  - [Web3 Dev Best Practices](../docs/reports/web3-dev-best-practices.md)
-  - [Master Liquid Light Integration Plan](../docs/reports/MASTER-LIQUID-LIGHT-INTEGRATION-PLAN.md)
+## 🏗️ Architecture
 
-Full index: see [TOC.md](../docs/TOC.md)
+### System Design
+- [Architecture Overview](./architecture/Architecture.md) - High-level system architecture
+- [Component Hierarchy](./architecture/ComponentHierarchy.md) - React component structure
+- [Service Layer](./architecture/ServiceLayer.md) - Backend services and utilities
 
-Regenerate TOC (manual):
-- From repo root, list docs and update `docs/TOC.md` accordingly. No code paths are affected by TOC updates.
+### Design Patterns
+- [Design Patterns](./patterns/DesignPatterns.md) - Architectural patterns used in the system
+- [State Management](./patterns/StateManagement.md) - State management strategies
+- [Error Handling](./patterns/ErrorHandling.md) - Error handling patterns
 
-Automated TOC generation:
-- Run: `node nfa-bears-mvp/scripts/generate_docs_toc.js`
+## 🧪 Testing
 
-- Guides
-  - [Start Here](../docs/guides/START_HERE.md)
-  - [Deployment Guide](../docs/guides/DEPLOYMENT_GUIDE.md)
-  - [API Testing Guide](../docs/guides/API_TESTING_GUIDE.md)
-  - [Mobile Testing Guide](../docs/guides/MOBILE_TESTING_GUIDE.md)
-  - [Redis Setup Guide](../docs/guides/REDIS_SETUP_GUIDE.md)
-  - [Pilot Event Checklist](../docs/guides/PILOT_EVENT_CHECKLIST.md)
-  - [Mint Page Setup](../docs/guides/MINT_PAGE_SETUP.md)
+### Testing Strategy
+- [Testing Strategy](./testing/TestingStrategy.md) - Comprehensive testing approach
+- [Unit Testing](./testing/UnitTesting.md) - Unit test implementation
+- [Integration Testing](./testing/IntegrationTesting.md) - Integration test patterns
+- [Performance Testing](./testing/PerformanceTesting.md) - Performance test methodology
+- [Accessibility Testing](./testing/AccessibilityTesting.md) - Accessibility test implementation
 
-  - [Pilot Event Simulation](../docs/guides/PILOT_EVENT_SIMULATION.md)
-  - [Ambassador Training](../docs/guides/AMBASSADOR_TRAINING.md)
+### Test Utilities
+- [Test Utilities](./testing/TestUtilities.md) - Custom test helpers and mocks
+- [Mock Data](./testing/MockData.md) - Test data and fixtures
 
-- Architecture
-  - [Dual Path Architecture Plan](../docs/architecture/DUAL_PATH_ARCHITECTURE_PLAN.md)
-  - [Technical Documentation](../docs/architecture/nfa-bears-technical-documentation.md)
-  - [Master Documentation](../docs/architecture/nfa-bears-master-doc.md)
+## 🚀 Development
 
-- Ops
-  - [Project Status](../docs/ops/PROJECT_STATUS.md)
-  - [Critical Blockers](../docs/ops/CRITICAL_BLOCKERS.md)
-  - [Final Handoff](../docs/ops/FINAL_HANDOFF.md)
-  - [Agents](../docs/ops/AGENTS.md)
-  - [Agent Audit Findings](../docs/ops/AGENT-AUDIT-FINDINGS.md)
-  - [Security Audit](../docs/ops/SECURITY_AUDIT.md)
-  - [Security Fixes Completed](../docs/ops/SECURITY_FIXES_COMPLETED.md)
-  - [Security Fixes Applied](../docs/ops/SECURITY-FIXES-APPLIED.md)
+### Getting Started
+- [Getting Started](./development/GettingStarted.md) - Setup and first steps
+- [Development Environment](./development/DevelopmentEnvironment.md) - Local development setup
+- [Code Style Guide](./development/CodeStyleGuide.md) - Coding standards and conventions
 
-  - [Autonomous Session Complete](../docs/ops/AUTONOMOUS_SESSION_COMPLETE.md)
-  - [Coordination Setup Log](../docs/ops/COORDINATION_SETUP_LOG.md)
-  - [Codex Colab MCP Diagnostic Prompt](../docs/ops/CODEX_COLAB_MCP_DIAGNOSTIC_PROMPT.md)
-  - [Feature Audit](../docs/ops/FEATURE_AUDIT.md)
-  - [Fix Summary](../docs/ops/FIX_SUMMARY.md)
-  - [Audit Findings](../docs/ops/AUDIT-FINDINGS.md)
-  - [Session Summary](../docs/ops/SESSION_SUMMARY.txt)
+### Contributing
+- [Contributing Guidelines](./development/Contributing.md) - How to contribute to the project
+- [Pull Request Process](./development/PullRequestProcess.md) - PR workflow and requirements
+- [Code Review Guidelines](./development/CodeReview.md) - Code review best practices
 
-Notes
-- Links target the reorganized docs only; runtime code/assets were not moved.
-- If you encounter a broken link, ping here and we’ll fix the index (not code).
+### Deployment
+- [Deployment Guide](./deployment/DeploymentGuide.md) - Production deployment process
+- [Environment Configuration](./deployment/EnvironmentConfiguration.md) - Environment setup
+- [Monitoring and Logging](./deployment/MonitoringAndLogging.md) - Production monitoring
+
+## 🎯 Quality Assurance
+
+### Code Quality
+- [Code Quality Standards](./quality/CodeQualityStandards.md) - Quality requirements and tools
+- [Linting and Formatting](./quality/LintingAndFormatting.md) - Code style enforcement
+- [Type Safety](./quality/TypeSafety.md) - TypeScript best practices
+
+### Performance
+- [Performance Monitoring](./performance/PerformanceMonitoring.md) - Real-time performance tracking
+- [Optimization Strategies](./performance/OptimizationStrategies.md) - Performance optimization techniques
+- [WebGL Optimizations](./performance/WebGLOptimizations.md) - WebGL-specific optimizations
+
+## 🔧 Configuration
+
+### Build Configuration
+- [Build Configuration](./configuration/BuildConfiguration.md) - Build system setup
+- [Webpack Configuration](./configuration/WebpackConfiguration.md) - Webpack customizations
+- [TypeScript Configuration](./configuration/TypeScriptConfiguration.md) - TypeScript setup
+
+### Environment Setup
+- [Environment Variables](./configuration/EnvironmentVariables.md) - Environment configuration
+- [Docker Configuration](./configuration/DockerConfiguration.md) - Container setup
+- [CI/CD Configuration](./configuration/CICDConfiguration.md) - Continuous integration
+
+## 📊 Analytics and Monitoring
+
+### Performance Metrics
+- [Performance Metrics](./analytics/PerformanceMetrics.md) - Key performance indicators
+- [User Analytics](./analytics/UserAnalytics.md) - User behavior tracking
+- [Error Tracking](./analytics/ErrorTracking.md) - Error monitoring and reporting
+
+### Monitoring Tools
+- [Monitoring Setup](./monitoring/MonitoringSetup.md) - Monitoring tool configuration
+- [Alerting Rules](./monitoring/AlertingRules.md) - Alert configuration
+- [Dashboard Configuration](./monitoring/DashboardConfiguration.md) - Monitoring dashboards
+
+## 🎨 Design System
+
+### Visual Design
+- [Design System](./design/DesignSystem.md) - Visual design guidelines
+- [Color Palettes](./design/ColorPalettes.md) - Color scheme documentation
+- [Typography](./design/Typography.md) - Font and text styling
+- [Components](./design/Components.md) - UI component library
+
+### Liquid Light Aesthetics
+- [60s Aesthetic Guide](./design/60sAestheticGuide.md) - Period-accurate design principles
+- [Liquid Light Effects](./design/LiquidLightEffects.md) - Visual effect specifications
+- [Animation Guidelines](./design/AnimationGuidelines.md) - Animation principles
+
+## 🔒 Security
+
+### Security Guidelines
+- [Security Overview](./security/SecurityOverview.md) - Security considerations
+- [Authentication](./security/Authentication.md) - User authentication
+- [Data Protection](./security/DataProtection.md) - Data security measures
+- [Audit Logging](./security/AuditLogging.md) - Security event logging
+
+## 📱 Platform Support
+
+### Browser Support
+- [Browser Compatibility](./platform/BrowserCompatibility.md) - Supported browsers
+- [WebGL Support](./platform/WebGLSupport.md) - WebGL requirements
+- [Mobile Support](./platform/MobileSupport.md) - Mobile device considerations
+
+### Device Capabilities
+- [Device Detection](./platform/DeviceDetection.md) - Device capability detection
+- [Performance Tiers](./platform/PerformanceTiers.md) - Device performance classification
+- [Fallback Strategies](./platform/FallbackStrategies.md) - Graceful degradation
+
+## 📈 Roadmap
+
+### Future Development
+- [Roadmap](./roadmap/Roadmap.md) - Development roadmap
+- [Feature Requests](./roadmap/FeatureRequests.md) - Planned features
+- [Technical Debt](./roadmap/TechnicalDebt.md) - Known issues and improvements
+
+## 🤝 Community
+
+### Community Guidelines
+- [Community Guidelines](./community/CommunityGuidelines.md) - Community standards
+- [Code of Conduct](./community/CodeOfConduct.md) - Community behavior expectations
+- [Contributing](./community/Contributing.md) - How to get involved
+
+### Support
+- [FAQ](./community/FAQ.md) - Frequently asked questions
+- [Support Channels](./community/SupportChannels.md) - Where to get help
+- [Bug Reports](./community/BugReports.md) - How to report issues
+
+---
+
+## 📝 Documentation Standards
+
+### Writing Guidelines
+- Use clear, concise language
+- Include code examples where appropriate
+- Keep documentation up-to-date with code changes
+- Use consistent formatting and structure
+
+### Maintenance
+- Review documentation regularly
+- Update when making code changes
+- Remove outdated information
+- Add new sections as needed
+
+---
+
+**Last Updated**: 2025-10-29  
+**Version**: 1.0.0  
+**Maintainer**: Cursor AI Assistant

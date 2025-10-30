@@ -170,6 +170,36 @@ const AUTHENTIC_PALETTES: Record<string, Palette> = {
     viscosity: 0.03,
     energy: 'joyful_celebratory'
   },
+  'st-stephen': {
+    id: 'st-stephen',
+    name: 'St. Stephen',
+    description: 'Deep purple, magenta, sky blue, gold',
+    colors: ['#6A1B9A', '#D81B60', '#42A5F5', '#FBC02D'],
+    wavelengths: [420, 640, 490, 580],
+    culturalContext: 'High energy, mystical character',
+    viscosity: 0.05,
+    energy: 'high'
+  },
+  'help-on-the-way': {
+    id: 'help-on-the-way',
+    name: 'Help on the Way',
+    description: 'Spring green, aqua, cream, lavender',
+    colors: ['#66BB6A', '#26C6DA', '#FFF8E1', '#B39DDB'],
+    wavelengths: [530, 490, 580, 420],
+    culturalContext: 'Medium energy, uplifting',
+    viscosity: 0.06,
+    energy: 'medium'
+  },
+  'eyes-of-the-world': {
+    id: 'eyes-of-the-world',
+    name: 'Eyes of the World',
+    description: 'Ocean blue, sea green, sunlight, twilight purple',
+    colors: ['#1E88E5', '#26A69A', '#FFD54F', '#7E57C2'],
+    wavelengths: [480, 510, 580, 430],
+    culturalContext: 'Medium energy, cosmic flow',
+    viscosity: 0.07,
+    energy: 'medium'
+  },
 };
 
 /**
@@ -302,6 +332,36 @@ class PaletteDirectorClass {
       const b = parseInt(hex.substring(5, 7), 16) / 255;
       return [r, g, b];
     });
+  }
+
+  /**
+   * Shader-ready flattened RGB array for 4 colors (Float32Array length 12)
+   */
+  getPaletteUniformRGB4(paletteId?: string): Float32Array {
+    const prev = this.currentPaletteId;
+    if (paletteId) this.setCurrentPalette(paletteId);
+    const colors = this.getCurrentColorsRGB();
+    if (paletteId) this.currentPaletteId = prev;
+    const out = new Float32Array(12);
+    for (let i = 0; i < 4; i++) {
+      const c = colors[i % colors.length] as number[];
+      out[i * 3 + 0] = c[0];
+      out[i * 3 + 1] = c[1];
+      out[i * 3 + 2] = c[2];
+    }
+    return out;
+  }
+
+  /**
+   * CSS gradient string for the current palette
+   */
+  getCSSGradientStops(paletteId?: string, angle: number = 45): string {
+    const prev = this.currentPaletteId;
+    if (paletteId) this.setCurrentPalette(paletteId);
+    const palette = this.getCurrentPalette();
+    if (paletteId) this.currentPaletteId = prev;
+    const stops = palette.colors.map((c, i) => `${c} ${(i / (palette.colors.length - 1)) * 100}%`).join(', ');
+    return `linear-gradient(${angle}deg, ${stops})`;
   }
 
   /**

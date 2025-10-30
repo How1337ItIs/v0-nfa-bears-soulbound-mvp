@@ -67,3 +67,21 @@ Layers should accept orchestrator-provided props when available, but remain back
 - Thin-film and other high-tier overlays should respect Pure Mode and performance gates.
 - Keep heavy work behind dev toggles; avoid shipping debug-only code in prod bundles.
 
+## Integration with Claude Code Services
+
+### Audio Pipeline
+- Uses `createEnhancedAudioProcessor` and `calculateEnhancedPhysicsParams` for smoothing, curves, and beat gating.
+- Beat detection via `BeatDetector` (`createAmbientDetector` for ambient mode, `createDanceFloorDetector` for reactive mode).
+
+### Palette Management
+- Orchestrator syncs `policy.paletteId` to `PaletteDirector.setCurrentPalette()`.
+- Thin-film fetches shader-ready RGB via `PaletteDirector.getCurrentColorsRGB()`.
+
+### Thin-Film Overlay
+- Mounted via `AuthenticThinFilmEffect` at z-index -30.
+- Enabled on medium/high tiers, auto-disabled under 45 FPS and in Pure Mode.
+- Intensity controlled by `policy.thinFilmIntensity` (0–1).
+
+### Performance HUD
+- `components/liquid-light/dev/PerformanceHUD` renders when `?debug=true` or in development.
+- Shows FPS, tier, DPR, audio levels, and BPM when available.
